@@ -1,3 +1,4 @@
+import { color, mirror, rotate, translate } from "./manipulate";
 
 export const serialize = (o: any) => {
   if (Array.isArray(o) || typeof o !== 'object') {
@@ -8,6 +9,17 @@ export const serialize = (o: any) => {
     .join(',');
 }
 export const indent = (s: string) => s.split('\n').map(r => '  ' + r).join('\n');
-export const shape = <T extends Shape>(s: string) => ({ src: s }) as T;
-export const shape2 = (s: string) => ({ src: s }) as Shape2;
-export const shape3 = (s: string) => ({ src: s }) as Shape3;
+
+export const shape = <T extends Shape>(s: string): T => {
+  const shape = {
+    src: s,
+    translate: (p: Vec3) => translate(p, shape),
+    rotate: (p: Vec3) => rotate(p, shape),
+    mirror: (p: Vec3) => mirror(p, shape),
+    color: (c: string) => color(c, shape)
+  } as Shape<T>;
+
+  return shape;
+}
+export const shape2 = (s: string) => shape<Shape2>(s);
+export const shape3 = (s: string) => shape<Shape3>(s);

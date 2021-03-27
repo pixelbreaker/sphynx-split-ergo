@@ -1,7 +1,7 @@
 import { indent, shape } from "./openscad-util";
 
 
-const expand = (s: Shape[]) => `{\n${s.map(k => indent(k.src)).join('\n')}\n}`;
+const expand = (s: Shape<unknown>[]) => `{\n${s.map(k => indent(k.src)).join('\n')}\n}`;
 type UnionShape = Shape2 | Shape3;
 
 

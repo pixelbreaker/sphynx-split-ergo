@@ -1,15 +1,15 @@
-import { indent, shape3 } from "./openscad-util";
+import { indent, shape } from "./openscad-util";
 
-export const translate = (p: Vec3, s: Shape3): Shape3 => {
-  return shape3(`translate(${JSON.stringify(p)}) \n${indent(s.src)}`);
+export const translate = <T extends Shape>(p: Vec3, s: T): T => {
+  return shape<T>(`translate(${JSON.stringify(p)}) \n${indent(s.src)}`);
 };
 
-export const rotate = (p: Vec3, s: Shape3): Shape3 => {
-  return shape3(`rotate(${JSON.stringify(p)}) \n${indent(s.src)}`);
+export const rotate = <T extends Shape>(p: Vec3, s: T): T => {
+  return shape<T>(`rotate(${JSON.stringify(p)}) \n${indent(s.src)}`);
 };
 
-export const mirror = (p: Vec3, s: Shape3): Shape3 => {
-  return shape3(`mirror(${JSON.stringify(p)}) \n${indent(s.src)}`);
+export const mirror = <T extends Shape>(p: Vec3, s: T): T => {
+  return shape<T>(`mirror(${JSON.stringify(p)}) \n${indent(s.src)}`);
 };
 
 /**
@@ -18,7 +18,7 @@ export const mirror = (p: Vec3, s: Shape3): Shape3 => {
  * @param s 
  * @returns colored shaped
  */
-export const color = (c: string, s: Shape3): Shape3 => {
-  return shape3(`color("${s}") \n${indent(s.src)}`);
+export const color = <T extends Shape>(c: string, s: T): T => {
+  return shape<T>(`color("${s}") \n${indent(s.src)}`);
 };
 

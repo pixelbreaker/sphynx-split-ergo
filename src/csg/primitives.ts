@@ -8,7 +8,7 @@ export const circle = (p: CirleProps): Shape2 => {
 type RegularPolygonProps = { $fn: number } & CirleProps
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
-export type SquareProps = { size: Vec2, center?: boolean };
+export type SquareProps = FProp<Vec2|{ size: Vec2, center?: boolean }>;
 export const square = (p: SquareProps): Shape2 => {
   return shape2(`square(${serialize(p)});`);
 };
