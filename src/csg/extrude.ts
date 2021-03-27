@@ -1,4 +1,4 @@
-import { serialize, shape3 } from "./openscad-util"
+import { indent, serialize, shape3 } from "./openscad-util"
 
 export type ExtrudeProps = FProp<{
   height: number,
@@ -8,8 +8,9 @@ export type ExtrudeProps = FProp<{
   slices?: number,
   scale?: number,
 }>;
+
 export const linear_extrude = (p: ExtrudeProps, s: Shape2): Shape3 => {
-  return shape3(`linear_extrude(${serialize(p)}) ${s.src}`);
+  return shape3(`linear_extrude(${serialize(p)}) \n${indent(s.src)}`);
 }
 
 export type RotateExtrudeProps = FProp<{
@@ -18,11 +19,11 @@ export type RotateExtrudeProps = FProp<{
 }>;
 
 export const rotate_extrude = (p: RotateExtrudeProps, s: Shape2): Shape3 => {
-  return shape3(`rotate_extrude(${serialize(p)}) ${s.src}`);
+  return shape3(`rotate_extrude(${serialize(p)}) \n${indent(s.src)}`);
 }
 
 
 export const scale = (p: FProp<Vec3>, s: Shape3): Shape3 => {
-  return shape3(`scale(${serialize(p)}) ${s.src}`);
+  return shape3(`scale(${serialize(p)}) \n${indent(s.src)}`);
 }
 
