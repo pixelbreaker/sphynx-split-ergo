@@ -1,7 +1,5 @@
 import { expand, indent, serialize } from "./openscad-util";
 
-
-
 export const union = <T>(...s: Shape<T>[]): Shape<T> =>
   new Shape<T>(`union()` + expand(s));
 

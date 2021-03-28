@@ -1,3 +1,5 @@
+import { Shape } from "./base";
+
 export const serialize = (o: any) => {
   if (Array.isArray(o) || typeof o !== 'object') {
     return JSON.stringify(o);
