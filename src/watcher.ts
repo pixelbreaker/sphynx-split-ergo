@@ -31,6 +31,7 @@ const load = (file: string) => {
           if (e) {
             console.log("error", fileName, e);
           } else {
+            console.log(src);
             console.log("saved", fileName);
           }
         });

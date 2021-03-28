@@ -25,7 +25,11 @@ export const hull = <T>(...s: Shape<T>[]): Shape<T> =>
 export const minkowski = <T>(...s: Shape<T>[]): Shape<T> =>
   new Shape<T>(`minkowski()` + expand(s));
 
-
+export type TileProps = {
+  translation: Vec3;
+  times: number;
+  opposite?: boolean;
+}
 export class Shape<T> {
   src: string;
   props: T;
@@ -64,6 +68,17 @@ export class Shape<T> {
   color(c: string) {
     return new Shape<T>(`color("${c}") \n${indent(this.src)}`);
   };
+
+  tile(t: TileProps): Shape<T> {
+    const times = t.times;
+    if (t.times <= 0) {
+      return this;
+    } else {
+      return this.union(
+        this.tile({ ...t, times: times - 1 })
+          .translate(t.translation));
+    }
+  }
 }
 
 
