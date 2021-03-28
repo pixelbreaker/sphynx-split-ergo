@@ -1,18 +1,6 @@
 import { expand, indent, serialize } from "./openscad-util";
 
-export type ExtrudeProps = FProp<{
-  height: number,
-  center?: boolean,
-  convexity?: number,
-  twist?: number,
-  slices?: number,
-  scale?: number,
-}>;
 
-export type RotateExtrudeProps = FProp<{
-  angle?: number,
-  convexity?: number
-}>;
 
 export const union = <T>(...s: Shape<T>[]): Shape<T> =>
   new Shape<T>(`union()` + expand(s));
@@ -37,16 +25,16 @@ export class Shape<T> {
     this.src = src;
   }
 
-  union(...s: Shape<T>[]): Shape<T> {
-    return union(this, ...s);
+  union(s: Shape<T>, ...rest: Shape<T>[]): Shape<T> {
+    return union(this, s, ...rest);
   }
 
-  difference(...s: Shape<T>[]): Shape<T> {
-    return difference<T>(this, ...s);
+  difference(s: Shape<T>, ...rest: Shape<T>[]): Shape<T> {
+    return difference<T>(this, s, ...rest);
   }
 
-  intersection(...s: Shape<T>[]): Shape<T> {
-    return intersection<T>(this, ...s);
+  intersection(s: Shape<T>, ...rest: Shape<T>[]): Shape<T> {
+    return intersection<T>(this, s, ...rest);
   }
 
   scale(p: Vec3) {
@@ -70,6 +58,21 @@ export class Shape<T> {
   };
 }
 
+
+export type ExtrudeProps = FProp<{
+  height: number,
+  center?: boolean,
+  convexity?: number,
+  twist?: number,
+  slices?: number,
+  scale?: number,
+}>;
+
+export type RotateExtrudeProps = FProp<{
+  angle?: number,
+  convexity?: number
+}>;
+
 export class Shape2 extends Shape<{ dim: 2 }> {
   dim: 2; // added to ensure that Shape2 and Shape3 do not fit
 
@@ -81,6 +84,7 @@ export class Shape2 extends Shape<{ dim: 2 }> {
     return new Shape3(`rotate_extrude(${serialize(p)}) \n${indent(this.src)}`);
   }
 }
+
 
 export class Shape3 extends Shape<{ dim: 3 }> {
   dim: 3; // added to ensure that Shape2 and Shape3 do not fit
