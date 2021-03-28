@@ -9,7 +9,7 @@ export const serialize = (o: any) => {
     .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
     .join(',');
 }
-export const indent = (s: string) => s.split('\n').map(r => '  ' + r).join('\n');
+export const indent = (s: string) => '  ' + s;
 
-
-export const expand = (s: Shape<unknown>[]) => `{\n${s.map(k => indent(k.src)).join('\n')}\n}`;
+export const expand = (s: Shape<unknown>[]) =>
+  s.flatMap(k => k.src).map(indent);

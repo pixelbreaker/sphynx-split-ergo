@@ -25,7 +25,7 @@ const load = (file: string) => {
     resetNodeCache();
     import(file).then(mod => {
       if ('main' in mod) {
-        const src = mod.main.src;
+        const src: string = mod.main.src.join('\n');
         const fileName = `${outputDir}/${name}.scad`;
         fs.writeFile(fileName, src, e => {
           if (e) {

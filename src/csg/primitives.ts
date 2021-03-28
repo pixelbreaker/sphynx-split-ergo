@@ -3,7 +3,7 @@ import { serialize } from "./openscad-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
 export const circle = (p: CirleProps) => {
-  return new Shape2(`circle(${serialize(p)});`);
+  return new Shape2([`circle(${serialize(p)});`]);
 };
 
 type RegularPolygonProps = { $fn: number } & CirleProps
@@ -11,7 +11,7 @@ export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
 export type SquareProps = FProp<Vec2 | { size: Vec2, center?: boolean }>;
 export const square = (p: SquareProps) => {
-  return new Shape2(`square(${serialize(p)});`);
+  return new Shape2([`square(${serialize(p)});`]);
 };
 
 export type PolygonProps = {
@@ -19,7 +19,7 @@ export type PolygonProps = {
   convexity?: number
 };
 export const polygon = (p: PolygonProps) => {
-  return new Shape2(`polygon(${serialize(p)});`);
+  return new Shape2([`polygon(${serialize(p)});`]);
 };
 
 export type TextProps = string | {
@@ -35,12 +35,12 @@ export type TextProps = string | {
   $fn?: number;
 };
 export const text = (p: TextProps) => {
-  return new Shape3(`text(${serialize(p)});`);
+  return new Shape3([`text(${serialize(p)});`]);
 };
 
 
 export const sphere = (p: CirleProps) => {
-  return new Shape3(`sphere(${serialize(p)});`);
+  return new Shape3([`sphere(${serialize(p)});`]);
 }
 
 type CubeProps = Vec3 | FProp<{
@@ -48,7 +48,7 @@ type CubeProps = Vec3 | FProp<{
   center?: boolean;
 }>
 export const cube = (p: CubeProps) => {
-  return new Shape3(`cube(${serialize(p)});`);
+  return new Shape3([`cube(${serialize(p)});`]);
 }
 
 type CylinderProps = FProp<(
@@ -57,7 +57,7 @@ type CylinderProps = FProp<(
     center?: boolean;
   }>;
 export const cylinder = (p: CylinderProps) => {
-  return new Shape3(`cylinder(${serialize(p)});`);
+  return new Shape3([`cylinder(${serialize(p)});`]);
 }
 
 type PolyhedronProps = FProp<{
@@ -67,5 +67,5 @@ type PolyhedronProps = FProp<{
 }>;
 
 export const ployhedron = (p: PolyhedronProps) => {
-  return new Shape3(`ployhedron(${serialize(p)});`);
+  return new Shape3([`ployhedron(${serialize(p)});`]);
 }

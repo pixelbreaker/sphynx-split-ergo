@@ -10,20 +10,15 @@ export type FProp<T> = T & Props;
 export type Vec2 = [number, number];
 export type Vec3 = [number, number, number];
 
-export const union = <T>(...s: Shape<T>[]): Shape<T> =>
-  new Shape<T>(`union()` + expand(s));
+const createListFn = (name: string) =>
+  <T>(...s: Shape<T>[]): Shape<T> =>
+    new Shape<T>([`${name}() {`, ...s.flatMap(k => k.src).map(indent), '}']);
 
-export const difference = <T>(...s: Shape<T>[]): Shape<T> =>
-  new Shape<T>(`difference()` + expand(s));
-
-export const intersection = <T>(...s: Shape<T>[]): Shape<T> =>
-  new Shape<T>(`intersection()` + expand(s));
-
-export const hull = <T>(...s: Shape<T>[]): Shape<T> =>
-  new Shape<T>(`hull()` + expand(s));
-
-export const minkowski = <T>(...s: Shape<T>[]): Shape<T> =>
-  new Shape<T>(`minkowski()` + expand(s));
+export const union = createListFn('union');
+export const difference = createListFn('difference');
+export const intersection = createListFn('intersection');
+export const hull = createListFn('hull');
+export const minkowski = createListFn('minkowski');
 
 export type TileProps = {
   translation: Vec3;
@@ -31,9 +26,9 @@ export type TileProps = {
   opposite?: boolean;
 }
 export class Shape<T> {
-  src: string;
+  src: string[];
   props: T;
-  constructor(src: string) {
+  constructor(src: string[]) {
     this.src = src;
   }
 
@@ -50,23 +45,23 @@ export class Shape<T> {
   }
 
   scale(p: Vec3) {
-    return new Shape<T>(`scale(${serialize(p)}) \n${indent(this.src)}`);
+    return new Shape<T>([`scale(${serialize(p)})`, ...this.src.map(indent)]);
   }
 
   translate(p: Vec3) {
-    return new Shape<T>(`translate(${JSON.stringify(p)}) \n${indent(this.src)}`);
+    return new Shape<T>([`translate(${JSON.stringify(p)})`, ...this.src.map(indent)]);
   };
 
   rotate(p: Vec3) {
-    return new Shape<T>(`rotate(${JSON.stringify(p)}) \n${indent(this.src)}`);
+    return new Shape<T>([`rotate(${JSON.stringify(p)})`, ...this.src.map(indent)]);
   };
 
   mirror(p: Vec3) {
-    return new Shape<T>(`mirror(${JSON.stringify(p)}) \n${indent(this.src)}`);
+    return new Shape<T>([`mirror(${JSON.stringify(p)})`, ...this.src.map(indent)]);
   };
 
   color(c: string) {
-    return new Shape<T>(`color("${c}") \n${indent(this.src)}`);
+    return new Shape<T>([`color("${c}")`, ...this.src.map(indent)]);
   };
 
   tile(t: TileProps): Shape<T> {
@@ -100,14 +95,13 @@ export class Shape2 extends Shape<{ dim: 2 }> {
   dim: 2; // added to ensure that Shape2 and Shape3 do not fit
 
   linear_extrude(p: ExtrudeProps) {
-    return new Shape3(`linear_extrude(${serialize(p)}) \n${indent(this.src)}`);
+    return new Shape3([`linear_extrude(${serialize(p)})`, ...this.src.map(indent)]);
   }
 
   rotate_extrude(p: RotateExtrudeProps) {
-    return new Shape3(`rotate_extrude(${serialize(p)}) \n${indent(this.src)}`);
+    return new Shape3([`rotate_extrude(${serialize(p)})`, ...this.src.map(indent)]);
   }
 }
-
 
 export class Shape3 extends Shape<{ dim: 3 }> {
   dim: 3; // added to ensure that Shape2 and Shape3 do not fit
