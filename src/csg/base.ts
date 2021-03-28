@@ -1,5 +1,15 @@
 import { expand, indent, serialize } from "./openscad-util";
 
+export type Props = {
+  $fn?: number;
+  $fa?: number;
+  $fs?: number;
+}
+export type FProp<T> = T & Props;
+
+export type Vec2 = [number, number];
+export type Vec3 = [number, number, number];
+
 export const union = <T>(...s: Shape<T>[]): Shape<T> =>
   new Shape<T>(`union()` + expand(s));
 

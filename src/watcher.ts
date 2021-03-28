@@ -1,13 +1,50 @@
 #!/usr/bin/env ts-node
-
 import * as path from 'path';
 import * as fs from 'fs';
 import * as chokidar from 'chokidar';
 
-
 const cwd = process.cwd();
-const watchDir = process.argv.length > 2 ? path.join(cwd, process.argv[2]) : cwd;
-console.log('watching', watchDir);
-chokidar.watch(watchDir, { ignored: ['node_modules/', '.*/'] }).on('change', (path) => {
-  console.log(path);
+console.log('watching', cwd);
+const outputDir = 'target';
+fs.mkdir(outputDir, (e) => { });
+
+const resetNodeCache = () => {
+  for (const path in require.cache) {
+    if (path.endsWith('.js') || path.endsWith('.ts')) { // only clear *.js, not *.node
+      delete require.cache[path]
+    }
+  }
+}
+
+const load = (file: string) => {
+  try {
+    if (!file.endsWith('.ts')) {
+      return;
+    }
+    console.log('detected', file);
+    const name = path.basename(file, '.ts');
+    resetNodeCache();
+    import(file).then(mod => {
+      if ('main' in mod) {
+        const src = mod.main.src;
+        const fileName = `${outputDir}/${name}.scad`;
+        fs.writeFile(fileName, src, e => {
+          console.log("saved file", fileName, e);
+        });
+      }
+    });
+  } catch (e) {
+    console.log('error', file, e);
+  }
+}
+
+const watcher = chokidar.watch(cwd, {
+  ignored: (p: string) =>
+    path.basename(p).startsWith('.') ||
+    p.includes('target') ||
+    p.includes('node_modules')
+});
+watcher.on('change', load);
+watcher.on('ready', () => {
+  console.log('ready');
 });

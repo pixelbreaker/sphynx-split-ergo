@@ -1,4 +1,4 @@
-import { Shape2, Shape3 } from "./base";
+import { FProp, Shape2, Shape3, Vec2, Vec3 } from "./base";
 import { serialize } from "./openscad-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
