@@ -14,8 +14,6 @@ type Shape<T = unknown> = T & {
   color: (c: string) => Shape<T>;
 };
 
-type Shape3 = Shape<{ dim: 3 }>;
-type Shape2 = Shape<{ dim: 2 }>;
 
 type Vec2 = [number, number];
 type Vec3 = [number, number, number];
