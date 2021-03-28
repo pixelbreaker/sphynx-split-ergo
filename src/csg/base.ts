@@ -1,4 +1,4 @@
-import { expand, indent, serialize } from "./openscad-util";
+import { indent, serialize } from "./openscad-util";
 
 export type Props = {
   $fn?: number;
@@ -74,35 +74,4 @@ export class Shape<T> {
           .translate(t.translation));
     }
   }
-}
-
-
-export type ExtrudeProps = FProp<{
-  height: number,
-  center?: boolean,
-  convexity?: number,
-  twist?: number,
-  slices?: number,
-  scale?: number,
-}>;
-
-export type RotateExtrudeProps = FProp<{
-  angle?: number,
-  convexity?: number
-}>;
-
-export class Shape2 extends Shape<{ dim: 2 }> {
-  dim: 2; // added to ensure that Shape2 and Shape3 do not fit
-
-  linear_extrude(p: ExtrudeProps) {
-    return new Shape3([`linear_extrude(${serialize(p)})`, ...this.src.map(indent)]);
-  }
-
-  rotate_extrude(p: RotateExtrudeProps) {
-    return new Shape3([`rotate_extrude(${serialize(p)})`, ...this.src.map(indent)]);
-  }
-}
-
-export class Shape3 extends Shape<{ dim: 3 }> {
-  dim: 3; // added to ensure that Shape2 and Shape3 do not fit
 }

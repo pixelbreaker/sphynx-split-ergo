@@ -1,26 +1,26 @@
-import { FProp, Shape2, Shape3, Vec2, Vec3 } from "./base";
+import { FProp, Vec2, Vec3 } from "./base";
+import { Shape2 } from "./base2";
+import { Shape3 } from "./base3";
 import { serialize } from "./openscad-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
-export const circle = (p: CirleProps) => {
-  return new Shape2([`circle(${serialize(p)});`]);
-};
+export const circle = (p: CirleProps) =>
+  new Shape2([`circle(${serialize(p)});`]);
 
-type RegularPolygonProps = { $fn: number } & CirleProps
+
+type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
 export type SquareProps = FProp<Vec2 | { size: Vec2, center?: boolean }>;
-export const square = (p: SquareProps) => {
-  return new Shape2([`square(${serialize(p)});`]);
-};
+export const square = (p: SquareProps) =>
+  new Shape2([`square(${serialize(p)});`]);
 
 export type PolygonProps = {
   points: Vec2[],
   convexity?: number
 };
-export const polygon = (p: PolygonProps) => {
-  return new Shape2([`polygon(${serialize(p)});`]);
-};
+export const polygon = (p: PolygonProps): Shape2 =>
+  new Shape2([`polygon(${serialize(p)});`]);
 
 export type TextProps = string | {
   text: string,

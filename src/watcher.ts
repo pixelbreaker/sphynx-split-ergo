@@ -36,6 +36,8 @@ const load = (file: string) => {
           }
         });
       }
+    }).catch(e => {
+      console.log(e);
     });
   } catch (e) {
     console.log('error', file, e);

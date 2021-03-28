@@ -1,0 +1,49 @@
+import { Shape, TileProps, Vec3 } from "./base";
+
+export class Shape3 extends Shape<{ dim: 3 }> {
+
+  union(s: Shape3, ...rest: Shape3[]): Shape3 {
+    const src = super.union(s, ...rest).src;
+    return new Shape3(src);
+  }
+
+  difference(s: Shape3, ...rest: Shape3[]): Shape3 {
+    const src = super.difference(s, ...rest).src;
+    return new Shape3(src);
+  }
+
+  intersection(s: Shape3, ...rest: Shape3[]): Shape3 {
+    const src = super.intersection(s, ...rest).src;
+    return new Shape3(src);
+  }
+
+  scale(p: Vec3) {
+    const src = super.scale(p).src;
+    return new Shape3(src);
+  }
+
+  translate(p: Vec3) {
+    const src = super.translate(p).src;
+    return new Shape3(src);
+  };
+
+  rotate(p: Vec3) {
+    const src = super.rotate(p).src;
+    return new Shape3(src);
+  };
+
+  mirror(p: Vec3) {
+    const src = super.mirror(p).src;
+    return new Shape3(src);
+  };
+
+  color(p: string) {
+    const src = super.color(p).src;
+    return new Shape3(src);
+  };
+
+  tile(p: TileProps): Shape3 {
+    const src = super.tile(p).src;
+    return new Shape3(src);
+  }
+}
