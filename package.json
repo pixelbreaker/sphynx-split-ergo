@@ -12,7 +12,7 @@
     "prebuild": "rimraf ./dist",
     "build": "tsc",
     "postbuild": "cd .. && npm pack ./openscad-ts && cd openscad-ts",
-    "start": "ts-node ./src/watcher.ts C:\\Users\\rwang\\scoop\\apps\\openscad\\2019.05",
+    "start": "ts-node ./src/watcher.ts",
     "test": "ts-node ./index.spec.ts",
     "ts": "ts-node"
   },

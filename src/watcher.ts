@@ -29,7 +29,11 @@ const load = (file: string) => {
         const src = mod.main.src;
         const fileName = `${outputDir}/${name}.scad`;
         fs.writeFile(fileName, src, e => {
-          console.log("saved file", fileName, e);
+          if (e) {
+            console.log("saved", fileName);
+          } else {
+            console.log("error", fileName, e);
+          }
         });
       }
     });
@@ -38,7 +42,7 @@ const load = (file: string) => {
   }
 }
 
-const watcher = chokidar.watch(cwd, {
+const watcher = chokidar.watch('projects', {
   ignored: (p: string) =>
     path.basename(p).startsWith('.') ||
     p.includes('target') ||
@@ -47,4 +51,5 @@ const watcher = chokidar.watch(cwd, {
 watcher.on('change', load);
 watcher.on('ready', () => {
   console.log('ready');
+  console.log(watcher.getWatched());
 });
