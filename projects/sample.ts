@@ -6,6 +6,4 @@ export const main = union(
   sphere({ r: 10 }).translate([10, 0, 0]),
   cube([10, 12, 15]),
   cylinder({ h: 20, r: 6 })
-
 );
-console.log(main.src);

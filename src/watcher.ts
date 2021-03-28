@@ -4,7 +4,6 @@ import * as fs from 'fs';
 import * as chokidar from 'chokidar';
 
 const cwd = process.cwd();
-console.log('watching', cwd);
 const outputDir = 'target';
 fs.mkdir(outputDir, (e) => { });
 
@@ -30,9 +29,9 @@ const load = (file: string) => {
         const fileName = `${outputDir}/${name}.scad`;
         fs.writeFile(fileName, src, e => {
           if (e) {
-            console.log("saved", fileName);
-          } else {
             console.log("error", fileName, e);
+          } else {
+            console.log("saved", fileName);
           }
         });
       }
@@ -42,7 +41,7 @@ const load = (file: string) => {
   }
 }
 
-const watcher = chokidar.watch('projects', {
+const watcher = chokidar.watch(`${cwd}/projects`, {
   ignored: (p: string) =>
     path.basename(p).startsWith('.') ||
     p.includes('target') ||
@@ -50,6 +49,6 @@ const watcher = chokidar.watch('projects', {
 });
 watcher.on('change', load);
 watcher.on('ready', () => {
-  console.log('ready');
+  console.log('watching');
   console.log(watcher.getWatched());
 });
