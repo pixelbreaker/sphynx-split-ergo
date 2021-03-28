@@ -25,9 +25,13 @@ export type TileProps = {
   times: number;
   opposite?: boolean;
 }
+export type TileCircularProps = {
+  times: number;
+  arc?: number;
+}
 export class Shape<T> {
   src: string[];
-  props: T;
+  _ignore?: T; // not actually used, just making sure our instance is different in terms of T
   constructor(src: string[]) {
     this.src = src;
   }
@@ -66,12 +70,29 @@ export class Shape<T> {
 
   tile(t: TileProps): Shape<T> {
     const times = t.times;
-    if (t.times <= 0) {
+    if (t.times <= 1) {
       return this;
-    } else {
-      return this.union(
-        this.tile({ ...t, times: times - 1 })
-          .translate(t.translation));
     }
+    const collect: Shape<T>[] = [];
+    for (let i = 1; i < times; i++) {
+      collect.push(new Shape<T>(this.src)
+        .translate(t.translation.map(t => t * i) as Vec3));
+    }
+    const [first, ...rest] = collect;
+    return this.union(first, ...rest);
+  }
+  tile_circular(t: TileCircularProps): Shape<T> {
+    const times = t.times;
+    const rotation = (t.arc || 360) / times;
+    if (t.times <= 1) {
+      return this;
+    }
+    const collect: Shape<T>[] = [];
+    for (let i = 1; i < times; i++) {
+      collect.push(new Shape<T>(this.src)
+        .rotate([0, 0, rotation * i]));
+    }
+    const [first, ...rest] = collect;
+    return this.union(first, ...rest);
   }
 }

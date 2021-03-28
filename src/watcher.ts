@@ -2,6 +2,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as chokidar from 'chokidar';
+import * as _ from 'lodash';
 
 const cwd = process.cwd();
 const outputDir = 'target';
@@ -31,7 +32,7 @@ const load = (file: string) => {
           if (e) {
             console.log("error", fileName, e);
           } else {
-            console.log(src);
+            //  console.log(src);
             console.log("saved", fileName);
           }
         });
@@ -50,7 +51,14 @@ const watcher = chokidar.watch(`${cwd}/projects`, {
     p.includes('target') ||
     p.includes('node_modules')
 });
-watcher.on('change', load);
+const updateAll = _.debounce(() => {
+  Object.entries(watcher.getWatched())
+    .forEach(([key, val]) => {
+      val.forEach(v => load(path.join(key, v)));
+    });
+}, 300);
+
+watcher.on('change', updateAll);
 watcher.on('ready', () => {
   console.log('watching');
   console.log(watcher.getWatched());

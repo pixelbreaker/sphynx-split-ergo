@@ -44,9 +44,8 @@ type RingOptions = {
 export const ring = ({ id, od, h }: RingOptions): Shape3 => {
   const r1 = od / 2;
   const r2 = id / 2;
-  const avg = (r1 + r2) / 2;
   const width = Math.abs(r1 - r2);
-  return square([width, h]).translate([avg, 0, 0]).rotate_extrude();
+  return square([width, h]).translate([r2, 0, 0]).rotate_extrude();
 }
 
 // test
