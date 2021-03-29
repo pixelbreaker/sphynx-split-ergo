@@ -1,6 +1,6 @@
 import { FProp, Shape, TileProps, union, Vec3 } from "./base";
 import { Shape3 } from "./base3";
-import { indent, serialize } from "./openscad-util";
+import { indent, serialize } from "./translation-util";
 
 
 export type ExtrudeProps = FProp<{

@@ -1,5 +1,3 @@
-import { Shape } from "./base";
-
 
 export const serialize = (o: any) => {
   if (!o) {
@@ -9,7 +7,7 @@ export const serialize = (o: any) => {
     return JSON.stringify(o);
   }
   return Object.entries(o)
-    .filter(([key,val]) => val)
+    .filter(([key, val]) => val)
     .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
     .join(',');
 }

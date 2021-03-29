@@ -1,4 +1,4 @@
-import { indent, serialize } from "./openscad-util";
+import { indent, serialize } from "./translation-util";
 
 export type Props = {
   $fn?: number;

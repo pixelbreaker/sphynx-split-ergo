@@ -1,7 +1,7 @@
 import { FProp, Vec2, Vec3 } from "./base";
 import { Shape2 } from "./base2";
 import { Shape3 } from "./base3";
-import { serialize } from "./openscad-util";
+import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
 export const circle = (p: CirleProps) =>
