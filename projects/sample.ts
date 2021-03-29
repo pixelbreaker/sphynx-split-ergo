@@ -1,13 +1,12 @@
 import { union, difference, intersection } from "../src/csg/base";
+import { polyRound } from "../src/csg/polyround";
 import { circle, square, polygon, } from "../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 
 
-export const main = union(
-  sphere({ r: 10 }).translate([10, 0, 0]),
-  cube([10, 12, 15]),
-  cylinder({ h: 20, r: 6 })
-    .tile({ translation: [10, 0, 0], times: 5 })
-    .tile({ translation: [0, 10, 0], times: 9 })
-);
+export const main = polyRound({
+  points: [[0, 0], [10, 0], [5, 5], [10, 10], [0, 10]],
+  radius: [5, 0.5, 0.5, 2, 4],
+  $fn: 30
+}).linear_extrude({ height: 10 });
 

@@ -10,7 +10,8 @@ const options = {
   meshSize: 8,
   thickness: 1.5
 }
-const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: typeof options) => {
+type Option = typeof options;
+const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: Option) => {
 
   const ringOuter = ring({
     od: rimDiameter,
@@ -28,16 +29,17 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: typeof
         thickness: thickness + 1,
         centerXY: true
       }).translate([0, 0, -0.5]));
-  const drainId = drainDiameter - thickness * 2;
+  const drainInnerDiameter = drainDiameter - thickness * 2;
   const braceLen = (rimDiameter - drainDiameter) / 2 + thickness / 2;
   const crossbrace = cube([braceLen, thickness, thickness])
-    .translate([drainId / 2, - thickness / 2, thickness]);
+    .translate([drainInnerDiameter / 2, - thickness / 2, thickness])
+    .rotate([0, 0, 15]); // offset a bit so that the bars don't end on center of hex
 
   const ringInner = ring({
     od: drainDiameter,
-    id: drainId,
-    h: thickness * 3
-  }).translate([0, 0, thickness * 2]);
+    id: drainInnerDiameter,
+    h: thickness * 2
+  }).translate([0, 0, thickness * 1.8]);
 
   return union(
     ringOuter,
