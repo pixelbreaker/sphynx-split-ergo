@@ -5,8 +5,8 @@ import * as chokidar from 'chokidar';
 import * as _ from 'lodash';
 
 const cwd = process.cwd();
-const outputDir = 'target';
-fs.mkdir(outputDir, (e) => { });
+const watchDir = path.join(cwd, 'projects');
+const outputDir = path.join(cwd, 'target');
 
 const resetNodeCache = () => {
   for (const path in require.cache) {
@@ -23,11 +23,14 @@ const load = (file: string) => {
     }
     console.log('detected', file);
     const name = path.basename(file, '.ts');
+    const target = path.join(outputDir, file.substr(watchDir.length));
+    const targetDir = path.dirname(target);
+    fs.mkdirSync(targetDir, { recursive: true });
     resetNodeCache();
     import(file).then(mod => {
       if ('main' in mod) {
         const src: string = mod.main.src.join('\n');
-        const fileName = `${outputDir}/${name}.scad`;
+        const fileName = path.join(targetDir, name + ".scad");
         fs.writeFile(fileName, src, e => {
           if (e) {
             console.log("error", fileName, e);
@@ -45,7 +48,7 @@ const load = (file: string) => {
   }
 }
 
-const watcher = chokidar.watch(`${cwd}/projects`, {
+const watcher = chokidar.watch(watchDir, {
   ignored: (p: string) =>
     path.basename(p).startsWith('.') ||
     p.includes('target') ||
