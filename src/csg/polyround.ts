@@ -38,11 +38,9 @@ export const polyRound = (p: PolyProps): Shape2 => {
     const aVec = scale(dot(dVec, a), a);
     const bVec = scale(dot(dVec, b), b);
     const cirProp: CirleProps = {
-      r: rad
-    }
-    if (p.$fn) {
-      cirProp.$fn = p.$fn;
-    }
+      r: rad,
+      $fn: p.$fn
+    };
     const currentCorner = polygon({
       points: [
         [aVec[0] + curr[0], aVec[1] + curr[1]],

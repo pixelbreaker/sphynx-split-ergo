@@ -50,5 +50,4 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: Option
     ringInner
   );
 }
-
 export const main = showerDrain(options);

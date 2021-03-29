@@ -1,7 +1,7 @@
 
 import { Shape3 } from '../src/csg/base3';
 import { polyRound } from '../src/csg/polyround';
-import { cylinder, polygon, square } from '../src/csg/primitives';
+import { cylinder } from '../src/csg/primitives';
 
 type HexTileOptions = {
   hexSize: number,
@@ -51,8 +51,8 @@ export const ring = ({ id, od, h, radius, $fn }: RingOptions): Shape3 => {
   return polyRound({
     points: [[0, 0], [width, 0], [width, h], [0, h]],
     radius: radius || [0],
-    $fn: ($fn || 30)
-  }).translate([r2, 0, 0]).rotate_extrude({ $fn: ($fn || 30) });
+    $fn
+  }).translate([r2, 0, 0]).rotate_extrude({ $fn });
 }
 
 // test

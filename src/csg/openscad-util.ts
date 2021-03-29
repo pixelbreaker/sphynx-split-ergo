@@ -9,7 +9,9 @@ export const serialize = (o: any) => {
     return JSON.stringify(o);
   }
   return Object.entries(o)
+    .filter(([key,val]) => val)
     .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
     .join(',');
 }
+
 export const indent = (s: string) => '  ' + s;
