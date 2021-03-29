@@ -16,10 +16,11 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: Option
   const ringOuter = ring({
     od: rimDiameter,
     id: rimDiameter - thickness * 2,
-    h: thickness * 2
+    h: thickness * 2,
+    radius: [0, 1, 0, 0]
   });
 
-  const hexMesh = cylinder({ d: rimDiameter, h: thickness })
+  const hexMesh = cylinder({ d: rimDiameter - thickness * 1.9, h: thickness })
     .difference(
       hexTile({
         hexSize: meshSize,

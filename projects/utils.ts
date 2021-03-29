@@ -1,5 +1,6 @@
 
 import { Shape3 } from '../src/csg/base3';
+import { polyRound } from '../src/csg/polyround';
 import { cylinder, polygon, square } from '../src/csg/primitives';
 
 type HexTileOptions = {
@@ -13,8 +14,8 @@ type HexTileOptions = {
 export const hexTile = ({ hexSize, spacing, thickness, minWidth, minHeight, centerXY }: HexTileOptions) => {
   const hexPlate = cylinder({ d: hexSize - (spacing / 2), h: thickness, $fn: 6 });
   const height = hexSize * Math.sqrt(3);
-  const rows = Math.ceil(minHeight / height);
-  const cols = Math.ceil(minWidth / hexSize);
+  const rows = Math.ceil(minHeight / height / 2) * 2; // want even number 
+  const cols = Math.ceil(minWidth / hexSize / 2) * 2;
   const tileHex = hexPlate
     .tile({ translation: [0, hexSize, 0], times: cols })
     .tile({ translation: [height, 0, 0], times: rows });
@@ -40,12 +41,17 @@ type RingOptions = {
   id: number;
   od: number;
   h: number;
+  radius?: number[];
 }
-export const ring = ({ id, od, h }: RingOptions): Shape3 => {
+export const ring = ({ id, od, h, radius }: RingOptions): Shape3 => {
   const r1 = od / 2;
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
-  return square([width, h]).translate([r2, 0, 0]).rotate_extrude();
+  return polyRound({
+    points: [[0, 0], [width, 0], [width, h], [0, h]],
+    radius: radius || [0],
+    $fn: 30
+  }).translate([r2, 0, 0]).rotate_extrude();
 }
 
 // test
