@@ -17,7 +17,8 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: Option
     od: rimDiameter,
     id: rimDiameter - thickness * 2,
     h: thickness * 2,
-    radius: [0, 1, 0, 0]
+    radius: [0, 1, 0, 0],
+    $fn: 50
   });
 
   const hexMesh = cylinder({ d: rimDiameter - thickness * 1.9, h: thickness })

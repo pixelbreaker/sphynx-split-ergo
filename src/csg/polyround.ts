@@ -1,4 +1,4 @@
-import { Vector } from "../math";
+import { minus, cross, add, normalize, dot, scale } from "../math";
 import { FProp, Vec2, Vec3 } from "./base";
 import { Shape2 } from "./base2";
 import { circle, CirleProps, polygon } from "./primitives";
@@ -20,24 +20,23 @@ export const polyRound = (p: PolyProps): Shape2 => {
     const prev = p.points[(i + len - 1) % len];
     const next = p.points[(i + 1) % len];
 
-    const c = [curr[0], curr[1], 0] as Vec3;
-    const a = new Vector([prev[0], prev[1], 0]).minus(c).toUnitVector().result;
-    const b = new Vector([next[0], next[1], 0]).minus(c).toUnitVector().result;
+    const c = [...curr, 0] as Vec3;
+    const a = normalize(minus([...prev, 0], c));
+    const b = normalize(minus([...next, 0], c));
 
-    const cross = new Vector(a).cross(b).result;
-    if (Math.abs(cross[2]) < epsilon) {
+    const crossp = cross(a, b);
+    if (Math.abs(crossp[2]) < epsilon) {
       // lines are colinear, we can ignore this point all together
       continue;
     }
 
-    const bisector = new Vector(a).add(b).toUnitVector().result;
-    const normal = new Vector(cross).cross(a).toUnitVector();
-    const d = rad / (new Vector(bisector).dot(normal.result));
-    const dVec = new Vector(bisector).scale(d).result;
-    const center = new Vector(dVec).add(c).result;
-    const aVec = new Vector(a).scale(new Vector(dVec).dot(a)).result;
-    const bVec = new Vector(b).scale(new Vector(dVec).dot(b)).result;
-    console.log(center, rad, a, b);
+    const bisector = normalize(add(a, b));
+    const normal = normalize(cross(crossp, a));
+    const d = rad / dot(bisector, normal);
+    const dVec = scale(d, bisector);
+    const center = add(dVec, c);
+    const aVec = scale(dot(dVec, a), a);
+    const bVec = scale(dot(dVec, b), b);
     const cirProp: CirleProps = {
       r: rad
     }
@@ -51,7 +50,7 @@ export const polyRound = (p: PolyProps): Shape2 => {
         [bVec[0] + curr[0], bVec[1] + curr[1]]]
     });
 
-    if (cross[2] < 0) {
+    if (crossp[2] < 0) {
       // convex --- remove material
       poly = poly
         .difference(currentCorner)  //remove the corner

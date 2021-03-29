@@ -42,16 +42,17 @@ type RingOptions = {
   od: number;
   h: number;
   radius?: number[];
+  $fn?: number;
 }
-export const ring = ({ id, od, h, radius }: RingOptions): Shape3 => {
+export const ring = ({ id, od, h, radius, $fn }: RingOptions): Shape3 => {
   const r1 = od / 2;
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
   return polyRound({
     points: [[0, 0], [width, 0], [width, h], [0, h]],
     radius: radius || [0],
-    $fn: 30
-  }).translate([r2, 0, 0]).rotate_extrude();
+    $fn: ($fn || 30)
+  }).translate([r2, 0, 0]).rotate_extrude({ $fn: ($fn || 30) });
 }
 
 // test
