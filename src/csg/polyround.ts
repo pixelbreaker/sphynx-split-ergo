@@ -47,8 +47,8 @@ export const polyRound = (p: PolyProps): Shape2 => {
         curr,
         [bVec[0] + curr[0], bVec[1] + curr[1]]]
     });
-
-    if (crossp[2] < 0) {
+    
+    if (crossp[2] > 0) {
       // convex --- remove material
       poly = poly
         .difference(currentCorner)  //remove the corner

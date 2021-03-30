@@ -1,18 +1,22 @@
 import { FProp, Vec2, Vec3 } from "./base";
 import { Shape2 } from "./base2";
 import { Shape3 } from "./base3";
+import { polyRound } from "./polyround";
 import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
 export const circle = (p: CirleProps) =>
   new Shape2([`circle(${serialize(p)});`]);
 
-
 type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
-export type SquareProps = FProp<Vec2 | { size: Vec2, center?: boolean }>;
-export const square = (p: SquareProps) =>
+export type SquareProps = FProp<Vec2 | { size: Vec2, radius?: number[], center?: boolean }>;
+export const square = (p: SquareProps) => ('radius' in p) ?
+  polyRound({
+    points: [[0, 0], [0, p.size[1]], [p.size[0], p.size[1]], [p.size[0], 0]],
+    radius: p.radius, $fn: p.$fn
+  }) :
   new Shape2([`square(${serialize(p)});`]);
 
 export type PolygonProps = {

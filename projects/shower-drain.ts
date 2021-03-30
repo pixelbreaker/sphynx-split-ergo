@@ -17,7 +17,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness }: Option
     od: rimDiameter,
     id: rimDiameter - thickness * 2,
     h: thickness * 2,
-    radius: [0, 1, 0, 0],
+    radius: [0, 0, 0, 1],
     $fn: 50
   });
 

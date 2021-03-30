@@ -49,7 +49,7 @@ export const ring = ({ id, od, h, radius, $fn }: RingOptions): Shape3 => {
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
   return polyRound({
-    points: [[0, 0], [width, 0], [width, h], [0, h]],
+    points: [[0, 0], [0, h], [width, h], [width, 0]],
     radius: radius || [0],
     $fn
   }).translate([r2, 0, 0]).rotate_extrude({ $fn });
