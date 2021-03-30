@@ -35,6 +35,9 @@ export class Shape<T> {
   constructor(src: string[]) {
     this.src = src;
   }
+  set(o: FProp<{}>) {
+    return new Shape<T>([serialize(o) + ';', ...this.src]);
+  }
 
   union(s: Shape<T>, ...rest: Shape<T>[]): Shape<T> {
     return union(this, s, ...rest);

@@ -1,4 +1,6 @@
 import { Shape, TileProps, Vec3 } from "./base";
+import { Shape2 } from "./base2";
+import { indent, serialize } from "./translation-util";
 
 export class Shape3 extends Shape<{ dim: 3 }> {
 
@@ -15,6 +17,10 @@ export class Shape3 extends Shape<{ dim: 3 }> {
   intersection(s: Shape3, ...rest: Shape3[]): Shape3 {
     const src = super.intersection(s, ...rest).src;
     return new Shape3(src);
+  }
+
+  projection(p?: { cut: boolean }) {
+    return new Shape2([`projection(${serialize(p)})`, ...this.src.map(indent)]);
   }
 
   scale(p: Vec3) {

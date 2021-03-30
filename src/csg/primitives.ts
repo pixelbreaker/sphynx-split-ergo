@@ -12,12 +12,20 @@ type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
 export type SquareProps = FProp<Vec2 | { size: Vec2, radius?: number[], center?: boolean }>;
-export const square = (p: SquareProps) => ('radius' in p) ?
-  polyRound({
-    points: [[0, 0], [0, p.size[1]], [p.size[0], p.size[1]], [p.size[0], 0]],
-    radius: p.radius, $fn: p.$fn
-  }) :
-  new Shape2([`square(${serialize(p)});`]);
+export const square = (p: SquareProps) => {
+  if ('radius' in p) {
+    const [width, height] = p.size;
+    let points: Vec2[] = [[0, 0], [0, height], [width, height], [width, 0]];
+    if (p.center) {
+      points = points.map(([x, y]) => [x - width / 2, y - height / 2]);
+    }
+    return polyRound({
+      radius: p.radius, $fn: p.$fn,
+      points,
+    });
+  }
+  return new Shape2([`square(${serialize(p)});`]);
+}
 
 export type PolygonProps = {
   points: Vec2[],
