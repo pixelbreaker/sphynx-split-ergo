@@ -9,7 +9,7 @@ export type ExtrudeProps = FProp<{
   convexity?: number,
   twist?: number,
   slices?: number,
-  scale?: number,
+  scale?: number[],
 }>;
 
 export type RotateExtrudeProps = FProp<{

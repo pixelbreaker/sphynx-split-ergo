@@ -11,19 +11,21 @@ export const circle = (p: CirleProps) =>
 type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
-export type SquareProps = FProp<Vec2 | { size: Vec2, radius?: number[], center?: boolean }>;
-export const square = (p: SquareProps) => {
-  if ('radius' in p) {
-    const [width, height] = p.size;
-    let points: Vec2[] = [[0, 0], [0, height], [width, height], [width, 0]];
-    if (p.center) {
-      points = points.map(([x, y]) => [x - width / 2, y - height / 2]);
-    }
-    return polyRound({
-      radius: p.radius, $fn: p.$fn,
-      points,
-    });
+export type SquareRoundProps = FProp<{ size: Vec2, radius: number[], center?: boolean }>;
+export const square_round = (p: SquareRoundProps) => {
+  const [width, height] = p.size;
+  let points: Vec2[] = [[0, 0], [0, height], [width, height], [width, 0]];
+  if (p.center) {
+    points = points.map(([x, y]) => [x - width / 2, y - height / 2]);
   }
+  return polyRound({
+    radiiPoints: points.map((xy, i) =>
+      [...xy, p.radius[i % p.radius.length]]),
+    fn: p.$fn
+  });
+}
+export type SquareProps = { size: Vec2, center?: boolean };
+export const square = (p: Vec2 | SquareProps) => {
   return new Shape2([`square(${serialize(p)});`]);
 }
 

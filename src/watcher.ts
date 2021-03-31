@@ -16,6 +16,8 @@ const resetNodeCache = () => {
   }
 }
 
+export const header = `include <${path.join(cwd, 'scad_modules', 'polyround.scad')}>`;
+
 const load = (file: string) => {
   try {
     if (!file.endsWith('.ts')) {
@@ -29,7 +31,7 @@ const load = (file: string) => {
     resetNodeCache();
     import(file).then(mod => {
       if ('main' in mod) {
-        const src: string = mod.main.src.join('\n');
+        const src: string = header + '\n' + mod.main.src.join('\n');
         const fileName = path.join(targetDir, name + ".scad");
         fs.writeFile(fileName, src, e => {
           if (e) {
