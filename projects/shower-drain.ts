@@ -1,7 +1,7 @@
 
 
 import { union } from '../src/csg/base';
-import { cube, cylinder, square, square_round } from '../src/csg/primitives';
+import { cube, cylinder, square } from '../src/csg/primitives';
 import { hexTile, ring } from './utils';
 
 const options = {
@@ -17,7 +17,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     od: rimDiameter,
     id: rimDiameter - t * 2,
     h: t * 2,
-    radius: [0, 0, 0, t],
+    radii: [0, 0, 0, t],
     $fn: 100
   });
 
@@ -34,7 +34,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
   const drainInnerDiameter = drainDiameter - t * 2;
   const braceLen = (rimDiameter - drainDiameter) / 2 + t / 2;
   const crossbrace = cube([braceLen, t * 1.2, t])
-    .union(square({ size: [t * .8, t ], center: true })
+    .union(square({ size: [t * .8, t], center: true })
       .linear_extrude({ height: t * .8, scale: [1, 3] })
       .translate([t / 2 - t * .1, t / 2, 0]))
     .translate([drainInnerDiameter / 2, - t / 2, t])

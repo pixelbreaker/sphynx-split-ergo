@@ -4,6 +4,6 @@ import { circle, square, polygon, } from "../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 
 export const main = polyRound({
-  radiiPoints: [[0, 0, 5], [0, 10, 2], [10, 10, 0.5], [5, 5, .2], [10, 0, 2]],
-  $fn: 30
-}).linear_extrude({ height: 10 });
+  points: [[0, 0], [0, 10], [10, 10], [5, 5], [10, 0]],
+  radii: [5, 3, 2, 3]
+}).extrude({ height: 10 });
