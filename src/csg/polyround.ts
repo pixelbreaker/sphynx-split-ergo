@@ -81,13 +81,17 @@ export class PolyRound {
     return new Shape2([`polygon(polyRound(${serialize(points)},${$fn || '$fn'}));`]);
   }
 
-  extrude(p: PolyExtrudeProps) {
-    const { $fn, center, height, ...rest } = p;
+  extrude({ $fn, center, height, r1 = 0, r2 = 0, ...rest }: PolyExtrudeProps) {
     const fn = $fn || '$fn';
     const radii = this.p.radii;
     const points = this.p.points.map(([x, y], i) => [x, y, radii[i % radii.length] || 0]);
-    const src = `polyRoundExtrude(${serialize(points)},length=${height},${serialize(rest)},fn=${fn});`;
-    const shape = new Shape3([src]);
+    const params = [
+      serialize(points),
+      serialize({ ...rest, r1, r2 }),
+      `length=${height}`,
+      `fn=${fn}`
+    ].join(',');
+    const shape = new Shape3([`polyRoundExtrude(${params});`]);
     if (center) {
       return shape.translate([0, 0, -height / 2]);
     }
