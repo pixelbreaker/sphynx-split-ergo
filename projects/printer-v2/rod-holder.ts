@@ -1,15 +1,20 @@
-import { union, difference, intersection } from "../../src/csg/base";
+import { union, difference, intersection, Vec3 } from "../../src/csg/base";
 import { polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, square_round, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
+import { bevel_box } from "../utils";
 
-const height = 4;
-const hole = 8;
-
-export const main = square_round({ size: [40, 20], radius: [2], center: true })
-  .linear_extrude({ height: 2 })
-  .union(cylinder({ d: 10, h: height }))
-  .difference(cylinder({ d: 8, h: height + 0.2 })
-    .translate([0, 0, -.1]))
-  .set({ $fn: 50 });
-
+const inf = 100;
+const base: Vec3 = [20, 40, 4];
+const hole = {
+  h: 10,
+  id: 8,
+  od: 10
+};
+export const main =
+  bevel_box({ size: base, radius: [2], rtop: 1, center: true })
+    .translate([0, 0, base[2] / 2])
+    .union(cylinder({ d: hole.od, h: hole.h }))
+    .difference(
+      cylinder({ d: hole.id, h: inf, center: true }))
+    .set({ $fn: 30 });

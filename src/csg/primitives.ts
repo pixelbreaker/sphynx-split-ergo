@@ -21,7 +21,7 @@ export const square_round = (p: SquareRoundProps) => {
   return polyRound({
     radiiPoints: points.map((xy, i) =>
       [...xy, p.radius[i % p.radius.length]]),
-    fn: p.$fn
+    $fn: p.$fn
   });
 }
 export type SquareProps = { size: Vec2, center?: boolean };
@@ -65,7 +65,7 @@ export const cube = (p: CubeProps) => {
   return new Shape3([`cube(${serialize(p)});`]);
 }
 
-type CylinderProps = FProp<(
+export type CylinderProps = FProp<(
   { r: number } | { r1: number, r2: number } | { d: number } | { d1: number, d2: number }) & {
     h: number;
     center?: boolean;
@@ -74,7 +74,7 @@ export const cylinder = (p: CylinderProps) => {
   return new Shape3([`cylinder(${serialize(p)});`]);
 }
 
-type PolyhedronProps = FProp<{
+export type PolyhedronProps = FProp<{
   points: Vec3[];
   faces: Vec3[];
   convexity: number;
