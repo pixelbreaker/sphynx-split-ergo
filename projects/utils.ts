@@ -35,14 +35,21 @@ type RingOptions = {
   od: number;
   h: number;
   radii?: number[];
+  center?: boolean;
   $fn?: number;
 }
-export const ring = ({ id, od, h, radii = [0], $fn }: RingOptions): Shape3 => {
+export const ring = ({ id, od, h, radii = [0], $fn, center }: RingOptions): Shape3 => {
   const r1 = od / 2;
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
-  return polyRound({ points: getRectPoints({ size: [width, h] }), radii })
+  const ret = polyRound({ points: getRectPoints({ size: [width, h] }), radii })
     .toPolygon($fn)
     .translate([r2, 0, 0])
     .rotate_extrude({ $fn });
+
+  if (center) {
+    return ret.translate([0, 0, -h / 2]);
+  }
+
+  return ret;
 }
