@@ -10,7 +10,7 @@ const hole = {
   id: 8,
   od: 14
 };
-const base: Vec3 = [35, (hole.od - hole.id) / 2, 15];
+const base: Vec3 = [35, (hole.od - hole.id) / 2, 20];
 
 const screw = {
   size: 5,
@@ -22,10 +22,17 @@ const screwHole = cylinder({ d: screw.size, h: inf, center: true });
 const gap = cube({ size: [1.5, inf, inf], center: true })
   .translate([0, -inf / 2, 0]);
 
-const bevel = ring({ id: hole.od - 1, od: hole.od + 2, h: 3, radii: [1, 1, 1, 1], center: true })
+const bevel = ring({
+  id: hole.od - 1.5,
+  od: hole.od + 1.5,
+  h: 4,
+  radii: [1, 1, 1, 1],
+  center: true,
+  $rfn: 1
+});
 
 export const main =
-  cylinder({ d: hole.od, h: base[2], center: true })
+  cylinder({ d: hole.od, h: base[2] / 2, center: true }).translate([0, 0, -base[2] / 4])
     .difference(cylinder({ d: hole.id, h: inf, center: true }))
     .union(
       cube({ size: base, center: true })
@@ -37,5 +44,5 @@ export const main =
         ).translate([0, hole.id / 2 + base[1] / 2, 0])
     ).difference(
       gap,
-      bevel
+      bevel.translate([0, 0, -base[2] / 3])
     ).set({ $fn: 60 });
