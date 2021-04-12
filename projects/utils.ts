@@ -44,7 +44,7 @@ export const ring = ({ id, od, h, radii = [0], $fn, $rfn, center }: RingOptions)
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
   const ret = polyRound({ points: getRectPoints({ size: [width, h] }), radii })
-    .toPolygon($rfn || $fn)
+    .toPolygon($rfn)
     .translate([r2, 0, 0])
     .rotate_extrude({ $fn });
 
