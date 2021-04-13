@@ -1,7 +1,7 @@
-import { union, difference, intersection, Vec3 } from "../../src/csg/base";
-import { getCircularPoints, getDiamondPoints, polyRound } from "../../src/csg/polyround";
-import { circle, square, polygon, } from "../../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
+import { union, difference, intersection, Vec3 } from "../src/csg/base";
+import { getCircularPoints, getDiamondPoints, polyRound } from "../src/csg/polyround";
+import { circle, square, polygon, } from "../src/csg/primitives";
+import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 
 const inf = 100;
 const base: Vec3 = [20, 40, 4];
