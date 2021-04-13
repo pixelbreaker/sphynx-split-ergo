@@ -10,12 +10,14 @@ export class Shape3 extends Shape<{ dim: 3 }> {
     return new Shape3(src);
   }
 
-  difference(s: Shape3, ...rest: Shape3[]): Shape3 {
+  difference(...shapes: Shape3[]): Shape3 {
+    const [s, ...rest] = shapes;
     const src = super.difference(s, ...rest).src;
     return new Shape3(src);
   }
 
-  intersection(s: Shape3, ...rest: Shape3[]): Shape3 {
+  intersection(...shapes: Shape3[]): Shape3 {
+    const [s, ...rest] = shapes;
     const src = super.intersection(s, ...rest).src;
     return new Shape3(src);
   }

@@ -1,4 +1,4 @@
-import { union, difference, intersection, Vec3 } from "../../src/csg/base";
+import { union, difference, intersection, Vec3, Vec2 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
@@ -13,7 +13,7 @@ export const m3_sunken = m3.union(cylinder({ d: 6, h: inf }));
 export const mount = {
   hole: 22 + 1,
   screw_spacing: 31,
-  screw_depth: 1
+  screw_depth: 3
 }
 
 export const motor_holes = cylinder({ d: mount.hole, h: inf, center: true, $fn: 100 }).union(
@@ -22,17 +22,20 @@ export const motor_holes = cylinder({ d: mount.hole, h: inf, center: true, $fn: 
     .map(c => m3_sunken.translate([c[0], c[1], mount.screw_depth]))
 ).rotate([0, 0, 45]).translate([mount.hole / 2, mount.hole / 2, 0]);
 
-const pulley = {
+export const pulley = {
   bore: 5,
   od: 8,
   brim: 18
 }
 const belt_thickness = 2;
 
-export const pulley_holes = m5.union(
-  m5.translate([pulley.od + belt_thickness, pulley.od, 0]),
-  m5.translate([pulley.od, pulley.od + belt_thickness, 0]),
-).translate([mount.hole / 2, mount.hole / 2, 0]);
+export const pulley_holes_coord: Vec2[] = [
+  [0, 0],
+  [pulley.od + belt_thickness, pulley.brim],
+  [pulley.brim, pulley.od + belt_thickness]
+].map(([x, y]) => ([x + mount.hole / 2, y + mount.hole / 2]) as Vec2);
+
+export const pulley_holes = pulley_holes_coord.map(c => (m5.translate([...c, 0])));
 
 export const rounding_box = polyRound({
   points: getRectPoints({ size: [inf, inf] }),
@@ -40,4 +43,5 @@ export const rounding_box = polyRound({
 }).extrude({ height: inf, $fn: 10 });
 
 export const rod_hole = cylinder({ d: 8, h: inf, center: true })
-  .translate([mount.hole / 2, 24, 0]);
+  .translate([mount.hole / 2, 30, 0]);
+
