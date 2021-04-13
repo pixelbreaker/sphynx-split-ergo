@@ -56,6 +56,7 @@ const watcher = chokidar.watch(watchDir, {
     p.includes('target') ||
     p.includes('node_modules')
 });
+
 const updateAll = _.debounce(() => {
   Object.entries(watcher.getWatched())
     .forEach(([key, val]) => {
@@ -63,7 +64,11 @@ const updateAll = _.debounce(() => {
     });
 }, 300);
 
-watcher.on('change', updateAll);
+const updateFile = _.debounce((path: string, stats: fs.Stats) => {
+  load(path);
+}, 300);
+
+watcher.on('change', updateFile);
 watcher.on('ready', () => {
   console.log('watching');
   console.log(watcher.getWatched());
