@@ -4,7 +4,8 @@ import { indent, serialize } from "./translation-util";
 
 export class Shape3 extends Shape<{ dim: 3 }> {
 
-  union(s: Shape3, ...rest: Shape3[]): Shape3 {
+  union(...shapes: Shape3[]): Shape3 {
+    const [s, ...rest] = shapes;
     const src = super.union(s, ...rest).src;
     return new Shape3(src);
   }
