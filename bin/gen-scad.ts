@@ -8,7 +8,7 @@ const outputDir = path.join(cwd, 'target');
 
 const header = `include <${path.join(__dirname, '..', 'scad_modules', 'polyround.scad')}>`;
 const arg = process.argv[2];
-const file = arg.startsWith('.') ? path.join(process.cwd(), arg) : arg;
+const file = path.normalize(arg.startsWith('.') ? path.join(process.cwd(), arg) : arg);
 
 const name = path.basename(file, '.ts');
 const target = path.join(outputDir, file.substr(watchDir.length));
