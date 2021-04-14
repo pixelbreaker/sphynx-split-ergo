@@ -6,9 +6,6 @@ import { ring } from "../utils";
 
 const inf = 1000;
 
-
-
-
 const rod_od = 10;
 const rod_offset = 15;
 const notch_offset = 8;
@@ -24,8 +21,6 @@ const body = cube({ size: body_size, center: true }).difference(
   notch.translate([0, 0, body_size[1] - notch_offset]),
   notch.translate([0, 0, -(body_size[1] - notch_offset)])
 );
-
-
 
 
 const t = 2;

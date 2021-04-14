@@ -3,10 +3,9 @@ import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from ".
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { ring } from "../utils";
-import { m5_sunken, motor_holes, rod_hole, rounding_box, mount, m5 } from "./xy-corner";
+import { m5_sunken, motor_holes, rod_hole, rounding_box, mount, m5, m5_countersunk } from "./xy-corner";
 
 const inf = 1000;
-
 export const base_size: Vec3 = [62, 62, 4];
 const base_offset = 20;
 
@@ -44,7 +43,7 @@ const side = polyRound({
   height: side_size[2], $fn: 30
 }).translate([0, base_size[2], 0])
   .difference(
-    m5.translate([25, 10, 2]),
+    m5_countersunk.translate([30, 10, 0.5]),
     rod_hole
   ).rotate([90, 0, 90]);
 

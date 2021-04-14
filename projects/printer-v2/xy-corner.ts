@@ -7,6 +7,7 @@ import { ring } from "../utils";
 export const inf = 1000;
 export const m5 = cylinder({ d: 5, h: inf, center: true });
 export const m5_sunken = m5.union(cylinder({ d: 10, h: inf }));
+export const m5_countersunk = m5.union(circle({ d: 5 }).linear_extrude({ height: 3, scale: [2, 2] }));
 export const m3 = cylinder({ d: 3, h: inf, center: true });
 export const m3_sunken = m3.union(cylinder({ d: 6, h: inf }));
 
@@ -20,7 +21,7 @@ export const motor_holes = cylinder({ d: mount.hole, h: inf, center: true, $fn: 
   // mounting screws
   ...getRectPoints({ size: [mount.screw_spacing, mount.screw_spacing], center: true })
     .map(c => m3_sunken.translate([c[0], c[1], mount.screw_depth]))
-).rotate([0, 0, 45]).translate([mount.hole / 2, mount.hole / 2, 0]);
+).rotate([0, 0, 45]).translate([mount.hole / 2 + 1, mount.hole / 2 + 1, 0]);
 
 export const pulley = {
   bore: 5,
