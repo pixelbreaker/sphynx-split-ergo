@@ -39,6 +39,8 @@ export const getDiamondPoints = (p: RectPointsProps): Vec2[] => {
 
 export type PolyExtrudeProps = {
   $fn?: number,
+  $fn1?: number,
+  $fn2?: number,
   center?: boolean,
   convexity?: number,
   r1?: number,
@@ -46,7 +48,7 @@ export type PolyExtrudeProps = {
   height: number,
 };
 
-export type PolyProps = { points: Vec2[], radii?: number[] };
+export type PolyProps = { points: Vec2[], radii?: number[], $fn?: number };
 export const polyRound = (p: PolyProps) => new PolyRound(p);
 
 export class PolyRound {
@@ -61,43 +63,43 @@ export class PolyRound {
     const radii = [...this.p.radii];
     const points = this.p.points.map(([x, y]) => [x, y] as Vec2);
     radii[i] = r;
-    return new PolyRound({ points, radii });
+    return new PolyRound({ ...this.p, points, radii });
   }
   translate(v: Vec2) {
     const radii = [...this.p.radii];
     const points = this.p.points.map(([x, y]) => [x + v[0], y + v[0]] as Vec2);
-    return new PolyRound({ points, radii });
+    return new PolyRound({ ...this.p, points, radii });
   }
   rotate(degrees: number) {
     const rx = Math.cos(degrees * Math.PI / 180);
     const ry = Math.sin(degrees * Math.PI / 180);
     const radii = [...this.p.radii];
     const points = this.p.points.map(([x, y]) => [x * rx, y * ry] as Vec2);
-    return new PolyRound({ points, radii });
+    return new PolyRound({ ...this.p, points, radii });
   }
 
   toPolygon($fn?: number) {
     const points = this.p.points.map(([x, y], i) => [x, y, this.p.radii[i] || 0]);
     const params = [serialize(points)];
-    if ($fn) {
-      params.push(`fn=${$fn}`);
+    const fn = $fn || this.p.$fn;
+    if (fn) {
+      params.push(`fn=${fn}`);
     }
     return new Shape2([`polygon(polyRound(${params.join(',')}));`]);
   }
 
-  extrude({ $fn, center, height, r1 = 0, r2 = 0, ...rest }: PolyExtrudeProps) {
-    const fn = $fn;
+  extrude({ $fn, $fn1, $fn2, center, height, r1 = 0, r2 = 0, ...rest }: PolyExtrudeProps) {
     const radii = this.p.radii;
     const points = this.p.points.map(([x, y], i) => [x, y, radii[i % radii.length] || 0]);
     const params = [
       serialize(points),
       serialize({ ...rest, r1, r2 }),
       `length=${height}`,
+      $fn ? `fn=${$fn}` : undefined,
+      $fn1 ? `fn1=${$fn1}` : undefined,
+      $fn2 ? `fn2=${$fn2}` : undefined,
     ];
-    if (fn) {
-      params.push(`fn=${fn}`);
-    }
-    const shape = new Shape3([`polyRoundExtrude(${params.join(',')});`]);
+    const shape = new Shape3([`polyRoundExtrude(${params.filter(o => o).join(',')});`]);
     if (center) {
       return shape.translate([0, 0, -height / 2]);
     }

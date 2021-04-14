@@ -21,8 +21,8 @@ export const base_size: Vec3 = [62, 62, 4];
 const base_offset = 20;
 export const base = polyRound({
   points: getRectPoints({ size: [base_size[0], base_size[1]] }),
-  radii: [1, 10, 30, 10],
-}).extrude({ height: base_size[2], r2: 1, $fn: 30 })
+  radii: [0, 10, 30, 10],
+}).extrude({ height: base_size[2], $fn: 30 })
   .translate([-base_offset, -base_offset, 0])
   .difference(
     // t-slot screws

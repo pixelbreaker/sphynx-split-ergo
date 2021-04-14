@@ -38,5 +38,6 @@ const clasp = cylinder({ d: clasp_size, h: lmu88.length, center: true })
   );
 
 export const main = union(
-  body
+  body,
+  clasp.translate([-(body_size[0] + clasp_size) / 2, 0, 0])
 ).set({ $fn: 60 });
