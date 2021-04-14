@@ -1,63 +1,47 @@
-import { union, difference, intersection, Vec3 } from "../../src/csg/base";
+import { union, difference, intersection, Vec3, Vec2 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { ring } from "../utils";
-import { m5_sunken, pulley, pulley_holes, rod_hole, rounding_box, mount, m5, m5_countersunk, pulley_holes_coord } from "./xy-corner";
-const inf = 1000;
-const base_size: Vec3 = [62, 62, 4];
-const extra_height = 4;
+import { m5, base_size, rod_offset, base, rounded_side } from "./xy-corner";
 
-const base_offset = 20;
+const pulley = {
+  bore: 5,
+  od: 8,
+  brim: 18
+}
+const belt_thickness = 2;
 
+const pulley_holes_coord: Vec2[] = [
+  [0, 0],
+  [pulley.od + belt_thickness, pulley.brim],
+  [pulley.brim, pulley.od + belt_thickness]
+].map(([x, y]) => ([x + rod_offset, y + rod_offset]) as Vec2);
 
-const base = polyRound({
-  points: getRectPoints({ size: [base_size[0], base_size[1]] }),
-  radii: [1, 10, 30, 10],
-}).extrude({ height: base_size[2], $fn: 30, r2: 1 })
-  .translate([-base_offset, -base_offset, 0])
-  .union(polyRound({
-    points: [
-      [0, 0],
-      [19, 41],
-      [41, 19],
-    ],
-    radii: [5.5, 9, 9],
-  }).extrude({ height: extra_height, $fn: 30, r2: -2 })
-    .translate([0, 0, base_size[2]]))
-  .difference(
-    ...pulley_holes,
-    // t-slot screws
-    m5.translate([-10, -10, base_size[2] - 3]),
-    m5.translate([32, -10, base_size[2] - 3]),
-    m5.translate([-10, 32, base_size[2] - 3]),
-  );
-
-const side_size: Vec3 = [base_size[0] - base_offset, base_size[1] - base_offset, 3];
-const side = polyRound({
-  points: getRectPoints({ size: [side_size[0], side_size[1]] }),
-  radii: [0, 0, side_size[0], 0],
-}).extrude({
-  height: side_size[2], $fn: 30
-}).translate([0, base_size[2], 0])
-  .difference(
-    m5_countersunk.translate([35, 10, 0.5]),
-    rod_hole
-  ).rotate([90, 0, 90]);
+const pulley_holes = pulley_holes_coord.map(c => (m5.translate([...c, 0])));
+const plateu_height = 4;
 
 const clearance_pulley = cylinder({ d: pulley.brim + 2, h: 12 })
   .translate([
     pulley_holes_coord[0][0],
     pulley_holes_coord[0][1],
-    base_size[2] + extra_height - 1
+    base_size[2] + plateu_height - 1
   ]);
 
-const rounded_side = rounding_box.intersection(
-  side.union(
-    side.mirror([-1, 1, 0])
-  )
-).difference(clearance_pulley);
+const plateu = polyRound({
+  points: [
+    [0, 0],
+    [19, 41],
+    [41, 19],
+  ],
+  radii: [5.5, 9, 9],
+}).extrude({ height: 4, $fn: 30, r2: -2 })
+  .translate([0, 0, base_size[2]]);
 
+export const main = base.union(
+  rounded_side.difference(clearance_pulley),
+  plateu
+).difference(
+  ...pulley_holes,
+).set({ $fn: 60 });
 
-export const main = base.union(rounded_side)
-  .set({ $fn: 60 });
