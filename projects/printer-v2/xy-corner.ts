@@ -11,7 +11,7 @@ export const m5_countersunk = m5.union(circle({ d: 5 })
   .linear_extrude({ height: 3, scale: [2, 2] }));
 export const m3 = cylinder({ d: 3, h: inf, center: true });
 export const m3_sunken = m3.union(cylinder({ d: 6, h: inf }));
-export const rod_offset = 11.5;
+export const rod_offset = 12;
 export const rod_depth = 30;
 
 const rod_hole = cylinder({ d: 8, h: inf, center: true })
