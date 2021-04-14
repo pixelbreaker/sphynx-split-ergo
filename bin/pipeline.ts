@@ -28,7 +28,7 @@ const stl_result = spawnSync('openscad', [
 ]).output.join('\n');
 console.log(stl_result);
 console.timeEnd('openscad');
-if (stl_result.indexOf('WARNING')) {
+if (stl_result.indexOf('WARNING') !== -1) {
   console.log('openscad errors/warnings detected, exiting');
   process.exit(1);
 }

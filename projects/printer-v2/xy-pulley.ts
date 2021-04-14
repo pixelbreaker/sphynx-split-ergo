@@ -35,8 +35,8 @@ const plateu = polyRound({
     [41, 19],
   ],
   radii: [5.5, 9, 9],
-}).extrude({ height: 4, $fn: 30, $fn2: 1, r2: -1.5 })
-  .translate([0, 0, base_size[2]-0.01]);
+}).extrude({ height: 4, $fn: 30, $fn2: 10, r2: -1.5 })
+  .translate([0, 0, base_size[2]]);
 export const main = base.union(
   rounded_side.difference(clearance_pulley),
   plateu
