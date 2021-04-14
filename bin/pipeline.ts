@@ -13,17 +13,17 @@ const scad_result = execSync([
 ].join(' ')).toString();
 const base_file = scad_result.match(/saved (.*)\.scad/)[1];
 const scad_file = base_file + '.scad';
-console.log('scad file', scad_file);
 
 // get stl
+console.log('openscad generating stl from', scad_file);
 const stl_file = base_file + '.stl';
 const stl_result = execSync([
   'openscad', '-o', stl_file, scad_file
 ].join(' ')).toString();
 console.log(stl_result);
-console.log('stl file', stl_file);
 
 // get gcode
+console.log('slic3r generating gcode from', stl_file);
 const gcode_file = base_file + '.gcode';
 const gcode_result = execSync([
   '%userprofile%\\Slic3r-1.3.0.64bit\\Slic3r-console.exe',
@@ -32,9 +32,9 @@ const gcode_result = execSync([
   stl_file
 ].join(' ')).toString();
 console.log(gcode_result);
-console.log('gcode file', gcode_file);
 
 // upload
+console.log('uploading gcode to http://octopi', gcode_file);
 const upload_result = execSync([
   'curl', '-k', '-H',
   '"X-Api-Key: E01B67DAC70E45FB87F33CE3CC0CF803"',
@@ -44,6 +44,9 @@ const upload_result = execSync([
   'http://octopi/api/files/local'
 ].join(' ')).toString();
 console.log(upload_result);
+
+
+console.log('done');
 
 
 
