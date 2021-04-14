@@ -12,7 +12,7 @@ export const m5_countersunk = m5.union(circle({ d: 5 })
 export const m3 = cylinder({ d: 3, h: inf, center: true });
 export const m3_sunken = m3.union(cylinder({ d: 6, h: inf }));
 export const rod_offset = 12;
-export const rod_depth = 30;
+export const rod_depth = 40;
 
 const rod_hole = cylinder({ d: 8, h: inf, center: true })
   .translate([rod_offset, rod_depth, 0]);
@@ -32,17 +32,17 @@ export const base = polyRound({
   );
 
 
-const side_size: Vec3 = [base_size[0] - base_offset, base_size[1] - base_offset, 3];
+const side_size: Vec3 = [base_size[0] - base_offset, 50, 3];
 const side = polyRound({
   points: getRectPoints({ size: [side_size[0], side_size[1]] }),
   radii: [0, 0, side_size[0], 0],
 }).extrude({
   height: side_size[2], $fn: 30
-}).translate([0, base_size[2], 0])
-  .difference(
-    m5_countersunk.translate([30, 10, 0.5]),
-    rod_hole
-  ).rotate([90, 0, 90]);
+}).difference(
+  m5_countersunk.translate([30, 10, 0.5]),
+  rod_hole
+).translate([0, base_size[2], 0])
+  .rotate([90, 0, 90]);
 
 
 const rounding_box = polyRound({
