@@ -36,7 +36,7 @@ function reverseList(list) = [ for(i=[len(list) - 1:-1:0]) list[i] ];
 // Apply `reverseList` to the array of vertex indices for an array of faces
 function invertFaces(faces) = [ for(f=faces) reverseList(f) ];
 
-function makeCurvedPartOfPolyHedron(radiiPoints,r,fn,minR=0.01)=
+function makeCurvedPartOfPolyHedron(radiiPoints,r,fn,fn1,minR=0.01)=
 // this is a private function that I'm not expecting library users to use directly
 // radiiPoints= serise of x, y, r points
 // r= radius of curve that will be put on the end of the extrusion
@@ -50,8 +50,8 @@ let(
   isCWorCCWOverall=CWorCCW(radiiPoints),
   dir=sign(r),
   absR=abs(r),
-  fractionOffLp=1-1/fn,
-  allPoints=[for(fraction=[0:1/fn:1])
+  fractionOffLp=1-1/fn1,
+  allPoints=[for(fraction=[0:1/fn1:1])
     let(
       iterationOffset=dir*sqrt(sq(absR)-sq(fraction*absR))-dir*absR,
       theOffsetPoints=offsetPolygonPoints(radiiPoints,iterationOffset),
@@ -125,7 +125,7 @@ function offsetAllFacesBy(array,offset)=[
   ]
 ];
 
-function extrudePolygonWithRadius(radiiPoints,h=5,r1=1,r2=1,fn=4)=
+function extrudePolygonWithRadius(radiiPoints,h=5,r1=1,r2=1,fn=4,fn1=4,fn2=4)=
 // this basically calls makeCurvedPartOfPolyHedron twice to get the curved section of the final polyhedron
 // and then goes about assmbling them, as the side faces and the top and bottom face caps are missing
 // radiiPoints= series of [x,y,r] points,
@@ -135,13 +135,13 @@ function extrudePolygonWithRadius(radiiPoints,h=5,r1=1,r2=1,fn=4)=
 // returns= [polyhedronPoints, polyhedronFaces]
 let(
   // top is the top curved part of the extrude
-  top=makeCurvedPartOfPolyHedron(radiiPoints,r1,fn),
+  top=makeCurvedPartOfPolyHedron(radiiPoints,r1,fn,fn1),
   topRadiusPoints=translate3Dcoords(top[0],[0,0,h-abs(r1)]),
   singeLayerLength=top[2],
   topRadiusFaces=top[1],
   radiusPointsLength=len(topRadiusPoints), // is the same length as bottomRadiusPoints
   // bottom is the bottom curved part of the extrude
-  bottom=makeCurvedPartOfPolyHedron(radiiPoints,r2,fn),
+  bottom=makeCurvedPartOfPolyHedron(radiiPoints,r2,fn,fn2),
   // Z axis needs to be multiplied by -1 to flip it so the radius is going in the right direction [1,1,-1]
   bottomRadiusPoints=translate3Dcoords(bottom[0],[0,0,abs(r2)],[1,1,-1]),
   // becaues the points will be all concatenated into the same array, and the bottom points come second, than
@@ -166,12 +166,12 @@ let(
   finalPolyhedronFaces
 ];
 
-module polyRoundExtrude(radiiPoints,length=5,r1=1,r2=1,fn=10,convexity=10) {
+module polyRoundExtrude(radiiPoints,length=5,r1=1,r2=1,fn=10,fn1=10,fn2=10,convexity=10) {
   orderedRadiiPoints = CWorCCW(radiiPoints) == 1
     ? reverseList(radiiPoints)
     : radiiPoints;
 
-  polyhedronPointsNFaces=extrudePolygonWithRadius(orderedRadiiPoints,length,r1,r2,fn);
+  polyhedronPointsNFaces=extrudePolygonWithRadius(orderedRadiiPoints,length,r1,r2,fn,fn1,fn2);
   polyhedron(points=polyhedronPointsNFaces[0], faces=polyhedronPointsNFaces[1], convexity=convexity);
 }
 
