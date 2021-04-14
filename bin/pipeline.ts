@@ -1,7 +1,8 @@
 #!/usr/bin/env ts-node
 import * as path from 'path';
 import * as os from 'os';
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
+import { exit } from 'node:process';
 
 const file = process.argv[2];
 console.time('done');
@@ -22,11 +23,15 @@ console.timeEnd('node');
 console.log(scad_file, '[openscad: scad -> stl]');
 console.time('openscad');
 const stl_file = base_file + '.stl';
-const stl_result = execSync([
-  'openscad', '-o', stl_file, scad_file
-].join(' ')).toString();
+const stl_result = spawnSync('openscad', [
+  '-o', stl_file, scad_file
+]).output.join('\n');
 console.log(stl_result);
 console.timeEnd('openscad');
+if (stl_result.indexOf('WARNING')) {
+  console.log('openscad errors/warnings detected, exiting');
+  process.exit(1);
+}
 
 // get gcode
 console.log(stl_file, '[slic3r: stl -> gcode]');
@@ -55,8 +60,8 @@ const upload_result = execSync([
 console.log(upload_result);
 console.timeEnd('curl');
 
-console.log('\nprocessed', file);
-console.timeEnd('done');
 
+console.log(`\n${new Date().toLocaleString()}`, 'processed', file);
+console.timeEnd('done');
 
 
