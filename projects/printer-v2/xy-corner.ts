@@ -3,14 +3,9 @@ import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from ".
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { ring } from "../utils";
+import { m5, m5_countersunk, inf } from "./hardware";
 
-const inf = 1000;
-export const m5 = cylinder({ d: 5, h: inf, center: true });
-export const m5_sunken = m5.union(cylinder({ d: 10, h: inf }));
-export const m5_countersunk = m5.union(circle({ d: 5 })
-  .linear_extrude({ height: 3, scale: [2, 2] }));
-export const m3 = cylinder({ d: 3, h: inf, center: true });
-export const m3_sunken = m3.union(cylinder({ d: 6, h: inf }));
+
 export const rod_offset = 12;
 export const rod_depth = 40;
 

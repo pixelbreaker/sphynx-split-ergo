@@ -3,9 +3,9 @@ import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from ".
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { ring } from "../utils";
-import { m5_sunken, base, rounded_side, m3_sunken, rod_offset } from "./xy-corner";
+import { m3_sunken, inf } from "./hardware";
+import { base, rounded_side, rod_offset } from "./xy-corner";
 
-const inf = 1000;
 const mount = {
   hole: 22 + 1,
   screw_spacing: 31,
