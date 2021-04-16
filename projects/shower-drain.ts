@@ -6,7 +6,7 @@ import { hexTile, ring } from './utils';
 
 const options = {
   rimDiameter: 68,
-  drainDiameter: 33,
+  drainDiameter: 37,
   meshSize: 8,
   thickness: 1.5
 }
@@ -17,11 +17,12 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     od: rimDiameter,
     id: rimDiameter - t * 2,
     h: t * 2,
-    radii: [0, 0, 0, t],
-    $fn: 100
+    radii: [0, 0, 0, t / 2],
+    $fn: 100,
+    $rfn: 1
   });
 
-  const hexMesh = cylinder({ d: rimDiameter - t * 1.9, h: t })
+  const hexMesh = cylinder({ d: rimDiameter - t * 1.8, h: t, $fn: 100 })
     .difference(
       hexTile({
         hexSize: meshSize,
@@ -45,7 +46,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
   const ringInner = ring({
     od: drainDiameter,
     id: drainInnerDiameter,
-    h: t * 2,
+    h: t * 3,
     $fn: 50
   }).translate([0, 0, t * 1.8]);
 
