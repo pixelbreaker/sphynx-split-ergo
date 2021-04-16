@@ -1,5 +1,6 @@
 
 
+import { OutputSettings } from '../bin/gen-scad';
 import { union } from '../src/csg/base';
 import { cube, cylinder, square } from '../src/csg/primitives';
 import { hexTile, ring } from './utils';
@@ -59,3 +60,8 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
 }
 
 export const main = showerDrain(options);
+export const settings: OutputSettings = {
+  slicer: {
+    raft_layers: 2
+  }
+}

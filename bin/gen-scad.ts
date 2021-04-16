@@ -1,7 +1,12 @@
 #!/usr/bin/env ts-node
 import * as path from 'path';
 import * as fs from 'fs';
+import { SlicerSettings } from '../slic3r_config/slicer-settings';
 
+export type OutputSettings = {
+  fileName?: string;
+  slicer?: SlicerSettings;
+}
 const cwd = process.cwd();
 const watchDir = path.join(cwd, 'projects');
 const outputDir = path.join(cwd, 'target');
@@ -22,11 +27,18 @@ import(file).then(mod => {
       if (e) {
         console.log("error", fileName, e);
       } else {
-        //  console.log(src);
-        console.log("saved", fileName);
+        let output: OutputSettings = {
+        };
+        if ('settings' in mod) {
+          output = mod.settings as OutputSettings;
+        }
+        output.fileName = fileName;
+        console.log('--LINE-BREAK--');
+        console.log(JSON.stringify(output));
       }
     });
   }
+
 }).catch(e => {
   console.log(e);
 });

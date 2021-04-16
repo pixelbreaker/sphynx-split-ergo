@@ -4,14 +4,14 @@ import { circle, square, polygon, } from "../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 import { ring } from "./utils";
 
-const id = 20.5;
-const height = 10;
+const id = 19;
+const height = 12;
 const thickness = 2;
 const od = id + thickness * 2;
 
 export const main = cylinder({ d: od, h: height })
   .difference(
-    cylinder({ d: id, h: height })
+    cylinder({ d1: id, d2: id + 1.5, h: height })
       .translate([0, 0, thickness]),
     ring({
       id: od - 1,

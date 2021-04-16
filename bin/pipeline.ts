@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { execSync, spawnSync } from 'child_process';
 import { exit } from 'node:process';
+import { OutputSettings } from './gen-scad';
 
 const file = process.argv[2];
 console.time('done');
@@ -15,9 +16,12 @@ const scad_result = execSync([
   process.platform.startsWith('win') ? 'npm.cmd' : 'npm',
   'run', 'ts', gen_scad, file
 ].join(' ')).toString();
-const base_file = scad_result.match(/saved (.*)\.scad/)[1];
-const scad_file = base_file + '.scad';
-console.timeEnd('node');
+const json = scad_result.split('--LINE-BREAK--')[1];
+console.log(scad_result);
+console.log(json);
+const settings: OutputSettings = JSON.parse(json);
+const scad_file = settings.fileName;
+const base_file = scad_file.slice(0, -5);
 
 // get stl
 console.log(scad_file, '[openscad: scad -> stl]');
@@ -37,12 +41,18 @@ if (stl_result.indexOf('WARNING') !== -1) {
 console.log(stl_file, '[slic3r: stl -> gcode]');
 console.time('slic3r');
 const gcode_file = base_file + '.gcode';
-const gcode_result = execSync([
+const slice_cmd = [
   '%userprofile%\\Slic3r-1.3.0.64bit\\Slic3r-console.exe',
   '--output', gcode_file,
-  '--load', path.join(__dirname, '..', 'slic3r_config', 'cube_normal_duramic_black.ini'),
-  stl_file
-].join(' ')).toString();
+  '--load', path.join(__dirname, '..', 'slic3r_config', 'cube_normal_duramic_black.ini')
+];
+Object.entries(settings.slicer || {}).forEach(([key, val]) => {
+  slice_cmd.push(`--${key}`, `${val}`);
+})
+slice_cmd.push(stl_file);
+const slice_cmd_str = slice_cmd.join(' ');
+console.log(slice_cmd_str);
+const gcode_result = execSync(slice_cmd_str).toString();
 console.log(gcode_result);
 console.timeEnd('slic3r');
 
