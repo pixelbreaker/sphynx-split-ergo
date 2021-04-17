@@ -2,7 +2,6 @@
 import * as path from 'path';
 import * as os from 'os';
 import { execSync, spawnSync } from 'child_process';
-import { exit } from 'node:process';
 import { OutputSettings } from './gen-scad';
 
 const file = process.argv[2];
