@@ -14,8 +14,11 @@ const screw = m5.rotate([0, 90, 0]);
 const clasp_gap_rad = 40 * (0.5 * Math.PI / 180);
 
 const holes = cylinder({ d: rod_od, h: inf, center: true })
+  .union(
+    ring({ id: rod_od + 1, od: rod_od + 3, h: 2, center: true })
+      .translate([0, 0, -3]))
   .rotate([90, 0, 0])
-  .translate([17, 0, 20])
+  .translate([17, 0, (height - rod_od) / 2 + 0.5])
   .union(
     // pulley screws
     screw.translate([body_size[0], pulley.bore, pulley_offset]),
