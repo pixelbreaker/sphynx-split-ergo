@@ -14,7 +14,7 @@ export const pulley = {
 export const steel_rod = 8;
 export const carbon_fiber_rod = 12;
 export const lmu88 = {
-  od: 16,
+  od: 15,
   length: 18
 }
 
