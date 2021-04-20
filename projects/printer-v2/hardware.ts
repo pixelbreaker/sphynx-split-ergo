@@ -18,11 +18,5 @@ export const lmu88 = {
   length: 18
 }
 
-export const m5 = cylinder({ d: 5, h: 20, center: true });
-export const m5_sunken = m5.union(cylinder({ d: 10, h: 20 }));
-export const m5_countersunk = m5.union(circle({ d: 5 })
-  .linear_extrude({ height: 3, scale: [2, 2] }));
-export const m3 = cylinder({ d: 3, h: 20, center: true });
-export const m3_sunken = m3.union(cylinder({ d: 6, h: 20 }));
-
 export const clearance_pulley = cylinder({ d: pulley.brim + 2, h: 12 });
+

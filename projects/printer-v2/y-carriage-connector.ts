@@ -3,14 +3,14 @@ import { union, difference, intersection, Vec3 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, PolyRound, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
-import { ring } from "../utils";
-import { lmu88, m5, pulley, inf, m5_sunken, m3_sunken, m3 } from "./hardware";
+import { hole, ring } from "../utils";
+import { lmu88, pulley, inf } from "./hardware";
 
 const rod_od = 12;
 const rod_offset = 20;
 const body_size: Vec3 = [55, 20, lmu88.od];
 const pulley_offset = pulley.brim / 2 + 0.5;
-const screw = m5.rotate([-90, 0, 0]);
+const screw = hole({ d: 5 }).rotate([-90, 0, 0]);
 const clasp_screw_distance = 18;
 const gap_size = 1;
 
@@ -23,7 +23,7 @@ const holes =
       screw.translate([pulley_offset, 3, -2]),
 
       // clasp screws
-      m3.rotate([90, 0, 0])
+      hole({ d: 3 }).rotate([90, 0, 0])
         .translate([clasp_screw_distance / 2, -body_size[1] / 2, body_size[2] / 4]),
 
       // gap

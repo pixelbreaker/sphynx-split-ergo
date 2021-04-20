@@ -2,8 +2,8 @@ import { union, difference, intersection, Vec3, Vec2 } from "../../src/csg/base"
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
-import { ring } from "../utils";
-import { belt_thickness, clearance_pulley, m5, pulley } from "./hardware";
+import { hole, ring } from "../utils";
+import { belt_thickness, clearance_pulley, pulley } from "./hardware";
 import { base_size, rod_offset, base, rounded_side } from "./xy-corner";
 
 const pulley_holes_coord: Vec2[] = [
@@ -12,7 +12,7 @@ const pulley_holes_coord: Vec2[] = [
   [pulley.brim, pulley.od + belt_thickness]
 ].map(([x, y]) => ([x + rod_offset, y + rod_offset]) as Vec2);
 
-const pulley_holes = pulley_holes_coord.map(c => (m5.translate([...c, 0])));
+const pulley_holes = pulley_holes_coord.map(c => (hole({ d: 5, center: true }).translate([...c, 0])));
 const plateu_height = 4;
 
 const plateu = polyRound({

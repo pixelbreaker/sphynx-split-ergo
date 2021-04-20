@@ -4,7 +4,7 @@ import { Shape3 } from '../src/csg/base3';
 import { getRectPoints, polyRound } from '../src/csg/polyround';
 import { cube, cylinder, sphere, square } from '../src/csg/primitives';
 
-
+const inf = 1000;
 type HexTileOptions = {
   hexSize: number,
   spacing: number,
@@ -53,4 +53,53 @@ export const ring = ({ id, od, h, radii = [0], $fn, $rfn, center }: RingOptions)
   }
 
   return ret;
+}
+
+
+type SimpleHoleProps = {
+  d: number;
+  h?: number;
+  invert?: boolean;
+  center?: boolean;
+};
+
+type CounterSinkProps = {
+  countersink: number
+  depth: number
+} & SimpleHoleProps;
+
+type CounterSink2Props = {
+  countersink: number
+  angle: number;
+} & SimpleHoleProps;
+
+type CounterBoreProps = {
+  counterbore: number
+  depth: number;
+} & SimpleHoleProps;
+
+type HoleProps = SimpleHoleProps | CounterBoreProps | CounterSinkProps | CounterSink2Props;
+
+export function hole(p: SimpleHoleProps): Shape3;
+export function hole(p: CounterBoreProps): Shape3;
+export function hole(p: CounterSinkProps): Shape3;
+export function hole(p: CounterSink2Props): Shape3;
+export function hole(p: HoleProps) {
+  const height = p.h || inf;
+  let hole = cylinder({ d: p.d, h: p.h || inf });
+  if ('counterbore' in p) {
+    hole = hole.union(cylinder({ d: p.counterbore, h: p.depth }));
+  } else if ('countersink' in p && 'depth' in p) {
+    hole = hole.union(cylinder({ d1: p.countersink, d2: p.d, h: p.depth }));
+  } else if ('angle' in p) {
+    const h = (p.countersink - p.d) / 2 / Math.tan(p.angle / 2 * Math.PI / 180);
+    hole = hole.union(cylinder({ d1: p.countersink, d2: p.d, h }));
+  }
+  if (p.center) {
+    hole = hole.translate([0, 0, -height / 2]);
+  }
+  if (!p.invert) {
+    hole = hole.mirror([0, 0, 1]);
+  }
+  return hole;
 }

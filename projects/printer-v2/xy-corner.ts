@@ -2,14 +2,16 @@ import { union, difference, intersection, Vec3, Vec2 } from "../../src/csg/base"
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
-import { ring } from "../utils";
-import { m5, m5_countersunk, inf } from "./hardware";
+import { hole, ring } from "../utils";
+import { inf } from "./hardware";
 
 
 export const rod_offset = 12;
 export const rod_depth = 40;
+const m5 = hole({ d: 5 });
+const m5_countersunk = hole({ d: 5, h: 20, countersink: 10, angle: 90 });
 
-const rod_hole = cylinder({ d: 8, h: inf, center: true })
+const rod_hole = hole({ d: 8, center: true })
   .translate([rod_offset, rod_depth, 0]);
 
 export const base_size: Vec3 = [62, 62, 4];
@@ -21,9 +23,9 @@ export const base = polyRound({
   .translate([-base_offset, -base_offset, 0])
   .difference(
     // t-slot screws
-    m5.translate([-10, -10, base_size[2] - 3]),
-    m5.translate([32, -10, base_size[2] - 3]),
-    m5.translate([-10, 32, base_size[2] - 3]),
+    m5.translate([-10, -10, base_size[2] + .01]),
+    m5.translate([32, -10, base_size[2] + .01]),
+    m5.translate([-10, 32, base_size[2] + .01]),
   );
 
 
@@ -34,7 +36,7 @@ const side = polyRound({
 }).extrude({
   height: side_size[2], $fn: 30
 }).difference(
-  m5_countersunk.translate([30, 10, 0.5]),
+  m5_countersunk.translate([30, 10, side_size[2] + 0.01]),
   rod_hole
 ).translate([0, base_size[2], 0])
   .rotate([90, 0, 90]);
@@ -50,3 +52,4 @@ export const rounded_side = rounding_box.intersection(
     side.mirror([-1, 1, 0])
   )
 );
+

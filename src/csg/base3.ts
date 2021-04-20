@@ -55,4 +55,8 @@ export class Shape3 extends Shape<{ dim: 3 }> {
     const src = super.tile(p).src;
     return new Shape3(src);
   }
+
+  debug(): Shape3 {
+    return new Shape3(["#", ...this.src]);
+  }
 }
