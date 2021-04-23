@@ -3,17 +3,35 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as chokidar from 'chokidar';
 import * as _ from 'lodash';
-import { spawn } from 'child_process';
+import { genScad } from './gen-scad';
 
 const cwd = process.cwd();
 const watchDir = path.join(cwd, 'projects');
-const gen_scad = path.join(__dirname, 'gen-scad.ts');
+const outputDir = path.join(cwd, 'target');
 
-const generateScad = (file: string) => {
-  spawn(
-    process.platform.startsWith('win') ? 'npm.cmd' : 'npm', [
-    'run', 'ts', gen_scad, file
-  ], { stdio: 'inherit' });
+const resetNodeCache = () => {
+  for (const path in require.cache) {
+    if (path.endsWith('.js') || path.endsWith('.ts')) { // only clear *.js, not *.node
+      delete require.cache[path]
+    }
+  }
+}
+
+const load = (file: string) => {
+  try {
+    if (!file.endsWith('.ts')) {
+      return;
+    }
+    console.log('detected', file);
+    const name = path.basename(file, '.ts');
+    const target = path.join(outputDir, file.substr(watchDir.length));
+    const targetDir = path.dirname(target);
+    const output = path.join(targetDir, name + ".scad");
+    resetNodeCache();
+    genScad(file, output);
+  } catch (e) {
+    console.log('error', file, e);
+  }
 }
 
 const watcher = chokidar.watch(watchDir, {
@@ -26,15 +44,15 @@ const watcher = chokidar.watch(watchDir, {
 const updateAll = _.debounce(() => {
   Object.entries(watcher.getWatched())
     .forEach(([key, val]) => {
-      val.forEach(v => generateScad(path.join(key, v)));
+      val.forEach(v => load(path.join(key, v)));
     });
 }, 300);
 
 const updateFile = _.debounce((path: string, stats: fs.Stats) => {
-  generateScad(path);
+  load(path);
 }, 300);
 
-watcher.on('change', updateFile);
+watcher.on('change', updateAll);
 watcher.on('ready', () => {
   console.log('watching');
   console.log(watcher.getWatched());

@@ -25,9 +25,9 @@ const holes =
     .translate([rod_offset, 0, 0])
     .union(
       // pulley screws
-      hole({ d: 3, h: 10 }).union(
+      hole({ d: 3, h: 15 }).union(
         //  nut
-        cube({ size: [6, inf, 3], center: true }).translate([0, (inf - 7) / 2, -6])
+        cube({ size: [6, inf, 3], center: true }).translate([0, (inf - 7) / 2, -10])
       ).rotate([-90, 0, 0])
         .translate([pulley_offset, body_size[1] / 2 + .01, -4]),
 
@@ -39,14 +39,12 @@ const holes =
       cube({ size: [gap_size, inf, inf], center: true }).translate([rod_offset, inf / 2, 0]),
 
       // gap screws
-      hole({ d: 4, h: 30, counterbore: 6, depth: 8 }).union(
+      hole({ d: 3.5, h: 30, counterbore: 6, depth: 8 }).union(
         //  nut
         cube({ size: [6, inf, 3], center: true }).translate([0, (inf - 7) / 2, -18])
       )
         .rotate([0, 90, 0])
         .translate([body_size[1] + .01, body_size[1] / 3, 0]),
-
-
     )
 
 const body = polyRound({
