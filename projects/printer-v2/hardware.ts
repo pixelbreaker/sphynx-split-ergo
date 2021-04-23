@@ -14,8 +14,9 @@ export const pulley = {
 export const steel_rod = 8;
 export const carbon_fiber_rod = 12;
 export const lmu88 = {
+  id: 8,
   od: 15,
-  length: 18
+  length: 24.5
 }
 
 export const clearance_pulley = cylinder({ d: pulley.brim + 2, h: 12 });
