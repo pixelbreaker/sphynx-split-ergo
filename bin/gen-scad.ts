@@ -9,7 +9,7 @@ export type OutputSettings = {
 }
 
 const header = `include <${path.join(__dirname, '..', 'scad_modules', 'polyround.scad')}>`;
-export const genScad = (in_file: string, out_file: string): Promise<{}> => {
+export const genScad = (out_file: string, in_file: string,): Promise<{}> => {
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ export const genScad = (in_file: string, out_file: string): Promise<{}> => {
   });
 };
 
-export const genSettings = (in_file: string, out_file: string): Promise<{}> => {
+export const genSettings = (out_file: string, in_file: string): Promise<{}> => {
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
