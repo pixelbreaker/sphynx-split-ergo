@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import { spawn } from 'child_process';
+
 /**
  * Simple file dependency/invoke based on modified file date - like Make
  */
-
 
 type FileTask = {
   deps: string[];
@@ -30,20 +30,19 @@ const isOlder = (a: string, ...b: string[]): Promise<boolean> => {
 export const spawnPromise = (cmd: string, args: string[] = []): Promise<string> =>
   new Promise((resolve, reject) => {
     const ch = spawn(cmd, args, { shell: true });
-    const buffer: string[] = [];
-    const cb = (data: any) => {
-      const str = data.toString();
-      console.log(str);
-      buffer.push(str);
-    };
-    ch.stdout.on('data', cb);
-    ch.stderr.on('data', cb);
+    const buffer: Buffer[] = [];
+    ch.stdout.on('data', (data: any) => {
+      process.stdout.write(data);
+      buffer.push(data);
+    });
+    ch.stderr.on('data', (data: any) => {
+      process.stderr.write(data);
+    });
     ch.on('close', (code) => {
-      const result = buffer.join('');
       if (code > 0) {
-        reject(`error exec ${cmd} \n ${result}`);
+        reject(`error exec ${cmd}`);
       } else {
-        resolve(result);
+        resolve(buffer.join(''));
       }
     });
   });
@@ -58,7 +57,7 @@ export class TaskCollection {
   ) {
     this.graph.set(t, { deps, action });
   }
-  
+
   do(filename: string): Promise<string> {
     const task = this.graph.get(filename);
     if (task) {

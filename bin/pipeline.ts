@@ -53,12 +53,13 @@ tasks.add(tf(base_output, 'gcode'), (out, settings, stl) => {
 }, tf(base_output, 'settings.json'), tf(base_output, 'stl'));
 
 tasks.add(tf(base_output, 'upload'),
-  (out, gcode) => spawnPromise('curl', ['-k', '-H', '--progress-bar',
+  (out, gcode) => spawnPromise('curl', ['-k', '-H',
     '"X-Api-Key: E01B67DAC70E45FB87F33CE3CC0CF803"',
     '-F', '"select=false"',
     '-F', '"print=false"',
     '-F', `"file=@${gcode}"`,
-    'http://octopi/api/files/local'])
+    'http://octopi/api/files/local'
+  ])
     .then(() => spawnPromise('touch', [out]))
   , tf(base_output, 'gcode'));
 

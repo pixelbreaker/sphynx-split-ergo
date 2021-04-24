@@ -9,23 +9,26 @@ export type OutputSettings = {
 }
 
 const header = `include <${path.join(__dirname, '..', 'scad_modules', 'polyround.scad')}>`;
-export const genScad = (out_file: string, in_file: string,): Promise<{}> => {
+export const genScad = (out_file: string, in_file: string): Promise<unknown> => {
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
     import(in_file).then(mod => {
       if ('main' in mod) {
         const src: string = header + '\n' + mod.main.src.join('\n');
-        fs.writeFileSync(out_file, src);
+        fs.writeFile(out_file, src, (e) => {
+          if (e) {
+            reject(e);
+          } else {
+            resolve(null);
+          }
+        });
       };
-      resolve({});
-    }).catch(e => {
-      reject(e);
-    });
+    }).catch(reject);
   });
 };
 
-export const genSettings = (out_file: string, in_file: string): Promise<{}> => {
+export const genSettings = (out_file: string, in_file: string): Promise<unknown> => {
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
@@ -33,11 +36,15 @@ export const genSettings = (out_file: string, in_file: string): Promise<{}> => {
       if ('settings' in mod) {
         const json = JSON.stringify(mod.settings);
         console.log('json', json);
-        fs.writeFileSync(out_file, json);
+        fs.writeFile(out_file, json, (e) => {
+          if (e) {
+            reject(e);
+          } else {
+            resolve(null);
+          }
+        });
       }
-      resolve({});
-    }).catch(e => {
-      reject(e);
-    });
+      resolve(null);
+    }).catch(reject);
   });
 };
