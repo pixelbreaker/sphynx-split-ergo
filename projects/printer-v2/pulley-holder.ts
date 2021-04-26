@@ -19,11 +19,11 @@ const body = polyRound({
 
 const cavity_size = size - thickness * 2;
 export const main = body.difference(
-  cube({ size: [cavity_size, inf, inf], center: true })
+  cube({ size: [cavity_size - 2, inf, inf], center: true })
     .translate([0, 0, (inf - cavity_size) / 2]),
   hole({ d: 5.5, counterbore: 10, depth: 2 })
     .translate([0, 0, -cavity_size / 2 + 0.01]),
-  hole({ d: 5, h: size + 0.01, counterbore: 5.5, depth: size / 2, center: true })
+  hole({ d: 4.5, h: size + 0.01, counterbore: 5.5, depth: size / 2, center: true })
     .rotate([0, 90, 0])
     .translate([0, 0, 3])
 ).set({ $fn: 60 });
