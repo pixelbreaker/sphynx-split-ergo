@@ -13,18 +13,24 @@ export const genScad = (out_file: string, in_file: string): Promise<unknown> => 
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
-    import(in_file).then(mod => {
-      if ('main' in mod) {
-        const src: string = header + '\n' + mod.main.src.join('\n');
-        fs.writeFile(out_file, src, (e) => {
-          if (e) {
-            reject(e);
-          } else {
+    try {
+      import(in_file).then(mod => {
+        if ('main' in mod) {
+          const src: string = header + '\n' + mod.main.src.join('\n');
+          fs.writeFile(out_file, src, (e) => {
+            if (e) {
+              console.log(e);
+            }
             resolve(null);
-          }
-        });
-      };
-    }).catch(reject);
+          });
+        };
+      }).catch(e => {
+        console.log(e);
+        resolve(null);
+      });
+    } catch (e) {
+      console.log(e);
+    }
   });
 };
 
@@ -32,19 +38,25 @@ export const genSettings = (out_file: string, in_file: string): Promise<unknown>
   const targetDir = path.dirname(out_file);
   fs.mkdirSync(targetDir, { recursive: true });
   return new Promise((resolve, reject) => {
-    import(in_file).then(mod => {
-      if ('settings' in mod) {
-        const json = JSON.stringify(mod.settings);
-        console.log('json', json);
-        fs.writeFile(out_file, json, (e) => {
-          if (e) {
-            reject(e);
-          } else {
+    try {
+      import(in_file).then(mod => {
+        if ('settings' in mod) {
+          const json = JSON.stringify(mod.settings);
+          console.log('json', json);
+          fs.writeFile(out_file, json, (e) => {
+            if (e) {
+              console.log(e);
+            }
             resolve(null);
-          }
-        });
-      }
-      resolve(null);
-    }).catch(reject);
+          });
+        }
+        resolve(null);
+      }).catch(e => {
+        console.log(e);
+        resolve(null);
+      });
+    } catch (e) {
+      console.log(e);
+    }
   });
 };
