@@ -5,32 +5,37 @@ import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { hole, ring } from "../utils";
 import { lmu88, pulley, inf } from "./hardware";
-import { base_size } from "./xy-corner";
 
-const size = [26, 20, 22];
+const size: Vec3 = [29, 26, 26];
 const offset_z = -1;
 const t = 6;
-const tz = 4 + offset_z;
+const tz = 5 + offset_z;
 
-const body = polyRound({
+const roundCube = (size: Vec3, radii: number[]) => polyRound({
   points: getRectPoints({
     size: [size[2], size[1]],
     center: true
   }),
-  radii: [0, 0, 10, 10]
+  radii
 }).extrude({ height: size[0], center: true, $fn: 60 })
-  .rotate([0, -90, 0])
+  .rotate([0, -90, 0]);
+  
+const body = roundCube(size, [0, 0, size[1] / 2, size[1] / 2])
   .translate([0, 0, offset_z]);
 
 const bearing = cylinder({ d: 16.5, h: size[0] - 2, center: true })
-  .union(cylinder({ d: 10, h: inf, center: true }))
+  .union(cylinder({ d: 14, h: inf, center: true }))
   .rotate([0, 90, 0]);
 
+const cavity = roundCube([inf, size[0] - t * 2, inf], [0, 0, 5, 5])
+  .mirror([0, 0, 1])
+  .rotate([0, 0, 90])
+  .translate([0, 0, (inf - size[2]) / 2 + tz]);
+
 export const main = body.difference(
-  cube({ size: [size[0] - t * 2, inf, inf], center: true })
-    .translate([0, 0, (inf - size[2]) / 2 + tz]),
-  hole({ d: 5.5, counterbore: 10, depth: 2 })
-    .translate([0, 0, -size[2] / 2 + tz + 0.01]),
+  cavity,
+  hole({ d: 5.5, counterbore: 10, depth: 2 + 10 })
+    .translate([0, 0, -size[2] / 2 + tz + 10.01]),
   bearing
 ).set({ $fn: 100 });
 
