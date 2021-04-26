@@ -28,7 +28,9 @@ const load = (file: string) => {
     const targetDir = path.dirname(target);
     const output = path.join(targetDir, name + ".scad");
     resetNodeCache();
-    genScad(file, output);
+    genScad(output, file).then(() => {
+      console.log('done', output);
+    });
   } catch (e) {
     console.log('error', file, e);
   }

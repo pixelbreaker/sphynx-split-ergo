@@ -1,18 +1,17 @@
 import { OutputSettings } from "../../bin/gen-scad";
 import { union, difference, intersection, Vec3 } from "../../src/csg/base";
-import { getCircularPoints, getDiamondPoints, getRectPoints, PolyRound, polyRound } from "../../src/csg/polyround";
+import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
 import { hole, ring } from "../utils";
 import { lmu88, pulley, inf } from "./hardware";
 import { base_size } from "./xy-corner";
 
-const id = 12;
+const id = 15.5;
 const offset_y = 2;
-const screw_offset = 10;
-const body_size: Vec3 = [30, 35, 40];
-const extrusion_size: Vec3 = [20, 20, 20];
-
+const screw_offset = 12;
+const body_size: Vec3 = [30, 30, 40];
+const extrusion_size: Vec3 = [20, body_size[1] - (id + offset_y * 2), 20];
 
 const body_offset_y = (body_size[1] - id) / 2 - offset_y;
 const body =
@@ -30,6 +29,7 @@ const body =
           (body_size[2] - extrusion_size[2]) / 2 + 0.01]),
       hole({ d: 3, h: 20 }).translate([screw_offset, 0, body_size[2] / 2 + 0.01]),
       hole({ d: 3, h: 20 }).translate([-screw_offset, 0, body_size[2] / 2 + 0.01]),
+      hole({ d: 5, h: inf }).translate([-screw_offset, 0, body_size[2] / 2 + 0.01]),
     );
 export const main = body.set({ $fn: 60 });
 export const settings: OutputSettings = {
@@ -37,4 +37,3 @@ export const settings: OutputSettings = {
     //"brim_width": 3
   }
 }
-
