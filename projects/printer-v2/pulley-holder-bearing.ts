@@ -11,16 +11,16 @@ const offset_z = -1;
 const t = 6;
 const tz = 5 + offset_z;
 
-const roundCube = (size: Vec3, radii: number[]) => polyRound({
+const roundCube = (size: Vec3, radii: number[], $fn = 60) => polyRound({
   points: getRectPoints({
     size: [size[2], size[1]],
     center: true
   }),
   radii
-}).extrude({ height: size[0], center: true, $fn: 60 })
+}).extrude({ height: size[0], center: true, $fn })
   .rotate([0, -90, 0]);
-  
-const body = roundCube(size, [0, 0, size[1] / 2, size[1] / 2])
+
+const body = cube({ size, center: true })//roundCube(size, [0, 0, size[1] / 4, size[1] / 4], 1)
   .translate([0, 0, offset_z]);
 
 const bearing = cylinder({ d: 16.5, h: size[0] - 2, center: true })
@@ -37,6 +37,6 @@ export const main = body.difference(
   hole({ d: 5.5, counterbore: 10, depth: 2 + 10 })
     .translate([0, 0, -size[2] / 2 + tz + 10.01]),
   bearing
-).set({ $fn: 100 });
+).rotate([90, 0, 0]).set({ $fn: 100 });
 
 
