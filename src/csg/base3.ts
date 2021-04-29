@@ -2,6 +2,13 @@ import { Shape, TileProps, Vec3 } from "./base";
 import { Shape2 } from "./base2";
 import { indent, serialize } from "./translation-util";
 
+const createListFn = (name: string) =>
+  (...s: Shape3[]): Shape3 =>
+    new Shape3([`${name}() {`, ...s.flatMap(k => k.src).map(indent), '}']);
+
+export const hull = createListFn('hull');
+export const minkowski = createListFn('minkowski');
+
 export class Shape3 extends Shape<{ dim: 3 }> {
 
   union(...shapes: Shape3[]): Shape3 {
@@ -50,6 +57,11 @@ export class Shape3 extends Shape<{ dim: 3 }> {
     const src = super.color(p).src;
     return new Shape3(src);
   };
+
+  render() {
+    return new Shape3([`render()`, ...this.src.map(indent)]);
+  };
+
 
   tile(p: TileProps): Shape3 {
     const src = super.tile(p).src;

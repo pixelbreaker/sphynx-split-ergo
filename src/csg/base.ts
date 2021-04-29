@@ -17,8 +17,6 @@ const createListFn = (name: string) =>
 export const union = createListFn('union');
 export const difference = createListFn('difference');
 export const intersection = createListFn('intersection');
-export const hull = createListFn('hull');
-export const minkowski = createListFn('minkowski');
 
 export type TileProps = {
   translation: Vec3;
@@ -70,6 +68,7 @@ export class Shape<T> {
   color(c: string) {
     return new Shape<T>([`color("${c}")`, ...this.src.map(indent)]);
   };
+  
 
   tile(t: TileProps): Shape<T> {
     const times = t.times;

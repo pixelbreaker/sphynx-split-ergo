@@ -35,7 +35,7 @@ const cavity = roundCube([inf, size[0] - t * 2, inf], [0, 0, 5, 5])
 export const main = body.difference(
   cavity,
   hole({ d: 5.5, counterbore: 10, depth: 2 + 10 })
-    .translate([0, 0, -size[2] / 2 + tz + 10.01]),
+    .translate([(size[0] - 20) / 2, 0, -size[2] / 2 + tz + 10.01]),
   bearing
 ).rotate([90, 0, 0]).set({ $fn: 100 });
 

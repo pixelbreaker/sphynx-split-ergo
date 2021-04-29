@@ -1,6 +1,6 @@
 
-import { FProp, minkowski, Vec2, Vec3 } from '../src/csg/base';
-import { Shape3 } from '../src/csg/base3';
+import { FProp, Vec2, Vec3 } from '../src/csg/base';
+import { minkowski, Shape3 } from '../src/csg/base3';
 import { getRectPoints, polyRound } from '../src/csg/polyround';
 import { cube, cylinder, sphere, square } from '../src/csg/primitives';
 
@@ -55,6 +55,16 @@ export const ring = ({ id, od, h, radii = [0], $fn, $rfn, center }: RingOptions)
   return ret;
 }
 
+export type PolyWireProps = {
+  points: Vec2[],
+  radii: number[],
+  t: number;
+}
+export const polyWire = ({ points, radii = [0], t }: PolyWireProps) => {
+  const base = polyRound({ points, radii, $fn: 10 }).toPolygon();
+  const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01 });
+  return minkowski(sphere({ d: t }), wire);
+}
 
 type SimpleHoleProps = {
   d: number;
@@ -103,3 +113,11 @@ export function hole(p: HoleProps) {
   }
   return hole;
 }
+
+
+export const shell = (s: Shape3, t: number): Shape3 =>
+  s.intersection(
+    minkowski(
+      sphere({ r: t, $fn: 10 }),
+      cube({ size: [inf, inf, inf], center: true }).difference(s))
+  );

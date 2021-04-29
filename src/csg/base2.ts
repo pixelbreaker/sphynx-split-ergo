@@ -1,4 +1,4 @@
-import { FProp, Shape, TileProps, union, Vec3 } from "./base";
+import { FProp, Shape, TileProps, Vec3 } from "./base";
 import { Shape3 } from "./base3";
 import { indent, serialize } from "./translation-util";
 
@@ -16,6 +16,12 @@ export type RotateExtrudeProps = FProp<{
   angle?: number,
   convexity?: number
 }>;
+
+export type OffsetProps = {
+  r?: number;
+  delta?: number;
+  chamfer?: boolean;
+}
 
 export class Shape2 extends Shape<{ dim: 2 }> {
 
@@ -72,5 +78,8 @@ export class Shape2 extends Shape<{ dim: 2 }> {
   tile(p: TileProps): Shape2 {
     const src = super.tile(p).src;
     return new Shape2(src);
+  }
+  offset(p: OffsetProps) {
+    return new Shape2([`offset(${serialize(p)})`, ...this.src.map(indent)]);
   }
 }
