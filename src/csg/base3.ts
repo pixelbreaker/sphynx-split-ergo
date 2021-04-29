@@ -1,36 +1,37 @@
-import { Shape, TileProps, Vec3 } from "./base";
+import { Shape, TileCircularProps, TileProps, Vec3 } from "./base";
 import { Shape2 } from "./base2";
 import { indent, serialize } from "./translation-util";
 
-const createListFn = (name: string) =>
-  (...s: Shape3[]): Shape3 =>
-    new Shape3([`${name}() {`, ...s.flatMap(k => k.src).map(indent), '}']);
-
-export const hull = createListFn('hull');
-export const minkowski = createListFn('minkowski');
-
-export class Shape3 extends Shape<{ dim: 3 }> {
-
-  union(...shapes: Shape3[]): Shape3 {
-    const [s, ...rest] = shapes;
-    const src = super.union(s, ...rest).src;
-    return new Shape3(src);
-  }
-
-  difference(...shapes: Shape3[]): Shape3 {
-    const [s, ...rest] = shapes;
-    const src = super.difference(s, ...rest).src;
-    return new Shape3(src);
-  }
-
-  intersection(...shapes: Shape3[]): Shape3 {
-    const [s, ...rest] = shapes;
-    const src = super.intersection(s, ...rest).src;
-    return new Shape3(src);
-  }
+export class Shape3 extends Shape {
 
   projection(p?: { cut: boolean }) {
     return new Shape2([`projection(${serialize(p)})`, ...this.src.map(indent)]);
+  }
+
+  // 'upgrade' common funcs
+  union(...s: Shape3[]): Shape3 {
+    const src = super.union(...s).src;
+    return new Shape3(src);
+  }
+
+  difference(...s: Shape3[]): Shape3 {
+    const src = super.difference(...s).src;
+    return new Shape3(src);
+  }
+
+  intersection(...s: Shape3[]): Shape3 {
+    const src = super.intersection(...s).src;
+    return new Shape3(src);
+  }
+
+  minkowski(...s: Shape3[]): Shape3 {
+    const src = super.minkowski(...s).src;
+    return new Shape3(src);
+  }
+
+  hull(...s: Shape3[]): Shape3 {
+    const src = super.hull(...s).src;
+    return new Shape3(src);
   }
 
   scale(p: Vec3) {
@@ -62,9 +63,12 @@ export class Shape3 extends Shape<{ dim: 3 }> {
     return new Shape3([`render()`, ...this.src.map(indent)]);
   };
 
-
   tile(p: TileProps): Shape3 {
     const src = super.tile(p).src;
+    return new Shape3(src);
+  }
+  tile_circular(p: TileCircularProps): Shape3 {
+    const src = super.tile_circular(p).src;
     return new Shape3(src);
   }
 

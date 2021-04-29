@@ -1,4 +1,4 @@
-import { union, difference, intersection, Vec3 } from "../src/csg/base";
+import { Vec3 } from "../src/csg/base";
 import { getRectPoints, polyRound } from "../src/csg/polyround";
 import { circle, square, polygon, } from "../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";

@@ -23,7 +23,7 @@ export type OffsetProps = {
   chamfer?: boolean;
 }
 
-export class Shape2 extends Shape<{ dim: 2 }> {
+export class Shape2 extends Shape {
 
   // 2d only functions
   linear_extrude(p: ExtrudeProps) {
@@ -34,19 +34,19 @@ export class Shape2 extends Shape<{ dim: 2 }> {
     return new Shape3([`rotate_extrude(${serialize(p)})`, ...this.src.map(indent)]);
   }
 
-  // common funcs
-  union(s: Shape2, ...rest: Shape2[]): Shape2 {
-    const src = super.union(s, ...rest).src;
+  // 'upgrade' common funcs
+  union(...s: Shape2[]): Shape2 {
+    const src = super.union(...s).src;
     return new Shape2(src);
   }
 
-  difference(s: Shape2, ...rest: Shape2[]): Shape2 {
-    const src = super.difference(s, ...rest).src;
+  difference(...s: Shape2[]): Shape2 {
+    const src = super.difference(...s).src;
     return new Shape2(src);
   }
 
-  intersection(s: Shape2, ...rest: Shape2[]): Shape2 {
-    const src = super.intersection(s, ...rest).src;
+  intersection(...s: Shape2[]): Shape2 {
+    const src = super.intersection(...s).src;
     return new Shape2(src);
   }
 

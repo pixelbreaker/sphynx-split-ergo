@@ -1,5 +1,5 @@
 import { OutputSettings } from '../bin/gen-scad';
-import { union } from '../src/csg/base';
+import { Shape3 } from '../src/csg/base3';
 import { cube, cylinder, square } from '../src/csg/primitives';
 import { hexTile, ring } from './utils';
 
@@ -49,7 +49,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     $fn: 50
   }).translate([0, 0, t * 1.8]);
 
-  return union(
+  return Shape3.prototype.union(
     ringOuter,
     hexMesh,
     crossbrace.tile_circular({ times: 12 }),
