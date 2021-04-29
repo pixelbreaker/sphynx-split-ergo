@@ -20,11 +20,11 @@ const roundCube = (size: Vec3, radii: number[], $fn = 60) => polyRound({
 }).extrude({ height: size[0], center: true, $fn })
   .rotate([0, -90, 0]);
 
-const body = cube({ size, center: true })//roundCube(size, [0, 0, size[1] / 4, size[1] / 4], 1)
+const body = cube(size)//roundCube(size, [0, 0, size[1] / 4, size[1] / 4], 1)
   .translate([0, 0, offset_z]);
 
-const bearing = cylinder({ d: 16.5, h: size[0] - 2, center: true })
-  .union(cylinder({ d: 14, h: inf, center: true }))
+const bearing = cylinder({ d: 16.5, h: size[0] - 2 })
+  .union(cylinder({ d: 14, h: inf }))
   .rotate([0, 90, 0]);
 
 const cavity = roundCube([inf, size[0] - t * 2, inf], [0, 0, 5, 5])

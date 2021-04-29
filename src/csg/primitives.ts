@@ -10,9 +10,8 @@ export const circle = (p: CirleProps) =>
 type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
-export type SquareProps = { size: Vec2, center?: boolean };
-export const square = (p: Vec2 | SquareProps) => {
-  return new Shape2([`square(${serialize(p)});`]);
+export const square = (p: Vec2) => {
+  return new Shape2([`square(size=${serialize(p)}, center=true);`]);
 }
 
 export type PolygonProps = {
@@ -38,26 +37,20 @@ export const text = (p: TextProps) => {
   return new Shape3([`text(${serialize(p)});`]);
 };
 
-
 export const sphere = (p: CirleProps) => {
   return new Shape3([`sphere(${serialize(p)});`]);
 }
 
-type CubeProps = Vec3 | FProp<{
-  size: Vec3;
-  center?: boolean;
-}>
-export const cube = (p: CubeProps) => {
-  return new Shape3([`cube(${serialize(p)});`]);
+export const cube = (p: Vec3) => {
+  return new Shape3([`cube(size=${serialize(p)}, center=true);`]);
 }
 
 export type CylinderProps = FProp<(
   { r: number } | { r1: number, r2: number } | { d: number } | { d1: number, d2: number }) & {
     h: number;
-    center?: boolean;
   }>;
 export const cylinder = (p: CylinderProps) => {
-  return new Shape3([`cylinder(${serialize(p)});`]);
+  return new Shape3([`cylinder(center=true, ${serialize(p)});`]);
 }
 
 export type PolyhedronProps = FProp<{

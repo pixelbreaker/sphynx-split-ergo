@@ -36,7 +36,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
   const braceWidth = t * 1.2;
   const chamferWidth = t - 0.2;
   const crossbrace = cube([braceLen, braceWidth, t])
-    .union(square({ size: [chamferWidth, braceWidth], center: true })
+    .union(square( [chamferWidth, braceWidth])
       .linear_extrude({ height: t, scale: [1, 2.5] })
       .translate([chamferWidth / 2, braceWidth / 2, 0]))
     .translate([drainInnerDiameter / 2, - t / 2, t])

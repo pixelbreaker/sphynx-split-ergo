@@ -12,7 +12,7 @@ const mount = {
   screw_depth: 1
 }
 
-const motor_holes = cylinder({ d: mount.hole, h: inf, center: true, $fn: 100 })
+const motor_holes = cylinder({ d: mount.hole, h: inf, $fn: 100 })
   .union(
     // mounting screws
     ...getRectPoints({ size: [mount.screw_spacing, mount.screw_spacing], center: true })

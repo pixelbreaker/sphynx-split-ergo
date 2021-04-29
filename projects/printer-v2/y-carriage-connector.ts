@@ -21,13 +21,13 @@ const clasp_hole = ring({ id: 20, od: 24, h: 4, center: true }).rotate([0, 90, 0
 
 const holes =
   // carbon fiber rod holes
-  cylinder({ d: rod_od, h: inf, center: true })
+  cylinder({ d: rod_od, h: inf })
     .translate([rod_offset, 3, 0])
     .union(
       // pulley screws
       hole({ d: 3.5, h: 13 }).union(
         //  nut
-        cube({ size: [6, inf, 3], center: true }).translate([0, (inf - 7) / 2, -10])
+        cube([6, inf, 3]).translate([0, (inf - 7) / 2, -10])
       ).rotate([-90, 0, 0])
         .translate([pulley_offset, body_size[1] / 2 + .01, -4]),
 
@@ -37,8 +37,8 @@ const holes =
       clasp_hole.translate([12, -body_size[1] / 2, 0]),
 
       // // gap
-      cube({ size: [rod_offset * 2, gap_size, inf], center: true })
-        .union(cube({ size: [gap_size * 2, inf, inf], center: true })
+      cube([rod_offset * 2, gap_size, inf])
+        .union(cube([gap_size * 2, inf, inf])
           .translate([0, inf / 2, 0]))
         .translate([
           0, 7, 0]),
@@ -66,7 +66,7 @@ const body = polyRound({
       radii: [6, 0, 0],
     }).extrude({ height: lmu88.length * 2, center: true, $fn: 30 })
       .rotate([0, 90, 0]),
-    cube({ size: [inf, lmu88.id + 1, inf], center: true }),
+    cube([inf, lmu88.id + 1, inf]),
 
   )
   //.union(cylinder({ d: lmu88.od, h: lmu88.length, center: true }).rotate([0, 90, 0]).debug())

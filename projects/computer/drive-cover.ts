@@ -23,8 +23,8 @@ const body =
     radii: [1, 1, 1, 1]
   }).extrude({ height: body_size[2] + t, center: true })
     .difference(
-      cube({ size: body_size, center: true }).translate([0, -t, t / 2 + 0.01]),
-      cube({ size: [body_size[0], body_size[1], body_size[2] / 2], center: true })
+      cube(body_size).translate([0, -t, t / 2 + 0.01]),
+      cube([body_size[0], body_size[1], body_size[2] / 2])
         .translate([0, t, body_size[2] / 4 + t]),
       ...Array.from(new Array(num_slots))
         .map((_, i) => slot.translate([(i + 0.5) * slot_size - body_size[0] / 2, 0, 0]))

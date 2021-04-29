@@ -19,7 +19,7 @@ const roundCube = (size: Vec3, radii: number[], $fn = 60) => polyRound({
 }).extrude({ height: size[0], center: true, $fn })
   .rotate([0, -90, 0]);
 
-const body = cube({ size, center: true });
+const body = cube(size);
 
 const cavity_size = size[2] - thickness * 2;
 export const main = body.difference(

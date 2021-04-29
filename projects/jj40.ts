@@ -18,12 +18,10 @@ const body = polyRound({
   radii: [r, r, r, r]
 }).extrude({ height: size[2], center: true, r2: r, $fn: 10 })
 
-const offset = cube({ size, center: true }).translate([0, 0, size[2] - t2]);
+const offset = cube(size).translate([0, 0, size[2] - t2]);
 
-const cavity = cube({
-  size: [size[0] - t2 * 2, size[1] - t2 * 2, size[2]],
-  center: true
-}).translate([0, 0, t1 + t2]);
+const cavity = cube([size[0] - t2 * 2, size[1] - t2 * 2, size[2]],
+).translate([0, 0, t1 + t2]);
 
 const times = 3;
 const texture_x = polyWire({
@@ -39,12 +37,12 @@ const texture_x = polyWire({
 ).tile({ times, translation: [size[0] / (times * 2), 0, 0] })
 
 
-const texture_y = cylinder({ d: 2, h: inf, center: true })
+const texture_y = cylinder({ d: 2, h: inf })
   .rotate([0, 90, 0])
   .translate([0, 0, -size[2] / 2])
   .union(
-    cylinder({ d: 2, h: inf, center: true }).translate([size[0] / 2 + t1, 0, 0]),
-    cylinder({ d: 2, h: inf, center: true }).translate([-size[0] / 2 - t1, 0, 0])
+    cylinder({ d: 2, h: inf }).translate([size[0] / 2 + t1, 0, 0]),
+    cylinder({ d: 2, h: inf }).translate([-size[0] / 2 - t1, 0, 0])
   );
 
 export const main = body.difference(

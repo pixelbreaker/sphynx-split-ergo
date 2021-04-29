@@ -20,5 +20,5 @@ export const main =
         .extrude({ height: hole.h - base[2], r1: 0, r2: -2, $fn: 10 })
         .translate([0, 0, base[2]]))
     .difference(
-      cylinder({ d: hole.id, h: inf, center: true }))
+      cylinder({ d: hole.id, h: inf }))
     .set({ $fn: 30 });

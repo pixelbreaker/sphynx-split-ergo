@@ -1,5 +1,6 @@
 
 import { FProp, Vec2, Vec3 } from '../src/csg/base';
+import { Shape2 } from '../src/csg/base2';
 import { Shape3 } from '../src/csg/base3';
 import { getRectPoints, polyRound } from '../src/csg/polyround';
 import { cube, cylinder, sphere, square } from '../src/csg/primitives';
@@ -118,5 +119,40 @@ export function hole(p: HoleProps) {
 export const shell = (s: Shape3, t: number): Shape3 =>
   s.intersection(
     sphere({ r: t, $fn: 10 }).minkowski(
-      cube({ size: [inf, inf, inf], center: true }).difference(s))
+      cube( [inf, inf, inf]).difference(s))
   );
+
+const epsilon = 0.01;
+export type ConvexShellProps = {
+  profiles: Shape2[],
+  t: number,
+  lengths: number[]
+}
+export const convexTube = (props: ConvexShellProps): Shape3 => {
+  const [first, ...rest] = props.profiles;
+  const sections: Shape3[] = [];
+  const prev = {
+    p: first.linear_extrude({ height: epsilon }),
+    p_min: first.offset({ r: props.t })
+      .linear_extrude({ height: epsilon })
+  };
+  let h = 0;
+  for (let i = 0; i < rest.length; i++) {
+    h += props.lengths[i];
+    const p = rest[i].linear_extrude({ height: epsilon }).translate([0, 0, h]);
+    const p_min = rest[i].offset({ r: -Math.abs(props.t) })
+      .linear_extrude({ height: epsilon })
+      .translate([0, 0, h]);
+    sections.push(
+      prev.p.hull(p)
+        .difference(
+          prev.p_min.translate([0, 0, -epsilon])
+            .hull(p_min.translate([0, 0, epsilon]))
+        ));
+    prev.p = p;
+    prev.p_min = p_min;
+  }
+  const [s1, ...srest] = sections;
+  return s1.union(...srest);
+
+}

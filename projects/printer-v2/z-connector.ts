@@ -22,8 +22,8 @@ const body =
     .extrude({ height: body_size[2], center: true })
     .translate([0, body_offset_y, 0])
     .difference(
-      cylinder({ d: id, h: inf, center: true }),
-      cube({ size: extrusion_size, center: true })
+      cylinder({ d: id, h: inf }),
+      cube(extrusion_size)
         .translate([0,
           (body_size[1] - extrusion_size[1]) / 2 + body_offset_y + 0.01,
           (body_size[2] - extrusion_size[2]) / 2 + 0.01]),
