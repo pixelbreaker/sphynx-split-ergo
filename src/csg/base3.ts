@@ -4,9 +4,14 @@ import { indent, serialize } from "./translation-util";
 
 export class Shape3 extends Shape {
 
+  // 3d only functions
   projection(p?: { cut: boolean }) {
     return new Shape2([`projection(${serialize(p)})`, ...this.src.map(indent)]);
   }
+  
+  render() {
+    return new Shape3([`render()`, ...this.src.map(indent)]);
+  };
 
   // 'upgrade' common funcs
   union(...s: Shape3[]): Shape3 {
@@ -59,14 +64,11 @@ export class Shape3 extends Shape {
     return new Shape3(src);
   };
 
-  render() {
-    return new Shape3([`render()`, ...this.src.map(indent)]);
-  };
-
   tile(p: TileProps): Shape3 {
     const src = super.tile(p).src;
     return new Shape3(src);
   }
+
   tile_circular(p: TileCircularProps): Shape3 {
     const src = super.tile_circular(p).src;
     return new Shape3(src);

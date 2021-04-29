@@ -1,4 +1,4 @@
-import { FProp, Shape, TileProps, Vec3 } from "./base";
+import { FProp, Shape, TileCircularProps, TileProps, Vec3 } from "./base";
 import { Shape3 } from "./base3";
 import { indent, serialize } from "./translation-util";
 
@@ -77,6 +77,10 @@ export class Shape2 extends Shape {
 
   tile(p: TileProps): Shape2 {
     const src = super.tile(p).src;
+    return new Shape2(src);
+  }
+  tile_circular(p: TileCircularProps): Shape2 {
+    const src = super.tile_circular(p).src;
     return new Shape2(src);
   }
   offset(p: OffsetProps) {
