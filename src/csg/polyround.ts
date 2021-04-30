@@ -21,7 +21,8 @@ type RectPointsProps = {
 export const getRectPoints = (p: RectPointsProps): Vec2[] => {
   const [width, length] = p.size;
   const points: Vec2[] = [[0, 0], [0, length], [width, length], [width, 0]];
-  if (p.center) {
+  const center = p.center === undefined ? true : p.center
+  if (center) {
     return points.map(([x, y]) => [x - width / 2, y - length / 2]);
   }
   return points;
@@ -30,7 +31,8 @@ export const getDiamondPoints = (p: RectPointsProps): Vec2[] => {
   const width = p.size[0] / 2;
   const length = p.size[1] / 2;
   const points: Vec2[] = [[0, -length], [-width, 0], [0, length], [width, 0]];
-  if (!p.center) {
+  const center = p.center === undefined ? true : p.center
+  if (!center) {
     return points.map(([x, y]) => [x + width, y + length]);
   }
   return points;
@@ -100,7 +102,8 @@ export class PolyRound {
       $fn2 ? `fn2=${$fn2}` : undefined,
     ];
     const shape = new Shape3([`polyRoundExtrude(${params.filter(o => o).join(',')});`]);
-    if (center) {
+    const _center = center === undefined ? true : center
+    if (_center) {
       return shape.translate([0, 0, -height / 2]);
     }
     return shape;

@@ -1,7 +1,7 @@
 
 import { FProp, Vec2, Vec3 } from '../src/csg/base';
 import { Shape2 } from '../src/csg/base2';
-import { Shape3 } from '../src/csg/base3';
+import { shape3, Shape3 } from '../src/csg/base3';
 import { getRectPoints, polyRound } from '../src/csg/polyround';
 import { cube, cylinder, sphere, square } from '../src/csg/primitives';
 
@@ -97,14 +97,21 @@ export function hole(p: CounterSinkProps): Shape3;
 export function hole(p: CounterSink2Props): Shape3;
 export function hole(p: HoleProps) {
   const height = p.h || inf;
-  let hole = cylinder({ d: p.d, h: p.h || inf });
+  let hole: Shape3 = cylinder({ d: p.d, h: height })
+    .translate([0, 0, height / 2]);
   if ('counterbore' in p) {
-    hole = hole.union(cylinder({ d: p.counterbore, h: p.depth }));
+    hole = hole.union(
+      cylinder({ d: p.counterbore, h: p.depth })
+        .translate([0, 0, p.depth / 2]));
   } else if ('countersink' in p && 'depth' in p) {
-    hole = hole.union(cylinder({ d1: p.countersink, d2: p.d, h: p.depth }));
+    hole = hole.union(
+      cylinder({ d1: p.countersink, d2: p.d, h: p.depth })
+        .translate([0, 0, p.depth / 2]));
   } else if ('angle' in p) {
     const h = (p.countersink - p.d) / 2 / Math.tan(p.angle / 2 * Math.PI / 180);
-    hole = hole.union(cylinder({ d1: p.countersink, d2: p.d, h }));
+    hole = hole.union(
+      cylinder({ d1: p.countersink, d2: p.d, h })
+        .translate([0, 0, h / 2]));
   }
   if (p.center) {
     hole = hole.translate([0, 0, -height / 2]);
@@ -116,43 +123,32 @@ export function hole(p: HoleProps) {
 }
 
 
-export const shell = (s: Shape3, t: number): Shape3 =>
+export const shell = (s: Shape3, t: number, $fn = 4): Shape3 =>
   s.intersection(
-    sphere({ r: t, $fn: 10 }).minkowski(
-      cube( [inf, inf, inf]).difference(s))
+    sphere({ r: t, $fn }).minkowski(
+      cube([inf, inf, inf]).difference(s))
   );
 
 const epsilon = 0.01;
 export type ConvexShellProps = {
   profiles: Shape2[],
-  t: number,
   lengths: number[]
 }
-export const convexTube = (props: ConvexShellProps): Shape3 => {
+export const convexTube = (props: ConvexShellProps): Shape3 & ConvexShellProps => {
   const [first, ...rest] = props.profiles;
   const sections: Shape3[] = [];
-  const prev = {
-    p: first.linear_extrude({ height: epsilon }),
-    p_min: first.offset({ r: props.t })
-      .linear_extrude({ height: epsilon })
+  const prev: { p: Shape3 } = {
+    p: first.linear_extrude({ height: epsilon })
   };
   let h = 0;
   for (let i = 0; i < rest.length; i++) {
     h += props.lengths[i];
     const p = rest[i].linear_extrude({ height: epsilon }).translate([0, 0, h]);
-    const p_min = rest[i].offset({ r: -Math.abs(props.t) })
-      .linear_extrude({ height: epsilon })
-      .translate([0, 0, h]);
     sections.push(
-      prev.p.hull(p)
-        .difference(
-          prev.p_min.translate([0, 0, -epsilon])
-            .hull(p_min.translate([0, 0, epsilon]))
-        ));
+      prev.p.hull(p));
     prev.p = p;
-    prev.p_min = p_min;
   }
   const [s1, ...srest] = sections;
-  return s1.union(...srest);
+  return shape3(s1.union(...srest).src, props);
 
 }

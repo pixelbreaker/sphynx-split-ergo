@@ -40,16 +40,14 @@ export const genSettings = (out_file: string, in_file: string): Promise<unknown>
   return new Promise((resolve, reject) => {
     try {
       import(in_file).then(mod => {
-        if ('settings' in mod) {
-          const json = JSON.stringify(mod.settings);
-          console.log('json', json);
-          fs.writeFile(out_file, json, (e) => {
-            if (e) {
-              console.log(e);
-            }
-            resolve(null);
-          });
-        }
+        const json = JSON.stringify(mod.settings || {});
+        console.log('json', json);
+        fs.writeFile(out_file, json, (e) => {
+          if (e) {
+            console.log(e);
+          }
+          resolve(null);
+        });
         resolve(null);
       }).catch(e => {
         console.log(e);

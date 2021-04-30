@@ -1,7 +1,12 @@
 import { FProp, Shape, TileCircularProps, TileProps, Vec3 } from "./base";
-import { Shape3 } from "./base3";
+import { shape3 } from "./base3";
 import { indent, serialize } from "./translation-util";
 
+export const shape2 = <T>(s: string[], t: T) => {
+  const sh = new Shape2(s);
+  Object.assign(sh, t);
+  return sh as (Shape2 & T);
+}
 
 export type ExtrudeProps = FProp<{
   height: number,
@@ -27,11 +32,11 @@ export class Shape2 extends Shape {
 
   // 2d only functions
   linear_extrude(p: ExtrudeProps) {
-    return new Shape3([`linear_extrude(${serialize(p)})`, ...this.src.map(indent)]);
+    return shape3([`linear_extrude(${serialize(p)})`, ...this.src.map(indent)], p);
   }
 
   rotate_extrude(p?: RotateExtrudeProps) {
-    return new Shape3([`rotate_extrude(${serialize(p)})`, ...this.src.map(indent)]);
+    return shape3([`rotate_extrude(${serialize(p)})`, ...this.src.map(indent)], p);
   }
 
   // 'upgrade' common funcs
@@ -50,24 +55,24 @@ export class Shape2 extends Shape {
     return new Shape2(src);
   }
 
-  scale(p: Vec3) {
+  scale(p: Vec3): Shape2 & Vec3 {
     const src = super.scale(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   }
 
-  translate(p: Vec3) {
+  translate(p: Vec3): Shape2 & Vec3 {
     const src = super.translate(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   };
 
-  rotate(p: Vec3) {
+  rotate(p: Vec3): Shape2 & Vec3 {
     const src = super.rotate(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   };
 
-  mirror(p: Vec3) {
+  mirror(p: Vec3): Shape2 & Vec3 {
     const src = super.mirror(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   };
 
   color(p: string) {
@@ -75,15 +80,15 @@ export class Shape2 extends Shape {
     return new Shape2(src);
   };
 
-  tile(p: TileProps): Shape2 {
+  tile(p: TileProps): Shape2 & TileProps {
     const src = super.tile(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   }
-  tile_circular(p: TileCircularProps): Shape2 {
+  tile_circular(p: TileCircularProps): Shape2 & TileCircularProps {
     const src = super.tile_circular(p).src;
-    return new Shape2(src);
+    return shape2(src, p);
   }
-  offset(p: OffsetProps) {
-    return new Shape2([`offset(${serialize(p)})`, ...this.src.map(indent)]);
+  offset(p: OffsetProps): Shape2 & OffsetProps {
+    return shape2([`offset(${serialize(p)})`, ...this.src.map(indent)], p);
   }
 }

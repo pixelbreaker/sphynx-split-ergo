@@ -1,6 +1,13 @@
 import { Shape, TileCircularProps, TileProps, Vec3 } from "./base";
-import { Shape2 } from "./base2";
+import { shape2, Shape2 } from "./base2";
 import { indent, serialize } from "./translation-util";
+
+export const shape3 = <T>(s: string[], t: T) => {
+  const sh = new Shape3(s);
+  Object.assign(sh, t);
+  return sh as (Shape3 & T);
+}
+
 
 export class Shape3 extends Shape {
 
@@ -8,7 +15,7 @@ export class Shape3 extends Shape {
   projection(p?: { cut: boolean }) {
     return new Shape2([`projection(${serialize(p)})`, ...this.src.map(indent)]);
   }
-  
+
   render() {
     return new Shape3([`render()`, ...this.src.map(indent)]);
   };
@@ -39,24 +46,24 @@ export class Shape3 extends Shape {
     return new Shape3(src);
   }
 
-  scale(p: Vec3) {
+  scale(p: Vec3): Shape3 & Vec3 {
     const src = super.scale(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   }
 
-  translate(p: Vec3) {
+  translate(p: Vec3): Shape3 & Vec3 {
     const src = super.translate(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   };
 
-  rotate(p: Vec3) {
+  rotate(p: Vec3): Shape3 & Vec3 {
     const src = super.rotate(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   };
 
-  mirror(p: Vec3) {
+  mirror(p: Vec3): Shape3 & Vec3 {
     const src = super.mirror(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   };
 
   color(p: string) {
@@ -64,17 +71,18 @@ export class Shape3 extends Shape {
     return new Shape3(src);
   };
 
-  tile(p: TileProps): Shape3 {
+  tile(p: TileProps): Shape3 & TileProps {
     const src = super.tile(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   }
 
-  tile_circular(p: TileCircularProps): Shape3 {
+  tile_circular(p: TileCircularProps): Shape3 & TileCircularProps {
     const src = super.tile_circular(p).src;
-    return new Shape3(src);
+    return shape3(src, p);
   }
 
-  debug(): Shape3 {
-    return new Shape3(["#", ...this.src]);
+  debug() {
+    this.src.unshift('#');
+    return this;
   }
 }
