@@ -9,28 +9,26 @@ const inf = 1000;
 type HexTileOptions = {
   hexSize: number,
   spacing: number,
-  thickness: number
-  minWidth: number,
-  minHeight: number,
-  centerXY?: true
+  thickness: number;
+  size: Vec2;
 }
-export const hexTile = ({ hexSize, spacing, thickness, minWidth, minHeight, centerXY }: HexTileOptions) => {
-  const hexPlate = cylinder({ d: hexSize - (spacing / 2), h: thickness, $fn: 6 });
+export const hexTile = (p: HexTileOptions) => {
+  const { hexSize, spacing, thickness, size } = p;
+  const hexPlate = cylinder({ d: hexSize * 2 / Math.sqrt(3) - spacing, h: thickness, $fn: 6 });
   const height = hexSize * Math.sqrt(3);
-  const rows = Math.ceil(minHeight / height / 2) * 2; // want even number 
-  const cols = Math.ceil(minWidth / hexSize / 2) * 2;
+  const rows = Math.ceil(size[0] / height / 2) * 2; // want even number 
+  const cols = Math.ceil(size[1] / hexSize / 2) * 2;
   const tileHex = hexPlate
     .tile({ translation: [0, hexSize, 0], times: cols })
     .tile({ translation: [height, 0, 0], times: rows });
 
-  const result = tileHex.union(tileHex.translate([height / 2, hexSize / 2, 0]));
-  if (centerXY) {
-    return result.translate([-(rows / 2) * height, -(cols / 2) * hexSize, 0]);
-  } else {
-    return result;
-  }
-}
+  const panel = tileHex.union(tileHex.translate([height / 2, hexSize / 2, 0]));
 
+  const result = panel.translate([-(rows / 2) * height, -(cols / 2) * hexSize, 0]);
+
+  Object.assign(result, p);
+  return result as (Shape3 & Vec3 & HexTileOptions);
+}
 type RingOptions = {
   id: number;
   od: number;
@@ -62,9 +60,9 @@ export type PolyWireProps = {
   t: number;
 }
 export const polyWire = ({ points, radii = [0], t }: PolyWireProps) => {
-  const base = polyRound({ points, radii, $fn: 10 }).toPolygon();
+  const base = polyRound({ points, radii, $fn: 5 }).toPolygon();
   const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01 });
-  return sphere({ d: t }).minkowski(wire);
+  return sphere({ d: t, $fn: 10 }).minkowski(wire);
 }
 
 type SimpleHoleProps = {
@@ -150,5 +148,15 @@ export const convexTube = (props: ConvexShellProps): Shape3 & ConvexShellProps =
   }
   const [s1, ...srest] = sections;
   return shape3(s1.union(...srest).src, props);
+
+}
+
+export type LineBreakProps = {
+  container: Vec3;
+  separator: Vec3;
+  length: number;
+  offset?: number;
+}
+export const line_breaks = (p: LineBreakProps) => {
 
 }

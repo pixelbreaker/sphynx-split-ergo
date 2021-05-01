@@ -1,4 +1,4 @@
-import { Vec3, Vec2 } from "../../src/csg/base";
+import {  Vec3, Vec2 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
@@ -15,9 +15,8 @@ const mount = {
 const motor_holes = cylinder({ d: mount.hole, h: inf, $fn: 100 })
   .union(
     // mounting screws
-    ...getRectPoints({ size: [mount.screw_spacing, mount.screw_spacing] })
-      .map(c => hole({ d: 3, counterbore: 6, depth: mount.screw_depth })
-        .translate([c[0], c[1], base_size[2] + 0.01]))
+    ...getRectPoints({ size: [mount.screw_spacing, mount.screw_spacing], center: true })
+      .map(c => hole({ d: 3, counterbore: 6, depth: mount.screw_depth }).translate([c[0], c[1], base_size[2] + 0.01]))
   )
   .rotate([0, 0, 45])
   .translate([rod_offset, rod_offset, 0]);
@@ -25,5 +24,4 @@ const motor_holes = cylinder({ d: mount.hole, h: inf, $fn: 100 })
 export const main = base
   .difference(motor_holes)
   .union(rounded_side).set({ $fn: 60 });
-
 

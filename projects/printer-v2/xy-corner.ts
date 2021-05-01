@@ -20,7 +20,7 @@ export const base = polyRound({
   points: getRectPoints({ size: [base_size[0], base_size[1]] }),
   radii: [0, 10, 30, 10],
 }).extrude({ height: base_size[2], $fn: 30 })
-  .translate([-base_offset, -base_offset, 0])
+  .translate([base_size[0] / 2 - base_offset, base_size[1] / 2 - base_offset, base_size[2] / 2])
   .difference(
     // t-slot screws
     m5.translate([-10, -10, base_size[2] + .01]),
@@ -35,17 +35,19 @@ const side = polyRound({
   radii: [0, 0, side_size[0], 0],
 }).extrude({
   height: side_size[2], $fn: 30
-}).difference(
+}).translate([side_size[0] / 2, side_size[1] / 2 , side_size[2] / 2])
+.difference(
   m5_countersunk.translate([30, 10, side_size[2] + 0.01]),
   rod_hole
-).translate([0, base_size[2], 0])
+  ).translate([0, base_size[2], 0])
   .rotate([90, 0, 90]);
 
 
 const rounding_box = polyRound({
   points: getRectPoints({ size: [inf, inf] }),
   radii: [3, 3, 3, 3],
-}).extrude({ height: inf, $fn: 10 });
+}).extrude({ height: inf, $fn: 10 })
+  .translate([inf / 2, inf / 2, inf / 2]);
 
 export const rounded_side = rounding_box.intersection(
   side.union(
@@ -53,3 +55,4 @@ export const rounded_side = rounding_box.intersection(
   )
 );
 
+export const main = rounded_side.union(base);

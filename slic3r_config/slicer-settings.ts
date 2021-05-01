@@ -37,7 +37,7 @@ export type SlicerSettings = Partial<{
   'extrusion-axis': number;
   'extrusion-multiplier': number;
   'extrusion-width': number;
-  'fan-always-on': number;
+  'fan-always-on': boolean;
   'fan-below-layer-time': number;
   'filament-colour': string;
   'filament-cost': number;

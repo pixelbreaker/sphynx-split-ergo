@@ -26,17 +26,15 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
       hexTile({
         hexSize: meshSize,
         spacing: t / 2,
-        minHeight: rimDiameter,
-        minWidth: rimDiameter,
-        thickness: t + 1,
-        centerXY: true
+        size: [rimDiameter, rimDiameter],
+        thickness: t + 1
       }).translate([0, 0, -0.5]));
   const drainInnerDiameter = drainDiameter - t * 2;
   const braceLen = (rimDiameter - drainDiameter) / 2 + t / 2;
   const braceWidth = t * 1.2;
   const chamferWidth = t - 0.2;
   const crossbrace = cube([braceLen, braceWidth, t])
-    .union(square( [chamferWidth, braceWidth])
+    .union(square([chamferWidth, braceWidth])
       .linear_extrude({ height: t, scale: [1, 2.5] })
       .translate([chamferWidth / 2, braceWidth / 2, 0]))
     .translate([drainInnerDiameter / 2, - t / 2, t])

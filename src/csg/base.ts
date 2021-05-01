@@ -13,7 +13,7 @@ export type Vec3 = [number, number, number];
 export type TileProps = {
   translation: Vec3;
   times: number;
-  opposite?: boolean;
+  both?: boolean;
 }
 export type TileCircularProps = {
   times: number;
@@ -70,15 +70,18 @@ export class Shape {
 
   tile(t: TileProps): Shape {
     const times = t.times;
-    if (t.times <= 1) {
+    if (t.times <= 0) {
       return this;
     }
     const collect: Shape[] = [];
-    for (let i = 1; i < times; i++) {
+    for (let i = 1; i <= times; i++) {
       collect.push(new Shape(this.src)
         .translate(t.translation.map(t => t * i) as Vec3));
+      if (t.both) {
+        collect.push(new Shape(this.src)
+          .translate(t.translation.map(t => -t * i) as Vec3));
+      }
     }
-    const [first, ...rest] = collect;
     return this.union(...collect);
   }
 
