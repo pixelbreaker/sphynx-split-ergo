@@ -54,6 +54,6 @@ export const settings: OutputSettings = {
   slicer: {
     'fan-always-on': true,
     'brim-width': 5,
-    'skirts': 0
+    'skirts': 0,
   }
 }

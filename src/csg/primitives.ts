@@ -1,6 +1,7 @@
 import { FProp, Vec2, Vec3 } from "./base";
 import { shape2, Shape2 } from "./base2";
 import { shape3, Shape3 } from "./base3";
+import { getRectPoints } from "./polyround";
 import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
@@ -44,6 +45,17 @@ export const sphere = (p: CirleProps) => shape3([`sphere(${serialize(p)});`], p)
 
 
 export const cube = (p: Vec3) => shape3([`cube(size=${serialize(p)}, center=true);`], p);
+export const cubeR = (r: number, p: Vec3) => {
+  const [c1, ...corners] = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] }).map(v => cylinder({ r, h: p[2] }).translate([v[0], v[1], 0]));
+  return c1.hull(...corners);
+}
+export const cubeR2 = (r: number, p: Vec3) => {
+  const [t1, ...rest] = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] })
+    .map(v => sphere({ r }).translate([v[0], v[1], p[2] / 2]));
+  const bot = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] })
+    .map(v => sphere({ r }).translate([v[0], v[1], -p[2] / 2]));
+  return t1.hull(...rest, ...bot);
+}
 
 
 export type CylinderProps = FProp<(
