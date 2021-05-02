@@ -4,5 +4,6 @@ import { circle, square, polygon, } from "../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 import { hole } from "./utils";
 
-export const main = hole({ d: 5, h: 20, counterbore: 10, depth: 5 })
-  .set({ $fn: 60 })
+export const main = cube([10, 20, 30])
+  .round2D(2, 'x')
+  .set({ $fa: 3, $fs: 0.4 });

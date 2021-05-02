@@ -15,9 +15,8 @@ const body = cube(size);
 const cavity_size = size[2] - thickness * 2;
 
 export const main = body.difference(
-  cube([inf, size[0] - thickness * 2, inf])
-    .round2D(2)
-    .rotate([0, 90, 90])
+  cube([size[0] - thickness * 2, inf, inf])
+    .round2D(2, 'y')
     .translate([0, 0, (inf - cavity_size) / 2]),
   hole({ d: 5.5, counterbore: 10, depth: 2 + 10 })
     .translate([0, 0, -cavity_size / 2 + 10]),

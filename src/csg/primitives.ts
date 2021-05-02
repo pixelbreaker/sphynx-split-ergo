@@ -1,7 +1,6 @@
 import { FProp, Vec2, Vec3 } from "./base";
 import { shape2, Shape2 } from "./base2";
 import { shape3, Shape3 } from "./base3";
-import { getRectPoints } from "./polyround";
 import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
@@ -33,8 +32,20 @@ export class Cube extends Alignable {
     return new Alignable(this.size, src);
   }
 
-  round2D(r: number | number[]) {
-    return this._round(r, r => cylinder({ r, h: this.size[2] }), 2);
+  round2D(r: number | number[], direction: 'x' | 'y' | 'z' = 'z') {
+    if (direction === 'z') {
+      return this._round(r, r => cylinder({ r, h: this.size[2] }), 2);
+    } else if (direction === 'y') {
+      const c: Shape3 = cube([this.size[0], this.size[2], this.size[1]])
+        .round2D(r)
+        .rotate([-90, 0, 0]);
+      return new Alignable(this.size, c.src);
+    } else {
+      const c: Shape3 = cube([this.size[2], this.size[1], this.size[0],])
+        .round2D(r)
+        .rotate([0, 90, 0]);
+      return new Alignable(this.size, c.src);
+    }
   }
 
   round3D(r: number | number[]) {
