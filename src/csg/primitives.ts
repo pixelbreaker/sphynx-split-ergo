@@ -98,6 +98,7 @@ export type CylinderProps = FProp<(
     h: number;
     sector?: number;
   }>;
+
 export const cylinder = (p: CylinderProps) => {
   let width: number;
   if ('d' in p) {
@@ -109,20 +110,10 @@ export const cylinder = (p: CylinderProps) => {
   } else if ('r1' in p) {
     width = Math.max(p.r1, p.r2) * 2;
   }
-  const { sector, ...rest } = p;
+  const { sector: angle, ...rest } = p;
   const src = [`cylinder(center=true, ${serialize(rest)});`];
-
-  if (sector && sector % 360 !== 0) {
-    const angle = sector % 360;
-    const divisions = Math.floor(angle / 90) + 1;
-    const sub_angle = angle / divisions * Math.PI / 180;
-    const points = Array.from(new Array(divisions + 1))
-      .map((_, i) => [
-        width * Math.cos(sub_angle * i),
-        width * Math.sin(sub_angle * i)
-      ] as Vec2);
-    const poly = polygon({ points: [[0, 0], ...points] })
-      .linear_extrude({ height: p.h + 1 })
+  if (angle && angle % 360 !== 0) {
+    const poly = sector(angle, width).linear_extrude({ height: p.h + 1 });
     const s = new Shape3(src).intersection(poly);
     return new Alignable([width, width, p.h], s.src);
   } else {
@@ -130,6 +121,24 @@ export const cylinder = (p: CylinderProps) => {
   }
 }
 
+/** 
+ * @param angle 
+ * @param radius 
+ * @returns rought 2D polygon that is at least radius distance for the given angle
+ */
+export const sector = (angle: number, radius: number = 1000): Shape2 => {
+  angle = angle % 360;
+  radius = radius * 2;
+  const divisions = Math.floor(angle / 90) + 1;
+  const sub_angle = angle / divisions * Math.PI / 180;
+  const points = Array.from(new Array(divisions + 1))
+    .map((_, i) => [
+      radius * Math.cos(sub_angle * i),
+      radius * Math.sin(sub_angle * i)
+    ] as Vec2);
+
+  return polygon({ points: [[0, 0], ...points] })
+}
 
 export type PolyhedronProps = FProp<{
   points: Vec3[];

@@ -22,6 +22,7 @@ export type SlicerSettings = Partial<{
   'complete-objects': number;
   'cooling': number;
   'default-acceleration': number;
+  'duplicate': number;
   'disable-fan-first-layers': number;
   'dont-support-bridges': number;
   'duplicate-distance': number;

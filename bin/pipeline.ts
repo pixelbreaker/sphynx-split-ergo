@@ -46,13 +46,14 @@ tasks.add(tf(base_output, 'gcode'), (out, settings, stl) => {
   ];
   const { slicer } = JSON.parse(fs.readFileSync(settings).toString()) as OutputSettings;
   Object.entries(slicer || {}).forEach(([key, val]) => {
-    if (typeof val === 'boolean'){
+    if (typeof val === 'boolean') {
       args.push(`--${key}`);
-    }else{
+    } else {
       args.push(`--${key}`, `${val}`);
     }
   })
   args.push(stl);
+  console.log('slicer: ', args);
   return spawnPromise('%userprofile%\\Slic3r-1.3.0.64bit\\Slic3r-console.exe', args);
 }, tf(base_output, 'settings.json'), tf(base_output, 'stl'));
 
