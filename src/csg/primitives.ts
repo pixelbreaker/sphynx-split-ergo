@@ -13,37 +13,33 @@ export class Sizable extends Shape3 {
     this.size = size;
   }
   align(v: Vec3) {
-    const src = this.translate(v.map((a, i) => a > 0 ? this.size[i] / 2 : 0) as Vec3).src;
+    const src = this.translate(v.map((a, i) => Math.sign(a) * this.size[i] / 2) as Vec3).src;
     return new Sizable(this.size, src);
   }
 }
 
 export class Cube extends Sizable {
 
-  round2D(r: number | number[]) {
+  private _round(r: number | number[], s: (r: number) => Shape3, dim: 2 | 3) {
     const radii: number[] = Array.isArray(r) ? r : [r];
     const half = this.size.map(s => s / 2) as Vec3;
-    const [c1, ...cylinders] = Array.from(new Array(4)).map((_, i) => {
-      const r = radii[i % 4];
-      const p = Array.from(new Array(2))
-        .map((_, j) => (i & (1 << j)) > 0 ? half[j] : -half[j]) as Vec2;
-      return cylinder({ r, h: this.size[2] }).translate([p[0], p[1], 0]);
-    })
-    const src = c1.hull(...cylinders).src;
+    const [c1, ...corners] = Array.from(new Array(Math.pow(2, dim))).map((_, i) => {
+      const r = Math.max(radii[i % radii.length], 0.001);
+      const p = Array.from(new Array(dim))
+        .map((_, j) => (i & (1 << j)) > 0 ? half[j] - r : -half[j] + r);
+
+      return s(r).translate(p as Vec3);
+    });
+    const src = c1.hull(...corners).src;
     return new Sizable(this.size, src);
   }
 
+  round2D(r: number | number[]) {
+    return this._round(r, r => cylinder({ r, h: this.size[2] }), 2);
+  }
+
   round3D(r: number | number[]) {
-    const radii: number[] = Array.isArray(r) ? r : [r];
-    const half = this.size.map(s => s / 2) as Vec3;
-    const [s1, ...spheres] = Array.from(new Array(8)).map((_, i) => {
-      const r = radii[i % 8];
-      const p = Array.from(new Array(3))
-        .map((_, j) => (i & (1 << j)) > 0 ? half[j] : -half[j]) as Vec3;
-      return sphere({ r }).translate(p);
-    })
-    const src = s1.hull(...spheres).src;
-    return new Sizable(this.size, src);
+    return this._round(r, r => sphere({ r }), 3);
   }
 }
 
@@ -91,7 +87,19 @@ export type CylinderProps = FProp<(
   { r: number } | { r1: number, r2: number } | { d: number } | { d1: number, d2: number }) & {
     h: number;
   }>;
-export const cylinder = (p: CylinderProps) => shape3([`cylinder(center=true, ${serialize(p)});`], p);
+export const cylinder = (p: CylinderProps) => {
+  let width;
+  if ('d' in p) {
+    width = p.d;
+  } else if ('d1' in p) {
+    width = Math.max(p.d1, p.d2);
+  } else if ('r' in p) {
+    width = p.r * 2;
+  } else if ('r1' in p) {
+    width = Math.max(p.r1, p.r2) * 2;
+  }
+  return new Sizable([width, width, p.h], [`cylinder(center=true, ${serialize(p)});`])
+}
 
 
 export type PolyhedronProps = FProp<{

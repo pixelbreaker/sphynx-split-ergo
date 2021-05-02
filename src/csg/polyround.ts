@@ -40,7 +40,6 @@ export const getDiamondPoints = (p: RectPointsProps): Vec2[] => {
 
 
 export type PolyExtrudeProps = {
-  $fn?: number,
   $fn1?: number,
   $fn2?: number,
   center?: boolean,
@@ -90,14 +89,14 @@ export class PolyRound {
     return new Shape2([`polygon(polyRound(${params.join(',')}));`]);
   }
 
-  extrude({ $fn, $fn1, $fn2, center, height, r1 = 0, r2 = 0, ...rest }: PolyExtrudeProps) {
+  extrude({ $fn1, $fn2, center, height, r1 = 0, r2 = 0, ...rest }: PolyExtrudeProps) {
     const radii = this.p.radii;
     const points = this.p.points.map(([x, y], i) => [x, y, radii[i % radii.length] || 0]);
     const params = [
       serialize(points),
       serialize({ ...rest, r1, r2 }),
       `length=${height}`,
-      $fn ? `fn=${$fn}` : undefined,
+      this.p.$fn ? `fn=${this.p.$fn}` : undefined,
       $fn1 ? `fn1=${$fn1}` : undefined,
       $fn2 ? `fn2=${$fn2}` : undefined,
     ];

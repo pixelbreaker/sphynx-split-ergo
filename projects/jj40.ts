@@ -18,7 +18,8 @@ const body = polyRound({
     center: true
   }),
   radii: [r, r, r, r],
-}).extrude({ height: size[2], $fn: 8 })
+  $fn: 8
+}).extrude({ height: size[2] })
 
 const inset = cube(size).translate([0, 0, size[2] - top]);
 
@@ -26,8 +27,8 @@ const cavity = cube([size[0] - t2 * 2, size[1] - t2 * 2, size[2]],
 ).translate([0, 0, bot]);
 
 const usb_height = 9;
-const usb = polyRound({ points: getRectPoints({ size: [12, usb_height] }), radii: [3, 3, 3, 3] })
-  .extrude({ height: (t1 + t2 + 1) * 2 })
+const usb = cube([12, usb_height, (t1 + t2 + 1) * 2])
+  .round2D(3)
   .rotate([90, 0, 0])
   .translate([-76, size[1] / 2, (size[2] - usb_height) / 2 - 3]);
 

@@ -1,4 +1,4 @@
-import {Vec3, Vec2 } from "../../src/csg/base";
+import { Vec3, Vec2 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
 import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
@@ -22,15 +22,16 @@ const plateu = polyRound({
     [41, 19],
   ],
   radii: [5.5, 9, 9],
-}).extrude({ height: 4, $fn: 30, $fn2: 10, r2: -1.5 })
+  $fn: 10
+}).extrude({ height: 4, $fn2: 10, r2: -1.5, center: false })
   .translate([0, 0, base_size[2]]);
 export const main = base.union(
   rounded_side.difference(clearance_pulley.translate([
     pulley_holes_coord[0][0],
     pulley_holes_coord[0][1],
-    base_size[2] + plateu_height - 1
+    base_size[2] + plateu_height - 1 + clearance_pulley.size[2] / 2
   ])),
   plateu
 ).difference(
   ...pulley_holes,
-).set({ $fn: 60 });
+).set({ $fa: 3, $fs: 0.4 });

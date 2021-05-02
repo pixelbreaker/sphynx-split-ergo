@@ -13,7 +13,7 @@ const [f, ...rest] = getRectPoints({ size: [r * 2.1, r * 2.1] })
   .map(p => sphere({ r }).translate([p[0], p[1], -(r - z)]));
 
 export const main = cube([6 * r, 6 * r, 6 * r])
-  .translate([0, 0, 3 * r])
+  .align([0, 0, 1])
   .difference(
     f.union(...rest)
   ).set({ $fn: 60 });

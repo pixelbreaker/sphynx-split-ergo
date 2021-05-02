@@ -36,15 +36,15 @@ const slot = cylinder({ d: 5, h: inf }).translate([0, 5, 0]).hull(
 );
 
 const whole = body.difference(
-  intake.translate([0, 0, intake.h / 2]),
+  intake.translate([0, 0, intake.size[2] / 2]),
   ...screws,
   exit_nozzle.translate([offset[0], offset[1] + slant, total_height - t / 2]),
-  drop_in.translate([0, -size[1] / 2 + drop_in[1] / 2 - 0.01, drop_in[2] / 2 + t]),
+  drop_in.translate([0, -size[1] / 2 + drop_in.size[1] / 2 - 0.01, drop_in.size[2] / 2 + t]),
 );
 const cut = cube([inf, inf, (base.lengths[0] - t / 2 - .5) * 2]);
 
 export const main = whole.intersection(cut).union(
-  whole.difference(cut).translate([size[0] + 5, 0, -cut[2] / 2])
+  whole.difference(cut).translate([size[0] + 5, 0, -cut.size[2] / 2])
 ).render().set({ $fn: 60 });
 
 export const settings: OutputSettings = {

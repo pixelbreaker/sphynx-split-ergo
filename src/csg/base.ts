@@ -25,7 +25,7 @@ export class Shape {
     this.src = src;
   }
   set(o: FProp<{}>) {
-    return new Shape([serialize(o) + ';', ...this.src]);
+    return new Shape([serialize(o).replace(/\,/g, ";") + ';', ...this.src]);
   }
 
   union(...s: Shape[]): Shape {
@@ -53,19 +53,19 @@ export class Shape {
   }
 
   translate(p: Vec3) {
-    return new Shape([`translate(${JSON.stringify(p)})`, ...this.src.map(indent)]);
+    return new Shape([`translate(${JSON.stringify(p)}) {`, ...this.src.map(indent), '}']);
   };
 
   rotate(p: Vec3) {
-    return new Shape([`rotate(${JSON.stringify(p)})`, ...this.src.map(indent)]);
+    return new Shape([`rotate(${JSON.stringify(p)}) {`, ...this.src.map(indent), '}']);
   };
 
   mirror(p: Vec3) {
-    return new Shape([`mirror(${JSON.stringify(p)})`, ...this.src.map(indent)]);
+    return new Shape([`mirror(${JSON.stringify(p)}) {`, ...this.src.map(indent), '}']);
   };
 
   color(c: string) {
-    return new Shape([`color("${c}")`, ...this.src.map(indent)]);
+    return new Shape([`color("${c}") {`, ...this.src.map(indent), '}']);
   };
 
   tile(t: TileProps): Shape {

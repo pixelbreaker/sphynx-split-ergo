@@ -55,7 +55,8 @@ const holes =
 const body = polyRound({
   points: getRectPoints({ size: [body_size[0], body_size[1]], center: true }),
   radii: [13, 10, 10, 13],
-}).extrude({ height: body_size[2], center: true, $fn: 30 })
+  $fn: 30
+}).extrude({ height: body_size[2], center: true })
   .difference(
     holes,
     holes.mirror([1, 0, 0])
@@ -64,7 +65,8 @@ const body = polyRound({
     polyRound({
       points: [[0, clasp_x], [clasp_y * 2, -clasp_x], [-clasp_y * 2, -clasp_x]], //getRectPoints({ size: [lmu88.od, lmu88.od], center: true }),
       radii: [6, 0, 0],
-    }).extrude({ height: lmu88.length * 2, center: true, $fn: 30 })
+      $fn: 30
+    }).extrude({ height: lmu88.length * 2, center: true })
       .rotate([0, 90, 0]),
     cube([inf, lmu88.id + 1, inf]),
 

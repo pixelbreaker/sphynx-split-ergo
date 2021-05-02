@@ -24,6 +24,7 @@ const motor_holes = cylinder({ d: mount.hole, h: inf, $fn: 100 })
 
 export const main = base
   .difference(motor_holes)
-  .union(rounded_side).set({ $fn: 60 });
+  .union(rounded_side)
+  .set({ $fa: 3, $fs: 0.4 });
 
 
