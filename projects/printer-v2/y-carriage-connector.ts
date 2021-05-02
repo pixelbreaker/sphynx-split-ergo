@@ -17,7 +17,7 @@ const gap_size = 1.2;
 const clasp_angle = 100;
 const clasp_x = (lmu88.od / 2) / Math.sin(clasp_angle / 2 * Math.PI / 180);
 const clasp_y = (lmu88.od / 2) / Math.cos(clasp_angle / 2 * Math.PI / 180);
-const clasp_hole = ring({ id: 20, od: 24, h: 4, center: true }).rotate([0, 90, 0])
+const clasp_hole = ring({ id: 20, od: 24, h: 4 }).rotate([0, 90, 0])
 
 const holes =
   // carbon fiber rod holes

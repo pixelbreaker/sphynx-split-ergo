@@ -6,7 +6,7 @@ import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
 
-export class Sizable extends Shape3 {
+export class Alignable extends Shape3 {
   size: Vec3;
   constructor(size: Vec3, src: string[]) {
     super(src);
@@ -14,12 +14,11 @@ export class Sizable extends Shape3 {
   }
   align(v: Vec3) {
     const src = this.translate(v.map((a, i) => Math.sign(a) * this.size[i] / 2) as Vec3).src;
-    return new Sizable(this.size, src);
+    return new Shape3(src);
   }
 }
 
-export class Cube extends Sizable {
-
+export class Cube extends Alignable {
   private _round(r: number | number[], s: (r: number) => Shape3, dim: 2 | 3) {
     const radii: number[] = Array.isArray(r) ? r : [r];
     const half = this.size.map(s => s / 2) as Vec3;
@@ -31,7 +30,7 @@ export class Cube extends Sizable {
       return s(r).translate(p as Vec3);
     });
     const src = c1.hull(...corners).src;
-    return new Sizable(this.size, src);
+    return new Alignable(this.size, src);
   }
 
   round2D(r: number | number[]) {
@@ -78,7 +77,7 @@ export const text = (p: TextProps) => shape3([`text(${serialize(p)});`], p);
 
 export const sphere = (p: CirleProps) => {
   const size = ('d' in p) ? p.d : p.r * 2;
-  return new Sizable([size, size, size], [`sphere(${serialize(p)});`]);
+  return new Alignable([size, size, size], [`sphere(${serialize(p)});`]);
 }
 
 export const cube = (p: Vec3) => new Cube(p, [`cube(size=${serialize(p)}, center=true);`]);
@@ -86,9 +85,10 @@ export const cube = (p: Vec3) => new Cube(p, [`cube(size=${serialize(p)}, center
 export type CylinderProps = FProp<(
   { r: number } | { r1: number, r2: number } | { d: number } | { d1: number, d2: number }) & {
     h: number;
+    sector?: number;
   }>;
 export const cylinder = (p: CylinderProps) => {
-  let width;
+  let width: number;
   if ('d' in p) {
     width = p.d;
   } else if ('d1' in p) {
@@ -98,7 +98,25 @@ export const cylinder = (p: CylinderProps) => {
   } else if ('r1' in p) {
     width = Math.max(p.r1, p.r2) * 2;
   }
-  return new Sizable([width, width, p.h], [`cylinder(center=true, ${serialize(p)});`])
+  const { sector, ...rest } = p;
+  const src = [`cylinder(center=true, ${serialize(rest)});`];
+
+  if (sector && sector % 360 !== 0) {
+    const angle = sector % 360;
+    const divisions = Math.floor(angle / 90) + 1;
+    const sub_angle = angle / divisions * Math.PI / 180;
+    const points = Array.from(new Array(divisions + 1))
+      .map((_, i) => [
+        width * Math.cos(sub_angle * i),
+        width * Math.sin(sub_angle * i)
+      ] as Vec2);
+    const poly = polygon({ points: [[0, 0], ...points] })
+      .linear_extrude({ height: p.h + 1 })
+    const s = new Shape3(src).intersection(poly);
+    return new Alignable([width, width, p.h], s.src);
+  } else {
+    return new Alignable([width, width, p.h], src);
+  }
 }
 
 

@@ -48,7 +48,8 @@ export const main = body.difference(
   cavity,
   usb,
   line_breaks.translate([0, 0, (br.size[2] - size[2]) / 2 + .4]),
-).union(...screws).set({ $fn: 10 });
+).union(...screws)
+.set({ $fn: 10 });
 
 
 export const settings: OutputSettings = {

@@ -16,10 +16,9 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     id: rimDiameter - t * 2,
     h: t * 2,
     radii: [0, 0, 0, t / 2],
-    center: false,
     $fn: 100,
     $rfn: 1
-  });
+  }).align([0, 0, 1]);
 
   const hexMesh = cylinder({ d: rimDiameter - t * 1.8, h: t, $fn: 100 })
     .difference(
@@ -49,8 +48,8 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     id: drainInnerDiameter,
     h: t * 3,
     $fn: 50,
-    center: false
-  }).translate([0, 0, t * 1.8]);
+  }).align([0, 0, 1])
+    .translate([0, 0, t * 1.8]);
 
   return ringOuter.union(
     hexMesh,

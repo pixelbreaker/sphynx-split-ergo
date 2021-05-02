@@ -7,17 +7,13 @@ import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 import { inf } from "./printer-v2/hardware";
 import { hexTile, polyWire, ring } from "./utils";
 
-const r = 10;
-const z = 4;
-const [f, ...rest] = getRectPoints({ size: [r * 2.1, r * 2.1] })
-  .map(p => sphere({ r }).translate([p[0], p[1], -(r - z)]));
+const w = 5;
+const t = 2;
+const base = cube([t, 20, w]).union(
+  ring({ od: 20, id: 15, h: w }).align([1, 0, 0])
+)
 
-export const main = cube([6 * r, 6 * r, 6 * r])
-  .align([0, 0, 1])
-  .intersection(
-    f.union(...rest)
-  );
-
+export const main = cylinder({ d: 10, h: 10, sector: 40 });
 export const settings: OutputSettings = {
   slicer: {
   }

@@ -3,7 +3,7 @@ import { FProp, Vec2, Vec3 } from '../src/csg/base';
 import { Shape2 } from '../src/csg/base2';
 import { shape3, Shape3 } from '../src/csg/base3';
 import { getRectPoints, polyRound } from '../src/csg/polyround';
-import { cube, cylinder, sphere, square } from '../src/csg/primitives';
+import { cube, cylinder, Alignable, sphere, square } from '../src/csg/primitives';
 
 const inf = 1000;
 type HexTileOptions = {
@@ -34,11 +34,10 @@ type RingOptions = {
   od: number;
   h: number;
   radii?: number[];
-  center?: boolean;
   $fn?: number;
   $rfn?: number;
 }
-export const ring = ({ id, od, h, radii = [0], $fn, $rfn, center }: RingOptions): Shape3 => {
+export const ring = ({ id, od, h, radii = [0], $fn, $rfn }: RingOptions): Alignable => {
   const r1 = od / 2;
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
@@ -46,13 +45,8 @@ export const ring = ({ id, od, h, radii = [0], $fn, $rfn, center }: RingOptions)
     .toPolygon($rfn)
     .translate([r2, 0, 0])
     .rotate_extrude({ $fn });
-    
-  const _center = center === undefined ? true : false;
-  if (_center) {
-    return ret.translate([0, 0, -h / 2]);
-  }
 
-  return ret;
+  return new Alignable([od, od, h], ret.translate([0, 0, -h / 2]).src);
 }
 
 export type PolyWireProps = {
@@ -62,7 +56,7 @@ export type PolyWireProps = {
 }
 export const polyWire = ({ points, radii = [0], t }: PolyWireProps) => {
   const base = polyRound({ points, radii, $fn: 5 }).toPolygon();
-  const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01 });
+  const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01 , center: false});
   return sphere({ d: t, $fn: 10 }).minkowski(wire);
 }
 
@@ -137,12 +131,12 @@ export const convexTube = (props: ConvexShellProps): Shape3 & ConvexShellProps =
   const [first, ...rest] = props.profiles;
   const sections: Shape3[] = [];
   const prev: { p: Shape3 } = {
-    p: first.linear_extrude({ height: epsilon })
+    p: first.linear_extrude({ height: epsilon , center: false})
   };
   let h = 0;
   for (let i = 0; i < rest.length; i++) {
     h += props.lengths[i];
-    const p = rest[i].linear_extrude({ height: epsilon }).translate([0, 0, h]);
+    const p = rest[i].linear_extrude({ height: epsilon , center: false}).translate([0, 0, h]);
     sections.push(
       prev.p.hull(p));
     prev.p = p;

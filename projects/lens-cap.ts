@@ -18,8 +18,7 @@ export const main = cylinder({ d: od, h: height })
       od: od + 1,
       h: 3,
       radii: [.5, .5],
-      $rfn: 1,
-      center: true
+      $rfn: 1
     }).translate([0, 0, height / 2])
   )
   .set({ $fn: 200 });

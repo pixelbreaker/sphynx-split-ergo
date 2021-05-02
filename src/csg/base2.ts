@@ -32,6 +32,9 @@ export class Shape2 extends Shape {
 
   // 2d only functions
   linear_extrude(p: ExtrudeProps) {
+    if (p.center === undefined) {
+      p.center = true;
+    }
     return shape3([`linear_extrude(${serialize(p)})`, ...this.src.map(indent)], p);
   }
 
