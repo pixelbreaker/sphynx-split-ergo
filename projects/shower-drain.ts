@@ -7,7 +7,7 @@ const options = {
   rimDiameter: 68,
   drainDiameter: 37,
   meshSize: 8,
-  thickness: 1.5
+  thickness: 1.2
 }
 type Option = typeof options;
 const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Option) => {
@@ -25,7 +25,7 @@ const showerDrain = ({ rimDiameter, drainDiameter, meshSize, thickness: t }: Opt
     .difference(
       hexTile({
         hexSize: meshSize,
-        spacing: t / 2,
+        spacing: t,
         size: [rimDiameter, rimDiameter],
         thickness: t + 1
       }))
