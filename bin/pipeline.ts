@@ -47,7 +47,9 @@ tasks.add(tf(base_output, 'gcode'), (out, settings, stl) => {
   const { slicer } = JSON.parse(fs.readFileSync(settings).toString()) as OutputSettings;
   Object.entries(slicer || {}).forEach(([key, val]) => {
     if (typeof val === 'boolean') {
-      args.push(`--${key}`);
+      if (val) {
+        args.push(`--${key}`);
+      }
     } else {
       args.push(`--${key}`, `${val}`);
     }
