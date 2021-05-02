@@ -14,9 +14,9 @@ const [f, ...rest] = getRectPoints({ size: [r * 2.1, r * 2.1] })
 
 export const main = cube([6 * r, 6 * r, 6 * r])
   .translate([0, 0, 3 * r])
-  .intersection(
+  .difference(
     f.union(...rest)
-  ).set({ $fn: 100 });
+  ).set({ $fn: 60 });
 
 
 export const settings: OutputSettings = {

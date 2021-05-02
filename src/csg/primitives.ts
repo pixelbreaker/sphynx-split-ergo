@@ -6,7 +6,46 @@ import { serialize } from "./translation-util";
 
 export type CirleProps = FProp<{ r: number } | { d: number }>;
 
+export class Sizable extends Shape3 {
+  size: Vec3;
+  constructor(size: Vec3, src: string[]) {
+    super(src);
+    this.size = size;
+  }
+  align(v: Vec3) {
+    const src = this.translate(v.map((a, i) => a > 0 ? this.size[i] / 2 : 0) as Vec3).src;
+    return new Sizable(this.size, src);
+  }
+}
 
+export class Cube extends Sizable {
+
+  round2D(r: number | number[]) {
+    const radii: number[] = Array.isArray(r) ? r : [r];
+    const half = this.size.map(s => s / 2) as Vec3;
+    const [c1, ...cylinders] = Array.from(new Array(4)).map((_, i) => {
+      const r = radii[i % 4];
+      const p = Array.from(new Array(2))
+        .map((_, j) => (i & (1 << j)) > 0 ? half[j] : -half[j]) as Vec2;
+      return cylinder({ r, h: this.size[2] }).translate([p[0], p[1], 0]);
+    })
+    const src = c1.hull(...cylinders).src;
+    return new Sizable(this.size, src);
+  }
+
+  round3D(r: number | number[]) {
+    const radii: number[] = Array.isArray(r) ? r : [r];
+    const half = this.size.map(s => s / 2) as Vec3;
+    const [s1, ...spheres] = Array.from(new Array(8)).map((_, i) => {
+      const r = radii[i % 8];
+      const p = Array.from(new Array(3))
+        .map((_, j) => (i & (1 << j)) > 0 ? half[j] : -half[j]) as Vec3;
+      return sphere({ r }).translate(p);
+    })
+    const src = s1.hull(...spheres).src;
+    return new Sizable(this.size, src);
+  }
+}
 
 
 
@@ -41,22 +80,12 @@ export type TextProps = string | {
 export const text = (p: TextProps) => shape3([`text(${serialize(p)});`], p);
 
 
-export const sphere = (p: CirleProps) => shape3([`sphere(${serialize(p)});`], p);
-
-
-export const cube = (p: Vec3) => shape3([`cube(size=${serialize(p)}, center=true);`], p);
-export const cubeR = (r: number, p: Vec3) => {
-  const [c1, ...corners] = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] }).map(v => cylinder({ r, h: p[2] }).translate([v[0], v[1], 0]));
-  return c1.hull(...corners);
-}
-export const cubeR2 = (r: number, p: Vec3) => {
-  const [t1, ...rest] = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] })
-    .map(v => sphere({ r }).translate([v[0], v[1], p[2] / 2]));
-  const bot = getRectPoints({ size: [p[0] - r * 2, p[1] - r * 2] })
-    .map(v => sphere({ r }).translate([v[0], v[1], -p[2] / 2]));
-  return t1.hull(...rest, ...bot);
+export const sphere = (p: CirleProps) => {
+  const size = ('d' in p) ? p.d : p.r * 2;
+  return new Sizable([size, size, size], [`sphere(${serialize(p)});`]);
 }
 
+export const cube = (p: Vec3) => new Cube(p, [`cube(size=${serialize(p)}, center=true);`]);
 
 export type CylinderProps = FProp<(
   { r: number } | { r1: number, r2: number } | { d: number } | { d1: number, d2: number }) & {

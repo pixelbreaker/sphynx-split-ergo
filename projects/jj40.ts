@@ -46,7 +46,7 @@ export const main = body.difference(
   inset,
   cavity,
   usb,
-  line_breaks.translate([0, 0, (br[2] - size[2]) / 2 + .4]),
+  line_breaks.translate([0, 0, (br.size[2] - size[2]) / 2 + .4]),
 ).union(...screws).set({ $fn: 10 });
 
 
