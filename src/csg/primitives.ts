@@ -1,4 +1,4 @@
-import { FProp, Vec2, Vec3 } from "./base";
+import { FProp, Shape, Vec2, Vec3 } from "./base";
 import { shape2, Shape2 } from "./base2";
 import { shape3, Shape3 } from "./base3";
 import { serialize } from "./translation-util";
@@ -12,29 +12,47 @@ export class Alignable extends Shape3 {
     this.size = size;
   }
   align(v: Vec3) {
-    const src = this.translate(v.map((a, i) => Math.sign(a) * this.size[i] / 2) as Vec3).src;
+    const src = this.translate(v.map((a, i) => a * (this.size[i] / 2)) as Vec3).src;
     return new Shape3(src);
   }
 }
 
-export class Cube extends Alignable {
-  private _round(r: number | number[], s: (r: number) => Shape3, dim: 2 | 3) {
-    const radii: number[] = Array.isArray(r) ? r : [r];
-    const half = this.size.map(s => s / 2) as Vec3;
-    const [c1, ...corners] = Array.from(new Array(Math.pow(2, dim))).map((_, i) => {
-      const r = Math.max(radii[i % radii.length], 0.001);
-      const p = Array.from(new Array(dim))
-        .map((_, j) => (i & (1 << j)) > 0 ? half[j] - r : -half[j] + r);
-
-      return s(r).translate(p as Vec3);
-    });
-    const src = c1.hull(...corners).src;
-    return new Alignable(this.size, src);
+export class Alignable2 extends Shape2 {
+  size: Vec2;
+  constructor(size: Vec2, src: string[]) {
+    super(src);
+    this.size = size;
   }
+  align(v: Vec2) {
+    const src = this.translate(v.map((a, i) => a * (this.size[i] / 2)) as Vec3).src;
+    return new Shape2(src);
+  }
+}
 
+const round = (r: number | number[], s: (r: number) => Shape, size: Vec2 | Vec3, dim: 2 | 3) => {
+  const radii: number[] = Array.isArray(r) ? r : [r];
+  const half = size.map(s => s / 2) as Vec3;
+  const [c1, ...corners] = Array.from(new Array(Math.pow(2, dim))).map((_, i) => {
+    const r = Math.max(radii[i % radii.length], 0.001);
+    const p = Array.from(new Array(dim))
+      .map((_, j) => (i & (1 << j)) > 0 ? half[j] - r : -half[j] + r);
+    return s(r).translate(p as Vec3);
+  });
+  return c1.hull(...corners);
+}
+
+export class Square extends Alignable2 {
+  round(r: number | number[]) {
+    const s = round(r, r => circle({ r }), this.size, 2);
+    return new Alignable2(this.size, s.src);
+  }
+}
+
+export class Cube extends Alignable {
   round2D(r: number | number[], direction: 'x' | 'y' | 'z' = 'z') {
     if (direction === 'z') {
-      return this._round(r, r => cylinder({ r, h: this.size[2] }), 2);
+      const s = round(r, r => cylinder({ r, h: this.size[2] }), this.size, 2);
+      return new Alignable(this.size, s.src);
     } else if (direction === 'y') {
       const c: Shape3 = cube([this.size[0], this.size[2], this.size[1]])
         .round2D(r)
@@ -47,13 +65,12 @@ export class Cube extends Alignable {
       return new Alignable(this.size, c.src);
     }
   }
-
+  
   round3D(r: number | number[]) {
-    return this._round(r, r => sphere({ r }), 3);
+    const s = round(r, r => sphere({ r }), this.size, 3);
+    return new Alignable(this.size, s.src);
   }
 }
-
-
 
 export const circle = (p: CirleProps) =>
   shape2([`circle(${serialize(p)});`], p);
@@ -61,8 +78,7 @@ export const circle = (p: CirleProps) =>
 type RegularPolygonProps = { $fn: number } & CirleProps;
 export const regular_polygon = (p: RegularPolygonProps) => circle(p);
 
-export const square = (p: Vec2) => shape2([`square(size=${serialize(p)}, center=true);`], p);
-
+export const square = (p: Vec2) => new Square(p, [`square(size=${serialize(p)}, center=true);`]);
 
 export type PolygonProps = {
   points: Vec2[],

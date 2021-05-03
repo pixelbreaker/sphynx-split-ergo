@@ -7,23 +7,22 @@ import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
 import { inf } from "./printer-v2/hardware";
 import { hexTile, polyWire, ring } from "./utils";
 
-const w = 5;
+const h = 6;
 const t = 2;
-const marker_diameter = 19;
+const length = 30;
+const marker_diameter = 17;
 
-const loop = ring({ od: marker_diameter + t * 2, id: marker_diameter, h: w });
+const loop = ring({ od: marker_diameter + t * 2, id: marker_diameter, h });
 const sector = 200;
 
-const hook = loop.intersection(
-  cylinder({ d: loop.size[0], h: w, sector }).rotate([0, 0, 180])
+const arc = loop.intersection(
+  cylinder({ d: loop.size[0], h: h, sector }).rotate([0, 0, 180])
 ).translate([loop.size[0] / 2, 0, 0]);
 
-const base = cube([t, 10, w]).align([1, 1, 0]).union(hook);
+const hook = cube([t, length, h]).align([1, 1, 0]).union(arc);
 
-export const main = base;
+export const main = hook.tile({ times: 3, translation: [0, length, 0] });
 export const settings: OutputSettings = {
   slicer: {
-    "duplicate": 4
   }
 }
- 

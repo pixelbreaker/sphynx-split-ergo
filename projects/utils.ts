@@ -37,16 +37,17 @@ type RingOptions = {
   $fn?: number;
   $rfn?: number;
 }
-export const ring = ({ id, od, h, radii = [0], $fn, $rfn }: RingOptions): Alignable => {
+export const ring = ({ id, od, h, radii = [0], $fn }: RingOptions): Alignable => {
   const r1 = od / 2;
   const r2 = id / 2;
   const width = Math.abs(r1 - r2);
-  const ret = polyRound({ points: getRectPoints({ size: [width, h], center: false }), radii })
-    .toPolygon($rfn)
+  const ret = square([width, h])
+    .round(radii)
+    .align([1, 0])
     .translate([r2, 0, 0])
     .rotate_extrude({ $fn });
 
-  return new Alignable([od, od, h], ret.translate([0, 0, -h / 2]).src);
+  return new Alignable([od, od, h], ret.src);
 }
 
 export type PolyWireProps = {
@@ -56,7 +57,7 @@ export type PolyWireProps = {
 }
 export const polyWire = ({ points, radii = [0], t }: PolyWireProps) => {
   const base = polyRound({ points, radii, $fn: 5 }).toPolygon();
-  const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01 , center: false});
+  const wire = base.offset({ r: 0.01 }).difference(base).linear_extrude({ height: .01, center: false });
   return sphere({ d: t, $fn: 10 }).minkowski(wire);
 }
 
@@ -131,12 +132,12 @@ export const convexTube = (props: ConvexShellProps): Shape3 & ConvexShellProps =
   const [first, ...rest] = props.profiles;
   const sections: Shape3[] = [];
   const prev: { p: Shape3 } = {
-    p: first.linear_extrude({ height: epsilon , center: false})
+    p: first.linear_extrude({ height: epsilon, center: false })
   };
   let h = 0;
   for (let i = 0; i < rest.length; i++) {
     h += props.lengths[i];
-    const p = rest[i].linear_extrude({ height: epsilon , center: false}).translate([0, 0, h]);
+    const p = rest[i].linear_extrude({ height: epsilon, center: false }).translate([0, 0, h]);
     sections.push(
       prev.p.hull(p));
     prev.p = p;
