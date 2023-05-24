@@ -4,25 +4,25 @@ import { deg2rad } from "./math";
 type SwitchTypes = "choc" | "mx";
 type SwitchStyle = SwitchTypes;
 type SwitchSpacing = SwitchTypes;
-type KeycapStyles = "choc" | "sa";
+type KeycapStyles = "choc" | "xda" | "sa";
 type MCUHolder = "elite-c" | "rpi-pico" | "pro-micro" | "splinky";
 type RenderSide = "right" | "left";
 
 export type Options = {
-  caseSpacing: number;
   caseRimDrop: number;
+  caseSpacing: number;
   centerColumn: number;
   centerRow: number;
-  columns: number;
+  columns: 5 | 6;
   extraHeight: number;
   extraWidth: number;
   keycapStyle: KeycapStyles;
   mcuHolder: MCUHolder;
-  plateThickness: number;
-  rows: number;
+  rows: 3 | 4;
   side: RenderSide;
   tentingAngle: number;
   thumbOffsets: Vec3;
+  webThickness: number;
   zOffset: number;
 } & ( // Discriminated union to disable encoder when trackpad is enabled
   | { trackpad: true; encoder: false }
@@ -54,17 +54,16 @@ export type Parameters = {
 };
 
 export const defaultOptions: Options = {
-  caseSpacing: 2,
   caseRimDrop: 1,
+  caseSpacing: 2,
   centerColumn: 2.5,
   centerRow: 1.5,
   columns: 5,
   encoder: false,
-  extraHeight: -1.2,
-  extraWidth: 1.1,
+  extraHeight: 0,
+  extraWidth: 1.4,
   keycapStyle: "choc",
   mcuHolder: "elite-c",
-  plateThickness: 2,
   rows: 3,
   side: "right",
   switchSpacing: "choc",
@@ -72,6 +71,7 @@ export const defaultOptions: Options = {
   tentingAngle: 14,
   thumbOffsets: [8, -5, 0],
   trackpad: true,
+  webThickness: 2,
   zOffset: 9,
 };
 
@@ -92,7 +92,7 @@ export const buildParameters = (
   const mountWidth = keyholeWidth + (o.switchSpacing === "choc" ? 3.2 : 4.7);
   const mountHeight = mountWidth;
   const keycapHeight = o.keycapStyle === "choc" ? 9 : 13;
-  const keyTopHeight = o.plateThickness + keycapHeight;
+  const keyTopHeight = o.webThickness + keycapHeight;
   const curveColumn = 13;
   const curveRow = 4;
   const radiusRow =
