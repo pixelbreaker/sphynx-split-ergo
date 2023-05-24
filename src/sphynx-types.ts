@@ -70,7 +70,7 @@ export const defaultOptions: Options = {
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
-  thumbOffsets: [8, 0, 10],
+  thumbOffsets: [8, -5, 0],
   trackpad: true,
   zOffset: 9,
 };

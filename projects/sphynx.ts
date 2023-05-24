@@ -10,7 +10,7 @@ import {
 } from "../src/sphynx-types";
 import { Shape3 } from "../src/csg/base3";
 import { deg2rad } from "../src/math";
-import { matrix } from "mathjs";
+import { matrix, multiply, add, zeros } from "mathjs";
 
 buildOptions({
   columns: 5,
@@ -23,6 +23,7 @@ buildOptions({
   switchStyle: "choc",
   trackpad: false,
   encoder: false,
+  mcuHolder: "rpi-pico",
 });
 
 // Key holes
@@ -86,16 +87,10 @@ const keyPlace = (column: number, row: number, shape: Shape3) => {
     .translate([0, 0, o.zOffset]);
 };
 
-const positionRelativeToKey = (
-  column: number,
-  row: number,
-  shape: Shape3,
-  position: Vec3 = [0, 0, 0]
-) => {
+const positionRelativeToKey = (column: number, row: number, shape: Shape3) => {
   const columnAngle = p.curveRow * (o.centerColumn - column);
 
   const pos = shape
-    .translate(position)
     // reverse rotations
     .rotate([-p.curveColumn * (o.centerRow - row), 0, 0])
     .rotate([0, -columnAngle, 0])
@@ -113,6 +108,51 @@ const positionRelativeToKey = (
   return pos;
 };
 
+const getKeyPosition = (column: number, row: number) => {
+  let position = matrix([0, 0, 0]);
+
+  const rotateX = (angle: number) => {
+    const rad = deg2rad(angle);
+    return multiply(
+      [
+        [1, 0, 0],
+        [0, Math.cos(rad), -Math.sin(rad)],
+        [0, -Math.sin(rad), Math.cos(rad)],
+      ],
+      position
+    );
+  };
+
+  const rotateY = (angle: number) => {
+    const rad = deg2rad(angle);
+    return multiply(
+      [
+        [Math.cos(rad), 0, Math.sin(rad)],
+        [0, 1, 0],
+        [-Math.sin(rad), 0, Math.cos(rad)],
+      ],
+      position
+    );
+  };
+
+  const columnAngle = p.curveRow * (o.centerColumn - column);
+  position = rotateX(-p.curveColumn * (o.centerRow - row));
+  position = rotateY(-columnAngle);
+  position = rotateY(-o.tentingAngle);
+  position = add(position, [0, 0, -p.radiusRow]) as math.Matrix;
+  position = rotateX(p.curveColumn * (o.centerRow - row));
+  position = add(position, [0, 0, p.radiusRow - p.radiusColumn]) as math.Matrix;
+  position = rotateY(columnAngle);
+  position = add(position, [0, 0, p.radiusColumn]) as math.Matrix;
+  position = add(position, getColumnOffset(column)) as math.Matrix;
+  position = rotateY(o.tentingAngle);
+  position = add(position, [0, 0, o.zOffset]) as math.Matrix;
+
+  return position.toArray() as Vec3;
+};
+
+getKeyPosition(1, 0);
+
 const placeKeys = (shape: Shape3) => {
   const keys = [];
   for (let i = 0; i < o.columns; i++) {
@@ -127,16 +167,14 @@ const placeKeys = (shape: Shape3) => {
 
 // Thumb keys
 const placeThumb = (rot: Vec3, move: Vec3, shape: Shape3) => {
-  return positionRelativeToKey(1, o.rows - 1, shape)
-    .translate([p.mountWidth / 2, -p.mountHeight / 2, 0])
-    .rotate(rot)
+  return positionRelativeToKey(1, o.rows - 1, shape.rotate(rot).translate(move))
     .translate(o.thumbOffsets)
-    .translate(move);
+    .translate([p.mountWidth / 2, -p.mountHeight / 2, 0]);
 };
 
 const thumbRPlace = (shape: Shape3): Shape3 =>
   placeThumb(
-    o.trackpad ? [11.5, -10, 8] : o.encoder ? [0, 0, 10] : [11.5, -25, 10],
+    o.trackpad ? [11.5, -10, 8] : o.encoder ? [0, 0, 10] : [11.5, -26, 10],
     o.trackpad
       ? [-2, -12.3, -6]
       : o.encoder
@@ -146,10 +184,10 @@ const thumbRPlace = (shape: Shape3): Shape3 =>
   );
 
 const thumbMPlace = (shape: Shape3): Shape3 =>
-  placeThumb([9, -12.5, 22], [-40, -16, -12], shape);
+  placeThumb([9, -12.5, 23], [-33.5, -16, -7.8], shape);
 
 const thumbLPlace = (shape: Shape3): Shape3 =>
-  placeThumb([8, 0, 33], [-65, -27.5, -18], shape);
+  placeThumb([8, 0, 33], [-52, -26, -10], shape);
 
 const placeThumbs = (shape: Shape3): Shape3 =>
   thumbRPlace(shape).union(thumbMPlace(shape), thumbLPlace(shape));
@@ -157,7 +195,7 @@ const placeThumbs = (shape: Shape3): Shape3 =>
 // Utility shapes
 const webThickness = 2;
 const postSize = 0.1;
-const sphereSize = webThickness * 1.5;
+const sphereSize = 3; //webThickness;
 
 const webSphere = sphere({ d: sphereSize, $fn: 20 }).translate([
   0,
@@ -599,10 +637,30 @@ export const caseWalls = () => {
   );
 };
 
+export const USBHolder = () => {
+  const [x, y] = getKeyPosition(1, 0);
+  return importModel(`./models/${o.mcuHolder}.stl`)
+    .translate([x, y, 0])
+    .translate([
+      -p.mountWidth / 2,
+      p.mountHeight / 2 + o.caseSpacing + sphereSize + 0.5,
+      0,
+    ])
+    .translate([o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
+};
+
+export const USBHolderSpace = () => {
+  return USBHolder()
+    .projection()
+    .linear_extrude({ height: 13.01, center: false })
+    .translate([0, 0, -1]);
+};
+
 export const main = placeKeys(singleKeyhole()).union(
-  // importModel("../models/cirque-40-flat.stl"),
+  // importModel("./models/cirque-40-flat.stl"),
   keyConnectors(),
-  caseWalls(),
-  placeThumbs(singleKeyhole())
+  caseWalls().difference(USBHolderSpace()),
+  placeThumbs(singleKeyhole()),
+  USBHolder().debug()
   // positionRelativeToKey(1, o.rows - 1, cube([1, 1, 1]))
 );
