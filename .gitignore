@@ -1,4 +1,5 @@
 node_modules
+projects_old
 target
 dist
 *.log

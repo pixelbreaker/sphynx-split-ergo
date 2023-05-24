@@ -12,5 +12,8 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "exclude":[
+    "projects_old/**/*.ts"
   ]
 }

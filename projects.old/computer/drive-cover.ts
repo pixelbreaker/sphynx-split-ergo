@@ -3,7 +3,7 @@ import { Vec3 } from "../../src/csg/base";
 import { Shape3 } from "../../src/csg/base3";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
+import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
 import { hole, ring } from "../utils";
 const t = 2;
 const body_size: Vec3 = [150, 77, 43];

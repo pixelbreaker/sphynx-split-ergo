@@ -1,12 +1,12 @@
 
 import { polyRound } from "../src/csg/polyround";
 import { circle, square, polygon, } from "../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
+import { cube, cylinder, sphere, polyhedron } from "../src/csg/primitives";
 import { ring } from "./utils";
 
 const id = 19;
 const height = 12;
-const thickness = 2;
+const thickness = 3;
 const od = id + thickness * 2;
 
 export const main = cylinder({ d: od, h: height })

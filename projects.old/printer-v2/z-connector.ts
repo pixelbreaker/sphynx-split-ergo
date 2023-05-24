@@ -2,7 +2,7 @@ import { OutputSettings } from "../../bin/gen-scad";
 import { Vec3 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
+import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
 import { hole, ring } from "../utils";
 import { lmu88, pulley, inf } from "./hardware";
 import { base_size } from "./xy-corner";

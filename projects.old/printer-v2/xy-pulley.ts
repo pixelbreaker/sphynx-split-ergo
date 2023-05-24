@@ -1,7 +1,7 @@
 import { Vec3, Vec2 } from "../../src/csg/base";
 import { getCircularPoints, getDiamondPoints, getRectPoints, polyRound } from "../../src/csg/polyround";
 import { circle, square, polygon, } from "../../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../../src/csg/primitives";
+import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
 import { hole, ring } from "../utils";
 import { belt_thickness, clearance_pulley, pulley } from "./hardware";
 import { base_size, rod_offset, base, rounded_side } from "./xy-corner";

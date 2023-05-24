@@ -2,7 +2,7 @@ import { OutputSettings } from "../bin/gen-scad";
 import { Vec3 } from "../src/csg/base";
 import { getCircularPoints, getRectPoints, polyRound } from "../src/csg/polyround";
 import { circle, square, polygon, } from "../src/csg/primitives";
-import { cube, cylinder, sphere, ployhedron } from "../src/csg/primitives";
+import { cube, cylinder, sphere, polyhedron } from "../src/csg/primitives";
 import { inf } from "./printer-v2/hardware";
 import { hexTile, polyWire, ring } from "./utils";
 
