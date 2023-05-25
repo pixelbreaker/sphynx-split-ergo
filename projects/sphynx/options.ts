@@ -1,5 +1,5 @@
-import { Vec3 } from "./csg/base";
-import { deg2rad } from "./math";
+import { Vec3 } from "../../src/csg/base";
+import { deg2rad } from "../../src/math";
 
 type SwitchTypes = "choc" | "mx";
 type SwitchStyle = SwitchTypes;
@@ -89,7 +89,7 @@ export const buildParameters = (
 ) => {
   const keyholeWidth = o.switchStyle === "choc" ? 13.8 : 14.95;
   const keyholeHeight = keyholeWidth;
-  const mountWidth = keyholeWidth + (o.switchSpacing === "choc" ? 3.2 : 4.7);
+  const mountWidth = keyholeWidth + (o.switchSpacing === "choc" ? 3.2 : 4);
   const mountHeight = mountWidth;
   const keycapHeight = o.keycapStyle === "choc" ? 9 : 13;
   const keyTopHeight = o.webThickness + keycapHeight;

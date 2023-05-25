@@ -1,15 +1,11 @@
-import { circle, square, polygon, importModel } from "../src/csg/primitives";
-import { FProp, Vec2, Vec3 } from "../src/csg/base";
-import { cube, cylinder, sphere, polyhedron } from "../src/csg/primitives";
-import { hole } from "./utils";
-import { polyRound } from "../src/csg/polyround";
-import {
-  buildOptions,
-  options as o,
-  parameters as p,
-} from "../src/sphynx-types";
-import { Shape3 } from "../src/csg/base3";
-import { deg2rad } from "../src/math";
+import { circle, square, polygon, importModel } from "../../src/csg/primitives";
+import { FProp, Vec2, Vec3 } from "../../src/csg/base";
+import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
+import { hole } from "../utils";
+import { polyRound } from "../../src/csg/polyround";
+import { buildOptions, options as o, parameters as p } from "./options";
+import { Shape3 } from "../../src/csg/base3";
+import { deg2rad } from "../../src/math";
 import { matrix, multiply, add, zeros } from "mathjs";
 
 buildOptions({
@@ -55,14 +51,14 @@ export const singleKeyhole = (): Shape3 => {
 
 export const singleKeycap = (row: number) =>
   importModel(
-    `../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
+    `../../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
   ).translate([0, 0, 4]);
-// .rotate([180, 0, 0]);
 
 const getColumnOffset = (column: number): Vec3 => {
   switch (column) {
     case -1:
     case 0: // both index rows should be the same to allow MCU holder to align correctly
+      return [0, 0.8, 0];
     case 1:
       return [0, 0.2, 0];
     case 2:
@@ -76,20 +72,8 @@ const getColumnOffset = (column: number): Vec3 => {
 };
 
 const getColumnSplay = (column: number): number => {
-  switch (column) {
-    case -1:
-    case 0: // both index rows should be the same to allow MCU holder to align correctly
-      return -1.5;
-    case 1:
-      return -1;
-    case 2:
-      return 0;
-    case 3:
-      return 3;
-    case 4:
-    default:
-      return 7;
-  }
+  const splays = [-2, -1, 0, 4, 9];
+  return splays[Math.min(Math.max(column, 0), splays.length - 1)];
 };
 
 // Placement
@@ -104,7 +88,7 @@ const keyPlace = (column: number, row: number, shape: Shape3) => {
     .translate([0, 0, p.radiusColumn])
     .translate(getColumnOffset(column))
     .rotate([0, o.tentingAngle, 0])
-    .translate([0, 0, o.zOffset]);
+    .translate([0, 0, o.zOffset - (column > 2 && row >= o.rows ? 0.5 : 0)]);
 };
 
 const positionRelativeToKey = (column: number, row: number, shape: Shape3) => {
@@ -198,6 +182,14 @@ const placeKeys = (shape: Shape3 | Function) => {
   return firstKey.union(...restKeys);
 };
 
+const buildWall = (start: Shape3, end: Shape3) => {
+  const edge = start.hull(end);
+  return edge
+    .projection()
+    .linear_extrude({ height: 1, center: false })
+    .hull(edge);
+};
+
 // Thumb keys
 const placeThumb = (rot: Vec3, move: Vec3, shape: Shape3) => {
   return positionRelativeToKey(1, o.rows - 1, shape.rotate(rot).translate(move))
@@ -224,28 +216,39 @@ const thumbLPlace = (shape: Shape3): Shape3 =>
 
 const placeThumbs = (shape: Shape3 | Function): Shape3 => {
   let key =
-    typeof shape === "function" ? (shape(1) as Shape3) : (shape as Shape3);
+    typeof shape === "function" ? (shape(2) as Shape3) : (shape as Shape3);
   return thumbRPlace(key).union(thumbMPlace(key), thumbLPlace(key));
 };
 
 // Utility shapes
 // const webThickness = 2;
 const postSize = 0.1;
-const sphereSize = 3; //webThickness;
+const sphereSize = o.webThickness;
+const sphereQuality = 12;
 
-const webSphere = sphere({ d: sphereSize, $fn: 20 }).translate([
+const webRim = sphere({ d: sphereSize * 1.5, $fn: sphereQuality }).translate([
   0,
   0,
   sphereSize / -2 + o.webThickness - o.caseRimDrop,
 ]);
-const webPost = cube([postSize, postSize, o.webThickness]).translate([
-  // const webPost = sphere({ d: weo.bThickness + 0.05, $fn: 12 }).translate([
+const thumbSphere = sphere({ d: sphereSize, $fn: sphereQuality }).translate([
   0,
   0,
-  o.webThickness / -2 + o.webThickness,
+  sphereSize / -2 + o.webThickness - 1,
+]);
+// const webPost = cube([postSize, postSize, o.webThickness]).translate([
+//   0,
+//   0,
+//   o.webThickness / -2 + o.webThickness,
+// ]);
+const webSphere = sphere({ d: sphereSize, $fn: sphereQuality }).translate([
+  0,
+  0,
+  sphereSize / -2 + o.webThickness,
 ]);
 const postOffset = { x: postSize / 2, y: postSize / 2 };
 const sphereOffset = { x: o.caseSpacing, y: o.caseSpacing };
+const thumbSphereOffset = { x: -o.caseSpacing, y: -o.caseSpacing };
 
 const getWebPost = (
   pos: "TL" | "TR" | "BL" | "BR",
@@ -260,14 +263,26 @@ const getWebPost = (
     0,
   ]);
 };
-const webPostTR = getWebPost("TR", webPost);
-const webPostTL = getWebPost("TL", webPost);
-const webPostBL = getWebPost("BL", webPost);
-const webPostBR = getWebPost("BR", webPost);
-const webSphereTR = getWebPost("TR", webSphere, sphereOffset);
-const webSphereTL = getWebPost("TL", webSphere, sphereOffset);
-const webSphereBL = getWebPost("BL", webSphere, sphereOffset);
-const webSphereBR = getWebPost("BR", webSphere, sphereOffset);
+
+type Posts = { tr: Shape3; tl: Shape3; br: Shape3; bl: Shape3 };
+
+const getPosts = (
+  shape: Shape3,
+  offset: { x: number; y: number } = postOffset
+): Posts => {
+  return {
+    tr: getWebPost("TR", shape, offset),
+    tl: getWebPost("TL", shape, offset),
+    br: getWebPost("BR", shape, offset),
+    bl: getWebPost("BL", shape, offset),
+  };
+};
+
+const posts = {
+  post: getPosts(webSphere),
+  rim: getPosts(webRim, sphereOffset),
+  thumb: getPosts(thumbSphere, thumbSphereOffset),
+};
 
 // Main key connectors
 // util to partition array in to incremental segments
@@ -289,7 +304,8 @@ const partition = <T extends any>(
 };
 
 const triangleHulls = (...args: Shape3[]) => {
-  const triGroups = partition<Shape3>(args, 3, 1);
+  const validArgs = args.filter((value) => value !== null);
+  const triGroups = partition<Shape3>(validArgs, 3, 1);
   const shapes: Shape3[] = [];
   triGroups.forEach(([first, ...rest]) => {
     shapes.push(first.hull(...rest)); // hull here
@@ -306,10 +322,10 @@ const keyConnectors = () => {
     for (let row = 0; row < o.rows; row++) {
       connectors.push(
         triangleHulls(
-          keyPlace(col + 1, row, webPostTL),
-          keyPlace(col, row, webPostTR),
-          keyPlace(col + 1, row, webPostBL),
-          keyPlace(col, row, webPostBR)
+          keyPlace(col + 1, row, posts.post.tl),
+          keyPlace(col, row, posts.post.tr),
+          keyPlace(col + 1, row, posts.post.bl),
+          keyPlace(col, row, posts.post.br)
         )
       );
     }
@@ -320,10 +336,10 @@ const keyConnectors = () => {
     for (let row = -1; row < o.rows; row++) {
       connectors.push(
         triangleHulls(
-          keyPlace(col, row, webPostBL),
-          keyPlace(col, row, webPostBR),
-          keyPlace(col, row + 1, webPostTL),
-          keyPlace(col, row + 1, webPostTR)
+          keyPlace(col, row, posts.post.bl),
+          keyPlace(col, row, posts.post.br),
+          keyPlace(col, row + 1, posts.post.tl),
+          keyPlace(col, row + 1, posts.post.tr)
         )
       );
     }
@@ -334,16 +350,211 @@ const keyConnectors = () => {
     for (let row = -1; row < o.rows; row++) {
       connectors.push(
         triangleHulls(
-          keyPlace(col, row, webPostBR),
-          keyPlace(col, row + 1, webPostTR),
-          keyPlace(col + 1, row, webPostBL),
-          keyPlace(col + 1, row + 1, webPostTL)
+          keyPlace(col, row, posts.post.br),
+          keyPlace(col, row + 1, posts.post.tr),
+          keyPlace(col + 1, row, posts.post.bl),
+          keyPlace(col + 1, row + 1, posts.post.tl)
         )
       );
     }
   }
   const [first, ...rest] = connectors;
+  return first.union(...rest);
+};
 
+const thumbConnectors = () => {
+  const connectors = [];
+  // between thumb keys
+  connectors.push(
+    triangleHulls(
+      thumbMPlace(posts.post.tr),
+      thumbMPlace(posts.post.br),
+      thumbRPlace(posts.post.tl),
+      thumbRPlace(posts.post.bl)
+    )
+  );
+  connectors.push(
+    triangleHulls(
+      thumbLPlace(posts.post.tr),
+      thumbLPlace(posts.post.br),
+      thumbMPlace(posts.post.tl),
+      thumbMPlace(posts.post.bl)
+    )
+  );
+
+  // direct to main body
+  // middle thumb to col 0
+  connectors.push(
+    triangleHulls(
+      keyPlace(-1, o.rows, posts.post.tr),
+      keyPlace(-1, o.rows - 1, posts.rim.br),
+      thumbLPlace(posts.thumb.tr)
+    )
+  );
+  connectors.push(
+    triangleHulls(
+      keyPlace(-1, o.rows, posts.post.tr),
+      // keyPlace(-1, o.rows - 1, posts.rim.br),
+      thumbLPlace(posts.thumb.tr),
+      thumbMPlace(posts.post.tl)
+    )
+  );
+  connectors.push(
+    triangleHulls(
+      thumbMPlace(posts.post.tl),
+      keyPlace(-1, o.rows, posts.post.tr),
+      thumbMPlace(posts.post.tr),
+      keyPlace(0, o.rows, posts.post.tl),
+      keyPlace(0, o.rows, posts.post.tr)
+    )
+  );
+
+  // right thumb
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.post.tl),
+      thumbMPlace(posts.post.tr),
+      keyPlace(1, o.rows, posts.post.tl),
+      keyPlace(0, o.rows, posts.post.tr)
+    )
+  );
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.post.tl),
+      thumbRPlace(posts.post.tr),
+      keyPlace(1, o.rows, posts.post.tl),
+      keyPlace(1, o.rows, posts.post.tr)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.thumb.br),
+      thumbRPlace(posts.post.tr),
+      keyPlace(3, o.rows, posts.rim.tl),
+      keyPlace(3, o.rows, posts.post.tl)
+    )
+  );
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.post.tr),
+      keyPlace(3, o.rows, posts.post.tl),
+      keyPlace(1, o.rows, posts.post.tr),
+      keyPlace(2, o.rows, posts.post.tr),
+      keyPlace(2, o.rows, posts.post.tl)
+    )
+  );
+
+  const [first, ...rest] = connectors;
+  return first.union(...rest);
+};
+
+const thumbRim = () => {
+  const connectors = [];
+  // between thumb keys
+  connectors.push(
+    triangleHulls(
+      thumbMPlace(posts.post.tl),
+      thumbLPlace(posts.post.tr),
+      thumbLPlace(posts.thumb.tr)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbLPlace(posts.post.tl),
+      thumbLPlace(posts.post.tr),
+      thumbLPlace(posts.thumb.tl),
+      thumbLPlace(posts.thumb.tr)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbLPlace(posts.post.tl),
+      thumbLPlace(posts.post.bl),
+      thumbLPlace(posts.thumb.tl),
+      thumbLPlace(posts.thumb.bl)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbLPlace(posts.post.br),
+      thumbLPlace(posts.post.bl),
+      thumbLPlace(posts.thumb.br),
+      thumbLPlace(posts.thumb.bl)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbLPlace(posts.post.br),
+      thumbMPlace(posts.post.bl),
+      thumbLPlace(posts.thumb.br)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbMPlace(posts.post.bl),
+      thumbLPlace(posts.thumb.br),
+      thumbMPlace(posts.post.br),
+      thumbMPlace(posts.thumb.br)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbMPlace(posts.post.br),
+      thumbRPlace(posts.post.bl),
+      thumbMPlace(posts.thumb.br)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.post.bl),
+      thumbMPlace(posts.thumb.br),
+      thumbRPlace(posts.post.br),
+      thumbRPlace(posts.thumb.br)
+    )
+  );
+
+  connectors.push(
+    triangleHulls(
+      thumbRPlace(posts.post.tr),
+      thumbRPlace(posts.post.br),
+      thumbRPlace(posts.thumb.br)
+    )
+  );
+
+  const [first, ...rest] = connectors;
+  return first.union(...rest);
+};
+
+const thumbWalls = () => {
+  const walls = [];
+  walls.push(
+    buildWall(thumbLPlace(posts.thumb.tr), thumbLPlace(posts.thumb.tl))
+  );
+  walls.push(
+    buildWall(thumbLPlace(posts.thumb.tl), thumbLPlace(posts.thumb.bl))
+  );
+  walls.push(
+    buildWall(thumbLPlace(posts.thumb.bl), thumbLPlace(posts.thumb.br))
+  );
+  walls.push(
+    buildWall(thumbLPlace(posts.thumb.br), thumbMPlace(posts.thumb.br))
+  );
+  walls.push(
+    buildWall(thumbMPlace(posts.thumb.br), thumbRPlace(posts.thumb.br))
+  );
+  walls.push(
+    buildWall(thumbRPlace(posts.thumb.br), keyPlace(3, o.rows, posts.rim.tl))
+  );
+
+  const [first, ...rest] = walls;
   return first.union(...rest);
 };
 
@@ -353,56 +564,58 @@ const leftRim = () => {
   for (let row = -1; row < o.rows; row++) {
     rimHulls.push(
       triangleHulls(
-        keyPlace(-1, row, webSphereBR),
-        keyPlace(-1, row + 1, webSphereTR),
-        keyPlace(-1, row, webPostBR),
-        keyPlace(-1, row + 1, webPostTR)
+        keyPlace(-1, row, posts.rim.br),
+        row < o.rows - 1 ? keyPlace(-1, row + 1, posts.rim.tr) : null,
+        keyPlace(-1, row, posts.post.br),
+        keyPlace(-1, row + 1, posts.post.tr)
       )
     );
     if (row >= 0) {
       rimHulls.push(
         triangleHulls(
-          keyPlace(-1, row, webPostTR),
-          keyPlace(-1, row, webSphereTR),
-          keyPlace(-1, row, webPostBR),
-          keyPlace(-1, row, webSphereBR)
+          keyPlace(-1, row, posts.post.tr),
+          keyPlace(-1, row, posts.rim.tr),
+          keyPlace(-1, row, posts.post.br),
+          keyPlace(-1, row, posts.rim.br)
         )
       );
     }
   }
 
   const [first, ...rest] = rimHulls;
-
   return first.union(...rest);
 };
 
 const leftWall = () => {
   const walls = [];
   for (let row = -1; row < o.rows; row++) {
-    const joint = keyPlace(-1, row, webSphereBR).hull(
-      keyPlace(-1, row + 1, webSphereTR)
-    );
-    walls.push(
-      joint
-        .projection()
-        .linear_extrude({ height: 1, center: false })
-        .hull(joint)
-    );
-    if (row >= 0) {
-      const side = keyPlace(-1, row, webSphereTR).hull(
-        keyPlace(-1, row, webSphereBR)
-      );
+    if (row < o.rows - 1) {
       walls.push(
-        side
-          .projection()
-          .linear_extrude({ height: 1, center: false })
-          .hull(side)
+        buildWall(
+          keyPlace(-1, row, posts.rim.br),
+          keyPlace(-1, row + 1, posts.rim.tr)
+        )
+      );
+    }
+    if (row >= 0) {
+      walls.push(
+        buildWall(
+          keyPlace(-1, row, posts.rim.tr),
+          keyPlace(-1, row, posts.rim.br)
+        )
       );
     }
   }
 
-  const [first, ...rest] = walls;
+  // thumb to left wall extra wall panel
+  walls.push(
+    buildWall(
+      thumbLPlace(posts.thumb.tr),
+      keyPlace(-1, o.rows - 1, posts.rim.br)
+    )
+  );
 
+  const [first, ...rest] = walls;
   return first.union(...rest);
 };
 
@@ -427,19 +640,19 @@ const topRim = () => {
 
     rimHulls.push(
       triangleHulls(
-        keyPlace(col, -1, getWebPost("BR", webSphere, offsetL)),
-        keyPlace(col, -1, webPostBR),
-        keyPlace(col + 1, -1, getWebPost("BL", webSphere, offsetR)),
-        keyPlace(col + 1, -1, webPostBL)
+        keyPlace(col, -1, getWebPost("BR", webRim, offsetL)),
+        keyPlace(col, -1, posts.post.br),
+        keyPlace(col + 1, -1, getWebPost("BL", webRim, offsetR)),
+        keyPlace(col + 1, -1, posts.post.bl)
       )
     );
     if (col >= 0) {
       rimHulls.push(
         triangleHulls(
-          keyPlace(col, -1, getWebPost("BL", webSphere, pOffsetR)),
-          keyPlace(col, -1, getWebPost("BR", webSphere, offsetL)),
-          keyPlace(col, -1, webPostBL),
-          keyPlace(col, -1, webPostBR)
+          keyPlace(col, -1, getWebPost("BL", webRim, pOffsetR)),
+          keyPlace(col, -1, getWebPost("BR", webRim, offsetL)),
+          keyPlace(col, -1, posts.post.bl),
+          keyPlace(col, -1, posts.post.br)
         )
       );
     }
@@ -448,7 +661,6 @@ const topRim = () => {
   }
 
   const [first, ...rest] = rimHulls;
-
   return first.union(...rest);
 };
 
@@ -471,26 +683,18 @@ const topWall = () => {
     const offsetL = { ...sphereOffset, x: xL };
     const pOffsetR = { ...sphereOffset, x: pR };
 
-    const joint = keyPlace(col, -1, getWebPost("BR", webSphere, offsetL)).hull(
-      keyPlace(col + 1, -1, getWebPost("BL", webSphere, offsetR))
-    );
     walls.push(
-      joint
-        .projection()
-        .linear_extrude({ height: 1, center: false })
-        .hull(joint)
+      buildWall(
+        keyPlace(col, -1, getWebPost("BR", webRim, offsetL)),
+        keyPlace(col + 1, -1, getWebPost("BL", webRim, offsetR))
+      )
     );
     if (col >= 0) {
-      const joint = keyPlace(
-        col,
-        -1,
-        getWebPost("BL", webSphere, pOffsetR)
-      ).hull(keyPlace(col, -1, getWebPost("BR", webSphere, offsetL)));
       walls.push(
-        joint
-          .projection()
-          .linear_extrude({ height: 1, center: false })
-          .hull(joint)
+        buildWall(
+          keyPlace(col, -1, getWebPost("BL", webRim, pOffsetR)),
+          keyPlace(col, -1, getWebPost("BR", webRim, offsetL))
+        )
       );
     }
     pOffset = offset;
@@ -498,7 +702,6 @@ const topWall = () => {
   }
 
   const [first, ...rest] = walls;
-
   return first.union(...rest);
 };
 
@@ -507,56 +710,48 @@ const rightRim = () => {
   for (let row = -1; row < o.rows; row++) {
     rimHulls.push(
       triangleHulls(
-        keyPlace(o.columns, row, webSphereBL),
-        keyPlace(o.columns, row + 1, webSphereTL),
-        keyPlace(o.columns, row, webPostBL),
-        keyPlace(o.columns, row + 1, webPostTL)
+        keyPlace(o.columns, row, posts.rim.bl),
+        keyPlace(o.columns, row + 1, posts.rim.tl),
+        keyPlace(o.columns, row, posts.post.bl),
+        keyPlace(o.columns, row + 1, posts.post.tl)
       )
     );
     if (row >= 0) {
       rimHulls.push(
         triangleHulls(
-          keyPlace(o.columns, row, webPostTL),
-          keyPlace(o.columns, row, webSphereTL),
-          keyPlace(o.columns, row, webPostBL),
-          keyPlace(o.columns, row, webSphereBL)
+          keyPlace(o.columns, row, posts.post.tl),
+          keyPlace(o.columns, row, posts.rim.tl),
+          keyPlace(o.columns, row, posts.post.bl),
+          keyPlace(o.columns, row, posts.rim.bl)
         )
       );
     }
   }
 
   const [first, ...rest] = rimHulls;
-
   return first.union(...rest);
 };
 
 const rightWall = () => {
   const walls = [];
   for (let row = -1; row < o.rows; row++) {
-    const joint = keyPlace(o.columns, row, webSphereBL).hull(
-      keyPlace(o.columns, row + 1, webSphereTL)
-    );
     walls.push(
-      joint
-        .projection()
-        .linear_extrude({ height: 1, center: false })
-        .hull(joint)
+      buildWall(
+        keyPlace(o.columns, row, posts.rim.bl),
+        keyPlace(o.columns, row + 1, posts.rim.tl)
+      )
     );
     if (row >= 0) {
-      const side = keyPlace(o.columns, row, webSphereBL).hull(
-        keyPlace(o.columns, row, webSphereTL)
-      );
       walls.push(
-        side
-          .projection()
-          .linear_extrude({ height: 1, center: false })
-          .hull(side)
+        buildWall(
+          keyPlace(o.columns, row, posts.rim.bl),
+          keyPlace(o.columns, row, posts.rim.tl)
+        )
       );
     }
   }
 
   const [first, ...rest] = walls;
-
   return first.union(...rest);
 };
 
@@ -583,19 +778,19 @@ const bottomRim = () => {
 
     rimHulls.push(
       triangleHulls(
-        keyPlace(col, o.rows, getWebPost("TR", webSphere, offsetR)),
-        keyPlace(col, o.rows, webPostTR),
-        keyPlace(col + 1, o.rows, getWebPost("TL", webSphere, offsetL)),
-        keyPlace(col + 1, o.rows, webPostTL)
+        keyPlace(col, o.rows, getWebPost("TR", webRim, offsetR)),
+        keyPlace(col, o.rows, posts.post.tr),
+        keyPlace(col + 1, o.rows, getWebPost("TL", webRim, offsetL)),
+        keyPlace(col + 1, o.rows, posts.post.tl)
       )
     );
     if (col >= 0) {
       rimHulls.push(
         triangleHulls(
-          keyPlace(col, o.rows, getWebPost("TL", webSphere, pOffsetL)),
-          keyPlace(col, o.rows, getWebPost("TR", webSphere, pOffsetR)),
-          keyPlace(col, o.rows, webPostTL),
-          keyPlace(col, o.rows, webPostTR)
+          keyPlace(col, o.rows, getWebPost("TL", webRim, pOffsetL)),
+          keyPlace(col, o.rows, getWebPost("TR", webRim, pOffsetR)),
+          keyPlace(col, o.rows, posts.post.tl),
+          keyPlace(col, o.rows, posts.post.tr)
         )
       );
     }
@@ -604,7 +799,6 @@ const bottomRim = () => {
   }
 
   const [first, ...rest] = rimHulls;
-
   return first.union(...rest);
 };
 
@@ -629,28 +823,18 @@ const bottomWall = () => {
     const pOffsetR = { ...sphereOffset, x: pR };
     const pOffsetL = { ...sphereOffset, x: pL };
 
-    const joint = keyPlace(
-      col,
-      o.rows,
-      getWebPost("TR", webSphere, offsetR)
-    ).hull(keyPlace(col + 1, o.rows, getWebPost("TL", webSphere, offsetL)));
     walls.push(
-      joint
-        .projection()
-        .linear_extrude({ height: 1, center: false })
-        .hull(joint)
+      buildWall(
+        keyPlace(col, o.rows, getWebPost("TR", webRim, offsetR)),
+        keyPlace(col + 1, o.rows, getWebPost("TL", webRim, offsetL))
+      )
     );
     if (col >= 0) {
-      const joint = keyPlace(
-        col,
-        o.rows,
-        getWebPost("TL", webSphere, pOffsetL)
-      ).hull(keyPlace(col, o.rows, getWebPost("TR", webSphere, pOffsetR)));
       walls.push(
-        joint
-          .projection()
-          .linear_extrude({ height: 1, center: false })
-          .hull(joint)
+        buildWall(
+          keyPlace(col, o.rows, getWebPost("TL", webRim, pOffsetL)),
+          keyPlace(col, o.rows, getWebPost("TR", webRim, pOffsetR))
+        )
       );
     }
     pOffset = offset;
@@ -658,7 +842,6 @@ const bottomWall = () => {
   }
 
   const [first, ...rest] = walls;
-
   return first.union(...rest);
 };
 
@@ -670,14 +853,17 @@ export const caseWalls = () => {
     rightRim(),
     rightWall(),
     bottomRim(),
-    bottomWall()
+    bottomWall(),
+    thumbRim(),
+    thumbWalls()
   );
 };
 
 export const USBHolder = () => {
   const [x, y] = getKeyPosition(1, 0);
-  return importModel(`../models/${o.mcuHolder}.stl`)
-    .translate([x, y + 1.2, 0])
+  return importModel(`../../models/${o.mcuHolder}.stl`)
+    .rotate([0, 0, -getColumnSplay(0)])
+    .translate([x, y + 1.4, 0])
     .translate([
       -p.mountWidth / 2,
       p.mountHeight / 2 + o.caseSpacing + sphereSize + 0.5,
@@ -689,18 +875,21 @@ export const USBHolder = () => {
 export const USBHolderSpace = () => {
   return USBHolder()
     .projection()
-    .linear_extrude({ height: 13.01, center: false })
+    .linear_extrude({ height: 13.02, center: false })
     .translate([0, 0, -1]);
 };
 
+export const keycaps = () =>
+  placeKeys((row: number) => singleKeycap(row))
+    .color("grey")
+    .union(placeThumbs((row: number) => singleKeycap(row)))
+    .color("grey");
+
 export const main = placeKeys(singleKeyhole()).union(
-  // importModel("../models/cirque-40-flat.stl"),
   keyConnectors(),
   caseWalls().difference(USBHolderSpace()),
   placeThumbs(singleKeyhole()),
+  thumbConnectors(),
   // USBHolder().debug()
-  // preview keys
-  placeKeys((row: number) => singleKeycap(row)).color("grey"),
-  placeThumbs((row: number) => singleKeycap(row)).color("grey")
-  // positionRelativeToKey(1, o.rows - 1, cube([1, 1, 1]))
+  keycaps()
 );
