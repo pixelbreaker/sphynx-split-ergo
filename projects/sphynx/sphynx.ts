@@ -1,12 +1,10 @@
-import { circle, square, polygon, importModel } from "../../src/csg/primitives";
-import { FProp, Vec2, Vec3 } from "../../src/csg/base";
-import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
-import { hole } from "../utils";
-import { polyRound } from "../../src/csg/polyround";
 import { buildOptions, options as o, parameters as p } from "./options";
-import { Shape3 } from "../../src/csg/base3";
+import { cube, sphere } from "../../src/csg/primitives";
 import { deg2rad } from "../../src/math";
-import { matrix, multiply, add, zeros } from "mathjs";
+import { importModel } from "../../src/csg/primitives";
+import { matrix, multiply, add } from "mathjs";
+import { Shape3 } from "../../src/csg/base3";
+import { Vec3 } from "../../src/csg/base";
 
 buildOptions({
   columns: 5,
@@ -54,21 +52,16 @@ export const singleKeycap = (row: number) =>
     `../../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
   ).translate([0, 0, 4]);
 
-const getColumnOffset = (column: number): Vec3 => {
-  switch (column) {
-    case -1:
-    case 0: // both index rows should be the same to allow MCU holder to align correctly
-      return [0, 0.8, 0];
-    case 1:
-      return [0, 0.2, 0];
-    case 2:
-      return [1, 3, -2.5];
-    case 3:
-      return [1.6, -1.5, -0.5];
-    case 4:
-    default:
-      return [1.4, -12.5, 2];
-  }
+const getColumnOffsets = (column: number): Vec3 => {
+  const offsets: Vec3[] = [
+    [0, 0.8, 0], // index inner
+    [0, 0.2, 0], // index
+    [1, 3, -2.5], // middle
+    [1.6, -1.5, -0.5], // ring
+    [1.4, -12.5, 2], // pinky
+  ];
+
+  return offsets[Math.min(Math.max(column, 0), offsets.length - 1)];
 };
 
 const getColumnSplay = (column: number): number => {
@@ -86,7 +79,7 @@ const keyPlace = (column: number, row: number, shape: Shape3) => {
     .translate([0, 0, p.radiusRow - p.radiusColumn])
     .rotate([0, columnAngle, -getColumnSplay(column)])
     .translate([0, 0, p.radiusColumn])
-    .translate(getColumnOffset(column))
+    .translate(getColumnOffsets(column))
     .rotate([0, o.tentingAngle, 0])
     .translate([0, 0, o.zOffset - (column > 2 && row >= o.rows ? 0.5 : 0)]);
 };
@@ -94,22 +87,14 @@ const keyPlace = (column: number, row: number, shape: Shape3) => {
 const positionRelativeToKey = (column: number, row: number, shape: Shape3) => {
   const columnAngle = p.curveRow * (o.centerColumn - column);
 
-  const pos = shape
-    // reverse rotations
-    .rotate([-p.curveColumn * (o.centerRow - row), 0, 0])
-    .rotate([0, -columnAngle, 0])
-    .rotate([0, -o.tentingAngle, 0])
-    // end reverse rotations
-    .translate([0, 0, -p.radiusRow])
-    .rotate([p.curveColumn * (o.centerRow - row), 0, 0])
-    .translate([0, 0, p.radiusRow - p.radiusColumn])
-    .rotate([0, columnAngle, -getColumnSplay(column)])
-    .translate([0, 0, p.radiusColumn])
-    .translate(getColumnOffset(column))
-    .rotate([0, o.tentingAngle, 0])
-    .translate([0, 0, o.zOffset]);
-
-  return pos;
+  return keyPlace(
+    column,
+    row,
+    shape
+      .rotate([-p.curveColumn * (o.centerRow - row), 0, 0])
+      .rotate([0, -columnAngle, -getColumnSplay(column)])
+      .rotate([0, -o.tentingAngle, 0])
+  );
 };
 
 const getKeyPosition = (column: number, row: number) => {
@@ -161,7 +146,7 @@ const getKeyPosition = (column: number, row: number) => {
   position = rotateY(columnAngle);
   position = rotateZ(-getColumnSplay(column));
   position = add(position, [0, 0, p.radiusColumn]) as math.Matrix;
-  position = add(position, getColumnOffset(column)) as math.Matrix;
+  position = add(position, getColumnOffsets(column)) as math.Matrix;
   position = rotateY(o.tentingAngle);
   position = add(position, [0, 0, o.zOffset]) as math.Matrix;
 
@@ -199,12 +184,8 @@ const placeThumb = (rot: Vec3, move: Vec3, shape: Shape3) => {
 
 const thumbRPlace = (shape: Shape3): Shape3 =>
   placeThumb(
-    o.trackpad ? [11.5, -10, 8] : o.encoder ? [0, 0, 10] : [11.5, -26, 10],
-    o.trackpad
-      ? [-2, -12.3, -6]
-      : o.encoder
-      ? [-13, -9, -10]
-      : [-15, -10.3, -1],
+    o.trackpad ? [11.5, -10, 8] : o.encoder ? [0, 1, 10] : [11.5, -26, 10],
+    o.trackpad ? [-2, -12.3, -6] : o.encoder ? [-10, -9, -6] : [-15, -10.3, -1],
     shape
   );
 
@@ -231,11 +212,10 @@ const webRim = sphere({ d: sphereSize * 1.5, $fn: sphereQuality }).translate([
   0,
   sphereSize / -2 + o.webThickness - o.caseRimDrop,
 ]);
-const thumbSphere = sphere({ d: sphereSize, $fn: sphereQuality }).translate([
-  0,
-  0,
-  sphereSize / -2 + o.webThickness - 1,
-]);
+const thumbSphere = sphere({
+  d: sphereSize * 1.5,
+  $fn: sphereQuality,
+}).translate([0, 0, sphereSize / -2 + o.webThickness - 1]);
 // const webPost = cube([postSize, postSize, o.webThickness]).translate([
 //   0,
 //   0,
@@ -625,7 +605,7 @@ const topRim = () => {
   let pOffset = 0;
   let pDiff = 0;
   for (let col = -1; col < o.columns; col++) {
-    const offset = getColumnOffset(col + 1)[2];
+    const offset = getColumnOffsets(col + 1)[2];
     const diff = offset - pOffset;
     const sphX = sphereOffset.x;
 
@@ -670,7 +650,7 @@ const topWall = () => {
   let pOffset = 0;
   let pDiff = 0;
   for (let col = -1; col < o.columns; col++) {
-    const offset = getColumnOffset(col + 1)[2];
+    const offset = getColumnOffsets(col + 1)[2];
     const diff = offset - pOffset;
     const sphX = sphereOffset.x;
 
@@ -763,7 +743,7 @@ const bottomRim = () => {
   const sphX = sphereOffset.x;
 
   for (let col = o.columns - 1; col >= 3; col--) {
-    const offset = getColumnOffset(col)[2];
+    const offset = getColumnOffsets(col)[2];
     const diff = offset - pOffset;
 
     const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
@@ -810,7 +790,7 @@ const bottomWall = () => {
   const sphX = sphereOffset.x;
 
   for (let col = o.columns - 1; col >= 3; col--) {
-    const offset = getColumnOffset(col)[2];
+    const offset = getColumnOffsets(col)[2];
     const diff = offset - pOffset;
 
     const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
@@ -885,11 +865,31 @@ export const keycaps = () =>
     .union(placeThumbs((row: number) => singleKeycap(row)))
     .color("grey");
 
-export const main = placeKeys(singleKeyhole()).union(
-  keyConnectors(),
-  caseWalls().difference(USBHolderSpace()),
-  placeThumbs(singleKeyhole()),
-  thumbConnectors(),
+export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
+  const models = [];
+  if (o.encoder) {
+    models.push(
+      thumbRPlace(importModel("../../models/ec11.stl")).translate([
+        0, -0.8, -2.5,
+      ])
+    );
+  }
+
+  return placeKeys(keyhole)
+    .union(
+      keyConnectors(),
+      caseWalls().difference(USBHolderSpace()),
+      placeThumbs(keyhole),
+      thumbConnectors(),
+      ...models
+      // USBHolder().debug()
+      // keycaps()
+    )
+    .mirror([Number(mirror), 0, 0]);
+};
+
+export const main = buildCase(singleKeyhole())
+  .union
   // USBHolder().debug()
-  keycaps()
-);
+  // keycaps()
+  ();

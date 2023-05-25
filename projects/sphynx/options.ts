@@ -69,10 +69,10 @@ export const defaultOptions: Options = {
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
-  thumbOffsets: [8, -5, 0],
+  thumbOffsets: [8, -8, -3],
   trackpad: true,
   webThickness: 2,
-  zOffset: 9,
+  zOffset: 10,
 };
 
 export let options: Required<Options>;
