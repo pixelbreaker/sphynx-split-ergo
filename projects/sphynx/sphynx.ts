@@ -29,7 +29,7 @@ export const init = () => {
   });
 };
 
-init();
+init(); // build options globally
 
 // Key holes
 export const filledKeyhole = () =>
@@ -936,10 +936,9 @@ export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
       caseRim(),
       placeThumbs(keyhole),
       thumbConnectors()
-      // ...models
     )
     .difference(...[o.trackpad && trackpadOuter()])
-    .union(...models)
+    .union(...models) // add models after cutting away
     .mirror([Number(mirror), 0, 0]);
 };
 
