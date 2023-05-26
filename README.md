@@ -15,10 +15,10 @@ This repository is a fork of Richard Wang's [Openscad-ts](https://github.com/ric
 
 ## Usage
 
-1. check out this project
-2. npm install
-3. npm watch
-4. start editing files under projects, scad files will output into "target" folder
+1. Check out this project with `git clone git@github.com:pixelbreaker/sphynx-split-ergo.git`
+2. Run `npm install`
+3. Run `npm watch`
+4. start editing files under projects, scad files will output into "/target" folder
 5. open openscad on the generated file
    - turn on "Automatic review and preview" mode
    - changes to the projects files will automatically propagate to openscad
