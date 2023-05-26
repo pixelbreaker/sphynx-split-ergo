@@ -1,6 +1,6 @@
 # Sphynx keyboard
 
-Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads and encoders can also be added.
+Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads and rotary encoders can also be added in place of the outer thumb key.
 
 ![Right side render](./img/right.png)
 
