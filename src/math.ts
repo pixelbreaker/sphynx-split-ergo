@@ -1,3 +1,4 @@
+import { multiply, matrix } from "mathjs";
 // some basic vector maths
 
 type Vec3 = [number, number, number];
@@ -14,6 +15,39 @@ export const V3 = {
   normalize: (a: Vec3) => V3.scale(1 / V3.length(a), a),
   cross: ([a, b, c]: Vec3, [x, y, z]: Vec3) =>
     [b * z - c * y, c * x - a * z, a * y - b * x] as Vec3,
+  rotateX: (angle: number, a: Vec3) => {
+    const rad = deg2rad(angle);
+    return multiply(
+      [
+        [1, 0, 0],
+        [0, Math.cos(rad), -Math.sin(rad)],
+        [0, -Math.sin(rad), Math.cos(rad)],
+      ],
+      matrix(a)
+    ).toArray() as Vec3;
+  },
+  rotateY: (angle: number, a: Vec3) => {
+    const rad = deg2rad(angle);
+    return multiply(
+      [
+        [Math.cos(rad), 0, Math.sin(rad)],
+        [0, 1, 0],
+        [-Math.sin(rad), 0, Math.cos(rad)],
+      ],
+      matrix(a)
+    ).toArray() as Vec3;
+  },
+  rotateZ: (angle: number, a: Vec3) => {
+    const rad = deg2rad(angle);
+    return multiply(
+      [
+        [Math.cos(rad), -Math.sin(rad), 0],
+        [Math.sin(rad), Math.cos(rad), 0],
+        [0, 0, 1],
+      ],
+      matrix(a)
+    ).toArray() as Vec3;
+  },
 };
 
 export const V2 = {

@@ -3,8 +3,8 @@ import { cube, cylinder, sphere, polyhedron } from "../../src/csg/primitives";
 import { hole } from "../utils";
 import { polyRound } from "../../src/csg/polyround";
 import { buildOptions, options as o, parameters as p } from "./options";
-import { init, singleKeyhole } from "./sphynx";
+import { init, singleKeyhole, trackpad, trackpadInset } from "./sphynx";
 
 init();
 
-export const main = singleKeyhole();
+export const main = cube([0, 0, 0]).union(trackpad(), trackpadInset().debug());

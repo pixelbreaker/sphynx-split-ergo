@@ -1,25 +1,35 @@
-import { buildOptions, options as o, parameters as p } from "./options";
-import { cube, sphere } from "../../src/csg/primitives";
+import {
+  Options,
+  buildOptions,
+  options as o,
+  parameters as p,
+} from "./options";
+import { cube, cylinder, sphere } from "../../src/csg/primitives";
 import { deg2rad } from "../../src/math";
-import { importModel } from "../../src/csg/primitives";
-import { matrix, multiply, add } from "mathjs";
+import { importModel, importShape } from "../../src/csg/primitives";
 import { Shape3 } from "../../src/csg/base3";
 import { Vec3 } from "../../src/csg/base";
+import { V3 } from "../../src/math";
+const { add, rotateX, rotateY, rotateZ } = V3;
 
-buildOptions({
-  columns: 5,
-  rows: 3,
-  caseRimDrop: 2,
-  caseSpacing: 2,
-  // tentingAngle: 30,
-  // zOffset: 20,
-  switchSpacing: "choc",
-  switchStyle: "choc",
-  keycapStyle: "choc",
-  trackpad: false,
-  encoder: false,
-  mcuHolder: "elite-c",
-});
+export const init = () => {
+  buildOptions({
+    columns: 5,
+    rows: 3,
+    caseRimDrop: 2,
+    caseSpacing: 2,
+    // tentingAngle: 30,
+    // zOffset: 20,
+    switchSpacing: "choc",
+    switchStyle: "choc",
+    keycapStyle: "choc",
+    trackpad: true,
+    encoder: false,
+    mcuHolder: "elite-c",
+  });
+};
+
+init();
 
 // Key holes
 export const filledKeyhole = () =>
@@ -30,21 +40,43 @@ export const filledKeyhole = () =>
   ]);
 
 export const singleKeyhole = (): Shape3 => {
-  const tabThickness = 1.32;
-  return cube([p.mountWidth, p.mountHeight, o.webThickness])
-    .translate([0, 0, o.webThickness / 2])
-    .difference(
-      cube([p.keyholeWidth, p.keyholeHeight, o.webThickness + 4]),
-      cube([p.keyholeWidth + tabThickness, p.keyholeHeight - 2, o.webThickness])
-        .union(
+  let tabThickness = 1.32;
+  let tabHeight = 1.5;
+  switch (o.switchStyle) {
+    case "mx":
+      // tabThickness
+      tabHeight = 2;
+      return cube([p.mountWidth, p.mountHeight, o.webThickness])
+        .translate([0, 0, o.webThickness / 2])
+        .difference(
+          cube([p.keyholeWidth, p.keyholeHeight, o.webThickness + 4]),
+          cube([3, p.keyholeHeight + tabThickness, o.webThickness]).translate([
+            0,
+            0,
+            o.webThickness - tabHeight,
+          ])
+        );
+    case "choc":
+    default:
+      return cube([p.mountWidth, p.mountHeight, o.webThickness])
+        .translate([0, 0, o.webThickness / 2])
+        .difference(
+          cube([p.keyholeWidth, p.keyholeHeight, o.webThickness + 4]),
           cube([
-            p.keyholeWidth - 2,
-            p.keyholeHeight + tabThickness,
+            p.keyholeWidth + tabThickness,
+            p.keyholeHeight - 2,
             o.webThickness,
           ])
-        )
-        .translate([0, 0, o.webThickness / 2 - tabThickness])
-    );
+            .union(
+              cube([
+                p.keyholeWidth - 2,
+                p.keyholeHeight + tabThickness,
+                o.webThickness,
+              ])
+            )
+            .translate([0, 0, o.webThickness / 2 - tabHeight])
+        );
+  }
 };
 
 export const singleKeycap = (row: number) =>
@@ -65,8 +97,14 @@ const getColumnOffsets = (column: number): Vec3 => {
 };
 
 const getColumnSplay = (column: number): number => {
-  const splays = [-2, -1, 0, 4, 9];
-  return splays[Math.min(Math.max(column, 0), splays.length - 1)];
+  const splays = [
+    -1, // inner index
+    -0.5, // index
+    0, // middle
+    4, // ring
+    8, // pinky
+  ];
+  return -splays[Math.min(Math.max(column, 0), splays.length - 1)];
 };
 
 // Placement
@@ -77,7 +115,7 @@ const keyPlace = (column: number, row: number, shape: Shape3) => {
     .translate([0, 0, -p.radiusRow])
     .rotate([p.curveColumn * (o.centerRow - row), 0, 0])
     .translate([0, 0, p.radiusRow - p.radiusColumn])
-    .rotate([0, columnAngle, -getColumnSplay(column)])
+    .rotate([0, columnAngle, getColumnSplay(column)])
     .translate([0, 0, p.radiusColumn])
     .translate(getColumnOffsets(column))
     .rotate([0, o.tentingAngle, 0])
@@ -92,68 +130,32 @@ const positionRelativeToKey = (column: number, row: number, shape: Shape3) => {
     row,
     shape
       .rotate([-p.curveColumn * (o.centerRow - row), 0, 0])
-      .rotate([0, -columnAngle, -getColumnSplay(column)])
+      .rotate([0, -columnAngle, getColumnSplay(column)])
       .rotate([0, -o.tentingAngle, 0])
   );
 };
 
 const getKeyPosition = (column: number, row: number) => {
-  let position = matrix([0, 0, 0]);
-
-  const rotateX = (angle: number) => {
-    const rad = deg2rad(angle);
-    return multiply(
-      [
-        [1, 0, 0],
-        [0, Math.cos(rad), -Math.sin(rad)],
-        [0, -Math.sin(rad), Math.cos(rad)],
-      ],
-      position
-    );
-  };
-
-  const rotateY = (angle: number) => {
-    const rad = deg2rad(angle);
-    return multiply(
-      [
-        [Math.cos(rad), 0, Math.sin(rad)],
-        [0, 1, 0],
-        [-Math.sin(rad), 0, Math.cos(rad)],
-      ],
-      position
-    );
-  };
-
-  const rotateZ = (angle: number) => {
-    const rad = deg2rad(angle);
-    return multiply(
-      [
-        [Math.cos(rad), -Math.sin(rad), 0],
-        [Math.sin(rad), Math.cos(rad), 0],
-        [0, 0, 1],
-      ],
-      position
-    );
-  };
+  let position: Vec3 = [0, 0, 0];
 
   const columnAngle = p.curveRow * (o.centerColumn - column);
-  position = rotateX(-p.curveColumn * (o.centerRow - row));
-  position = rotateY(-columnAngle);
-  position = rotateY(-o.tentingAngle);
-  position = add(position, [0, 0, -p.radiusRow]) as math.Matrix;
-  position = rotateX(p.curveColumn * (o.centerRow - row));
-  position = add(position, [0, 0, p.radiusRow - p.radiusColumn]) as math.Matrix;
-  position = rotateY(columnAngle);
-  position = rotateZ(-getColumnSplay(column));
-  position = add(position, [0, 0, p.radiusColumn]) as math.Matrix;
-  position = add(position, getColumnOffsets(column)) as math.Matrix;
-  position = rotateY(o.tentingAngle);
-  position = add(position, [0, 0, o.zOffset]) as math.Matrix;
+  position = rotateX(-p.curveColumn * (o.centerRow - row), position);
+  position = rotateY(-columnAngle, position);
+  position = rotateY(-o.tentingAngle, position);
+  position = add(position, [0, 0, -p.radiusRow]);
+  position = rotateX(p.curveColumn * (o.centerRow - row), position);
+  position = add(position, [0, 0, p.radiusRow - p.radiusColumn]);
+  position = rotateY(columnAngle, position);
+  position = rotateZ(getColumnSplay(column), position);
+  position = add(position, [0, 0, p.radiusColumn]);
+  position = add(position, getColumnOffsets(column));
+  position = rotateY(o.tentingAngle, position);
+  position = add(position, [0, 0, o.zOffset]);
 
-  return position.toArray() as Vec3;
+  return position;
 };
 
-const placeKeys = (shape: Shape3 | Function) => {
+const placeKeys = (shape: Shape3 | ((row: number) => Shape3)) => {
   const keys = [];
   for (let i = 0; i < o.columns; i++) {
     for (let j = 0; j < o.rows; j++) {
@@ -184,8 +186,8 @@ const placeThumb = (rot: Vec3, move: Vec3, shape: Shape3) => {
 
 const thumbRPlace = (shape: Shape3): Shape3 =>
   placeThumb(
-    o.trackpad ? [11.5, -10, 8] : o.encoder ? [0, 1, 10] : [11.5, -26, 10],
-    o.trackpad ? [-2, -12.3, -6] : o.encoder ? [-10, -9, -6] : [-15, -10.3, -1],
+    o.trackpad ? [18, -5, -8] : o.encoder ? [0, 1, 10] : [11.5, -26, 10], // rotation
+    o.trackpad ? [-3, -11, -1] : o.encoder ? [-10, -9, -7] : [-15, -10.3, -1], // translation
     shape
   );
 
@@ -195,10 +197,20 @@ const thumbMPlace = (shape: Shape3): Shape3 =>
 const thumbLPlace = (shape: Shape3): Shape3 =>
   placeThumb([8, 0, 33], [-52, -26, -10], shape);
 
-const placeThumbs = (shape: Shape3 | Function): Shape3 => {
+const placeThumbs = (
+  shape: Shape3 | ((row: number) => Shape3),
+  ignoreRThumbWithAccessory: boolean = false
+): Shape3 => {
   let key =
     typeof shape === "function" ? (shape(2) as Shape3) : (shape as Shape3);
-  return thumbRPlace(key).union(thumbMPlace(key), thumbLPlace(key));
+  return thumbLPlace(key).union(
+    ...[
+      thumbMPlace(key),
+      ...((!(o.trackpad || o.encoder) || !ignoreRThumbWithAccessory) && [
+        thumbRPlace(key),
+      ]),
+    ]
+  );
 };
 
 // Utility shapes
@@ -826,24 +838,18 @@ const bottomWall = () => {
 };
 
 export const caseWalls = () => {
-  return leftRim().union(
-    leftWall(),
-    topRim(),
-    topWall(),
-    rightRim(),
-    rightWall(),
-    bottomRim(),
-    bottomWall(),
-    thumbRim(),
-    thumbWalls()
-  );
+  return leftWall().union(topWall(), rightWall(), bottomWall(), thumbWalls());
+};
+
+export const caseRim = () => {
+  return leftRim().union(topRim(), rightRim(), bottomRim(), thumbRim());
 };
 
 export const USBHolder = () => {
   const [x, y] = getKeyPosition(1, 0);
   return importModel(`../../models/${o.mcuHolder}.stl`)
-    .rotate([0, 0, -getColumnSplay(0)])
-    .translate([x, y + 1.4, 0])
+    .rotate([0, 0, getColumnSplay(0)])
+    .translate([x, y + 1.8, 0])
     .translate([
       -p.mountWidth / 2,
       p.mountHeight / 2 + o.caseSpacing + sphereSize + 0.5,
@@ -859,15 +865,63 @@ export const USBHolderSpace = () => {
     .translate([0, 0, -1]);
 };
 
-export const keycaps = () =>
+export const previewKeycaps = () =>
   placeKeys((row: number) => singleKeycap(row))
     .color("grey")
-    .union(placeThumbs((row: number) => singleKeycap(row)))
+    .union(placeThumbs((row: number) => singleKeycap(row), true))
     .color("grey");
+
+export const previewTrackpad = () =>
+  thumbRPlace(cylinder({ d: 40, h: 2, $fn: 70 }).translate([0, 0, 6.5])).color(
+    "#222222"
+  );
+
+export const trackpadInset = () => {
+  return thumbRPlace(cylinder({ d: 40, h: 8, $fn: 50 }).translate([0, 0, 7]))
+    .hull(
+      thumbRPlace(posts.post.br).union(
+        thumbRPlace(posts.post.bl),
+        thumbRPlace(posts.post.tl),
+        keyPlace(3, 3, posts.post.tl).translate([0, -2, 0]),
+        keyPlace(2, 3, posts.post.tr).translate([0, -2, 0]),
+        keyPlace(2, 3, posts.post.tl).translate([0, -2, 0])
+      )
+    )
+    .union(
+      thumbRPlace(
+        cylinder({ d: 20, h: 80 }).translate([0, 6, 0]).rotate([12, 0, -6])
+      )
+    );
+  // .translate([0, 0, 5]);
+};
+
+export const trackpadOuter = () =>
+  thumbRPlace(cylinder({ d: 42, h: 4, $fn: 70 }).translate([0, 0, 3])).hull(
+    thumbRPlace(posts.thumb.br).union(
+      thumbRPlace(posts.thumb.bl),
+      thumbRPlace(posts.thumb.tl),
+      keyPlace(3, 3, posts.rim.tl),
+      keyPlace(2, 3, posts.post.tr),
+      keyPlace(2, 3, posts.post.tl)
+    )
+    // .translate([0, 0, -5])
+  );
+
+export const trackpad = () => {
+  const hullForm = trackpadOuter().difference(trackpadInset());
+
+  return thumbRPlace(
+    importModel("../../models/cirque-40-flat.stl")
+      .rotate([0, 0, 180])
+      .translate([0, 0, 5])
+  ).union(hullForm);
+};
 
 export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
   const models = [];
-  if (o.encoder) {
+  if (o.trackpad) {
+    models.push(trackpad());
+  } else if (o.encoder) {
     models.push(
       thumbRPlace(importModel("../../models/ec11.stl")).translate([
         0, -0.8, -2.5,
@@ -879,17 +933,44 @@ export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
     .union(
       keyConnectors(),
       caseWalls().difference(USBHolderSpace()),
+      caseRim(),
       placeThumbs(keyhole),
-      thumbConnectors(),
-      ...models
-      // USBHolder().debug()
-      // keycaps()
+      thumbConnectors()
+      // ...models
     )
+    .difference(...[o.trackpad && trackpadOuter()])
+    .union(...models)
     .mirror([Number(mirror), 0, 0]);
+};
+
+export const outline = () => {
+  return placeKeys(filledKeyhole()).union(
+    keyConnectors(),
+    caseWalls().difference(USBHolderSpace()),
+    caseRim(),
+    placeThumbs(filledKeyhole()),
+    thumbConnectors()
+  );
+};
+
+export const buildPlate = () => {
+  const shape = outline().projection();
+  return shape
+    .difference(
+      shape
+        .offset({ delta: -4 })
+        .difference(
+          importShape("../../models/voronoi.dxf")
+            .scale([0.25, 0.25, 1])
+            .translate([-168, -85, 0])
+        )
+    )
+    .linear_extrude({ height: o.plateThickness, center: false });
 };
 
 export const main = buildCase(singleKeyhole())
   .union
   // USBHolder().debug()
-  // keycaps()
+  // previewKeycaps(),
+  // previewTrackpad()
   ();

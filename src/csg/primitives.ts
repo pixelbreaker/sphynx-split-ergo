@@ -127,6 +127,9 @@ export const cube = (p: Vec3) =>
 export const importModel = (filename: string) => {
   return new Shape3([`import ("${filename}");`]);
 };
+export const importShape = (filename: string) => {
+  return new Shape2([`import ("${filename}");`]);
+};
 
 export type CylinderProps = FProp<
   (

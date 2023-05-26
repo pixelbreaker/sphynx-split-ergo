@@ -23,6 +23,7 @@ export type Options = {
   tentingAngle: number;
   thumbOffsets: Vec3;
   webThickness: number;
+  plateThickness: number;
   zOffset: number;
 } & ( // Discriminated union to disable encoder when trackpad is enabled
   | { trackpad: true; encoder: false }
@@ -72,6 +73,7 @@ export const defaultOptions: Options = {
   thumbOffsets: [8, -8, -3],
   trackpad: true,
   webThickness: 2,
+  plateThickness: 2,
   zOffset: 10,
 };
 
