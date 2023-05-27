@@ -33,3 +33,4 @@ The models are:
 - [MBK Choc keycaps](https://www.thingiverse.com/thing:4564253)
 - [SA Keycaps](https://www.thingiverse.com/thing:4283287)
 - [XDA Keycaps](https://www.thingiverse.com/thing:4593219/files)
+- [Encoder knob](https://www.thingiverse.com/thing:4541677/files)
