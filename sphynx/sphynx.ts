@@ -4,15 +4,15 @@ import {
   options as o,
   parameters as p,
 } from "./options";
-import { cube, cylinder, sphere } from "../../src/csg/primitives";
-import { deg2rad } from "../../src/math";
-import { importModel, importShape } from "../../src/csg/primitives";
-import { Shape3 } from "../../src/csg/base3";
-import { Vec3 } from "../../src/csg/base";
-import { V3 } from "../../src/math";
+import { cube, cylinder, sphere } from "../src/csg/primitives";
+import { deg2rad } from "../src/math";
+import { importModel, importShape } from "../src/csg/primitives";
+import { Shape3 } from "../src/csg/base3";
+import { Vec3 } from "../src/csg/base";
+import { V3 } from "../src/math";
 const { add, rotateX, rotateY, rotateZ } = V3;
 
-export const init = () => {
+export const init = (overrides: Partial<Options> = undefined) => {
   buildOptions({
     columns: 5,
     rows: 3,
@@ -20,13 +20,14 @@ export const init = () => {
     caseSpacing: 2,
     // tentingAngle: 30,
     // zOffset: 20,
-    switchSpacing: "choc",
-    switchStyle: "choc",
-    keycapStyle: "choc",
+    switchSpacing: "mx",
+    switchStyle: "mx",
+    keycapStyle: "sa",
     trackpad: true,
     encoder: false,
     mcuHolder: "elite-c",
-  });
+    ...overrides,
+  } as Options);
 };
 
 init(); // build options globally
@@ -81,7 +82,7 @@ export const singleKeyhole = (): Shape3 => {
 
 export const singleKeycap = (row: number) =>
   importModel(
-    `../../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
+    `../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
   ).translate([0, 0, 4]);
 
 const getColumnOffsets = (column: number): Vec3 => {
@@ -186,16 +187,16 @@ const placeThumb = (rot: Vec3, move: Vec3, shape: Shape3) => {
 
 const thumbRPlace = (shape: Shape3): Shape3 =>
   placeThumb(
-    o.trackpad ? [18, -5, -8] : o.encoder ? [0, 1, 10] : [11.5, -26, 10], // rotation
-    o.trackpad ? [-3, -11, -1] : o.encoder ? [-10, -9, -7] : [-15, -10.3, -1], // translation
+    o.trackpad ? [18, -5, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
+    o.trackpad ? [-3, -19, -1] : o.encoder ? [-10, -13, -3] : [-15, -10.3, -1], // translation
     shape
   );
 
 const thumbMPlace = (shape: Shape3): Shape3 =>
-  placeThumb([9, -12.5, 23], [-33.8, -16.2, -7.8], shape);
+  placeThumb([9, -12.5, 23], [-34.8, -16.2, -7.8], shape);
 
 const thumbLPlace = (shape: Shape3): Shape3 =>
-  placeThumb([8, 0, 33], [-52, -26, -10], shape);
+  placeThumb([8, 0, 33], [-54, -26, -10], shape);
 
 const placeThumbs = (
   shape: Shape3 | ((row: number) => Shape3),
@@ -227,7 +228,7 @@ const webRim = sphere({ d: sphereSize * 1.5, $fn: sphereQuality }).translate([
 const thumbSphere = sphere({
   d: sphereSize * 1.5,
   $fn: sphereQuality,
-}).translate([0, 0, sphereSize / -2 + o.webThickness - 1]);
+}).translate([0, 0, sphereSize / -2 + o.webThickness - o.caseRimDrop]);
 // const webPost = cube([postSize, postSize, o.webThickness]).translate([
 //   0,
 //   0,
@@ -240,7 +241,7 @@ const webSphere = sphere({ d: sphereSize, $fn: sphereQuality }).translate([
 ]);
 const postOffset = { x: postSize / 2, y: postSize / 2 };
 const sphereOffset = { x: o.caseSpacing, y: o.caseSpacing };
-const thumbSphereOffset = { x: -o.caseSpacing, y: -o.caseSpacing };
+const thumbSphereOffset = { x: -o.caseSpacing - 1, y: -o.caseSpacing - 1 };
 
 const getWebPost = (
   pos: "TL" | "TR" | "BL" | "BR",
@@ -427,15 +428,41 @@ const thumbConnectors = () => {
       keyPlace(3, o.rows, posts.post.tl)
     )
   );
-  connectors.push(
-    triangleHulls(
-      thumbRPlace(posts.post.tr),
-      keyPlace(3, o.rows, posts.post.tl),
-      keyPlace(1, o.rows, posts.post.tr),
-      keyPlace(2, o.rows, posts.post.tr),
-      keyPlace(2, o.rows, posts.post.tl)
-    )
-  );
+  if (!o.encoder) {
+    connectors.push(
+      triangleHulls(
+        thumbRPlace(posts.post.tr),
+        keyPlace(3, o.rows, posts.post.tl),
+        keyPlace(1, o.rows, posts.post.tr),
+        keyPlace(2, o.rows, posts.post.tr),
+        keyPlace(2, o.rows, posts.post.tl)
+      )
+    );
+  } else {
+    connectors.push(
+      triangleHulls(
+        thumbRPlace(posts.post.tr),
+        keyPlace(3, o.rows, posts.post.tl),
+        keyPlace(2, o.rows, posts.post.tr)
+      )
+    );
+
+    connectors.push(
+      triangleHulls(
+        thumbRPlace(posts.post.tr),
+        keyPlace(2, o.rows, posts.post.tl),
+        keyPlace(1, o.rows, posts.post.tr)
+      )
+    );
+
+    connectors.push(
+      triangleHulls(
+        thumbRPlace(posts.post.tr),
+        keyPlace(2, o.rows, posts.post.tl),
+        keyPlace(2, o.rows, posts.post.tr)
+      )
+    );
+  }
 
   const [first, ...rest] = connectors;
   return first.union(...rest);
@@ -847,9 +874,9 @@ export const caseRim = () => {
 
 export const USBHolder = () => {
   const [x, y] = getKeyPosition(1, 0);
-  return importModel(`../../models/${o.mcuHolder}.stl`)
-    .rotate([0, 0, getColumnSplay(0)])
-    .translate([x, y + 1.8, 0])
+  return importModel(`../models/${o.mcuHolder}.stl`)
+    .rotate([0, 0, getColumnSplay(1)]) // + getColumnSplay(1) / 2])
+    .translate([x, y + (p.mountHeight - p.keyholeHeight) * 0.7, 0])
     .translate([
       -p.mountWidth / 2,
       p.mountHeight / 2 + o.caseSpacing + sphereSize + 0.5,
@@ -862,7 +889,8 @@ export const USBHolderSpace = () => {
   return USBHolder()
     .projection()
     .linear_extrude({ height: 13.02, center: false })
-    .translate([0, 0, -1]);
+    .translate([0, 0, -1])
+    .union(cube([9, 6, 18]).translate([-44, 38, 8]));
 };
 
 export const previewKeycaps = () =>
@@ -871,13 +899,22 @@ export const previewKeycaps = () =>
     .union(placeThumbs((row: number) => singleKeycap(row), true))
     .color("grey");
 
+const trackpadOffsetX = 2;
+
 export const previewTrackpad = () =>
-  thumbRPlace(cylinder({ d: 40, h: 2, $fn: 70 }).translate([0, 0, 6.5])).color(
-    "#222222"
-  );
+  thumbRPlace(
+    cylinder({ d: 40, h: 2, $fn: 70 }).translate([trackpadOffsetX, 0, 6.5])
+  ).color("#222222");
+
+export const previewEncoder = () =>
+  thumbRPlace(importModel("../models/encoder.stl"))
+    .translate([0, 0, 3])
+    .color("#222222");
 
 export const trackpadInset = () => {
-  return thumbRPlace(cylinder({ d: 40, h: 8, $fn: 50 }).translate([0, 0, 7]))
+  return thumbRPlace(
+    cylinder({ d: 41, h: 8, $fn: 50 }).translate([trackpadOffsetX, 0, 7])
+  )
     .hull(
       thumbRPlace(posts.post.br).union(
         thumbRPlace(posts.post.bl),
@@ -889,14 +926,18 @@ export const trackpadInset = () => {
     )
     .union(
       thumbRPlace(
-        cylinder({ d: 20, h: 80 }).translate([0, 6, 0]).rotate([12, 0, -6])
+        cylinder({ d: 20, h: 60 })
+          .translate([trackpadOffsetX - 3, 6, 0])
+          .rotate([5, 0, 20])
       )
     );
   // .translate([0, 0, 5]);
 };
 
 export const trackpadOuter = () =>
-  thumbRPlace(cylinder({ d: 42, h: 4, $fn: 70 }).translate([0, 0, 3])).hull(
+  thumbRPlace(
+    cylinder({ d: 42, h: 4, $fn: 70 }).translate([trackpadOffsetX, 0, 3])
+  ).hull(
     thumbRPlace(posts.thumb.br).union(
       thumbRPlace(posts.thumb.bl),
       thumbRPlace(posts.thumb.tl),
@@ -907,25 +948,24 @@ export const trackpadOuter = () =>
     // .translate([0, 0, -5])
   );
 
-export const trackpad = () => {
+export const trackpad = (mirror: boolean = false) => {
   const hullForm = trackpadOuter().difference(trackpadInset());
 
   return thumbRPlace(
-    importModel("../../models/cirque-40-flat.stl")
+    importModel("../models/cirque-40-flat.stl")
+      .mirror([Number(mirror), 0, 0])
       .rotate([0, 0, 180])
-      .translate([0, 0, 5])
+      .translate([trackpadOffsetX, 0, 5])
   ).union(hullForm);
 };
 
 export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
   const models = [];
   if (o.trackpad) {
-    models.push(trackpad());
+    models.push(trackpad(mirror));
   } else if (o.encoder) {
     models.push(
-      thumbRPlace(importModel("../../models/ec11.stl")).translate([
-        0, -0.8, -2.5,
-      ])
+      thumbRPlace(importModel("../models/ec11.stl")).translate([0, -0.8, -2.5])
     );
   }
 
@@ -937,9 +977,9 @@ export const buildCase = (keyhole: Shape3, mirror: boolean = false) => {
       placeThumbs(keyhole),
       thumbConnectors()
     )
-    .difference(...[o.trackpad && trackpadOuter()])
-    .union(...models) // add models after cutting away
-    .mirror([Number(mirror), 0, 0]);
+    .difference(...[...(o.trackpad && [trackpadInset()])])
+    .union(...models); // add models after cutting away
+  // .mirror([Number(mirror), 0, 0]);
 };
 
 export const outline = () => {
@@ -959,7 +999,7 @@ export const buildPlate = () => {
       shape
         .offset({ delta: -4 })
         .difference(
-          importShape("../../models/voronoi.dxf")
+          importShape("../models/voronoi.dxf")
             .scale([0.25, 0.25, 1])
             .translate([-168, -85, 0])
         )
@@ -972,4 +1012,5 @@ export const main = buildCase(singleKeyhole())
   // USBHolder().debug()
   // previewKeycaps(),
   // previewTrackpad()
+  // previewEncoder()
   ();

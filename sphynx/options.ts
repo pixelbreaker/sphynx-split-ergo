@@ -1,5 +1,5 @@
-import { Vec3 } from "../../src/csg/base";
-import { deg2rad } from "../../src/math";
+import { Vec3 } from "../src/csg/base";
+import { deg2rad } from "../src/math";
 
 type SwitchTypes = "choc" | "mx";
 type SwitchStyle = SwitchTypes;
@@ -25,6 +25,8 @@ export type Options = {
   webThickness: number;
   plateThickness: number;
   zOffset: number;
+  // trackpad: boolean;
+  // encoder: boolean;
 } & ( // Discriminated union to disable encoder when trackpad is enabled
   | { trackpad: true; encoder: false }
   | { trackpad: false; encoder: boolean }
@@ -70,7 +72,7 @@ export const defaultOptions: Options = {
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
-  thumbOffsets: [8, -8, -3],
+  thumbOffsets: [8, -1, -3],
   trackpad: true,
   webThickness: 2,
   plateThickness: 2,
@@ -89,7 +91,7 @@ export const buildParameters = (
   o: Required<Options>,
   overrides: Partial<Parameters> = {}
 ) => {
-  const keyholeWidth = o.switchStyle === "choc" ? 13.8 : 14.95;
+  const keyholeWidth = o.switchStyle === "choc" ? 13.8 : 13.95;
   const keyholeHeight = keyholeWidth;
   const mountWidth = keyholeWidth + (o.switchSpacing === "choc" ? 3.2 : 4);
   const mountHeight = mountWidth;

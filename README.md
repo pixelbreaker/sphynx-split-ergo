@@ -4,7 +4,7 @@ Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay.
 
 ![Right side render](./img/right.png)
 
-I have written this from scratch in TypeScript, but the code is heavily influenced by:
+I have written this from scratch in TypeScript, but the code is heavily influenced by and sections ported from the Clojure:
 
 - Josh Bertrand's [Dactyl Manuform](https://github.com/abstracthat/dactyl-manuform)
 - Okke Formsma's [Dactyl Manuform Tight](https://github.com/okke-formsma/dactyl-manuform-tight/)
