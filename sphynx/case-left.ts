@@ -1,19 +1,13 @@
-import { circle, square, polygon } from "../src/csg/primitives";
-import { cube, cylinder, sphere, polyhedron } from "../src/csg/primitives";
-import { hole } from "./utils";
-import { polyRound } from "../src/csg/polyround";
-import { buildOptions, options as o, parameters as p } from "./options";
-import {
-  buildCase,
-  singleKeyhole,
-  buildPlate,
-  init,
-  USBHolder,
-  previewKeycaps,
-  previewTrackpad,
-  previewEncoder,
-} from "./sphynx";
+import { options, parameters } from "./options";
+import { init, Sphynx } from "./Sphynx";
 
-init({ encoder: true, trackpad: false });
+init();
 
-export const main = buildCase(singleKeyhole(), true).mirror([1, 0, 0]);
+export const model = new Sphynx(
+  { ...options, encoder: true, trackpad: false },
+  parameters
+);
+
+export const main = model
+  .buildCase(model.singleKeyhole(), true)
+  .mirror([1, 0, 0]);

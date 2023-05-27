@@ -10,6 +10,24 @@ import {
   square,
 } from "../src/csg/primitives";
 
+// util to partition array in to incremental segments
+// used to build triangle hulls
+export const partition = <T extends any>(
+  arr: Array<T>,
+  size: number,
+  offset: number
+): Array<Array<T>> => {
+  const partitionCount = arr.length - size + offset;
+  const partitions: Array<Array<T>> = [];
+
+  for (let i = 0; i < partitionCount; i++) {
+    const start = i * offset;
+    partitions.push(arr.slice(start, start + size));
+  }
+
+  return partitions;
+};
+
 const inf = 1000;
 type HexTileOptions = {
   hexSize: number;
