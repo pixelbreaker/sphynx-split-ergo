@@ -12,7 +12,7 @@ export type Options = {
   caseRimDrop: number;
   caseSpacing: number;
   centerColumn: number;
-  centerRow: number;
+  centreRow: number;
   columns: 5 | 6;
   extraHeight: number;
   extraWidth: number;
@@ -43,6 +43,7 @@ export type Options = {
   );
 
 export type Parameters = {
+  centreRow: number;
   curveColumn: number;
   curveRow: number;
   deltaColumnX: number;
@@ -60,7 +61,7 @@ export const defaultOptions: Options = {
   caseRimDrop: 1,
   caseSpacing: 2,
   centerColumn: 2.5,
-  centerRow: 1.5,
+  centreRow: 1.5,
   columns: 5,
   encoder: false,
   extraHeight: 0,
@@ -106,8 +107,10 @@ export const buildParameters = (
     keyTopHeight +
     (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow) / 2);
   const deltaColumnX = -1 + -(radiusColumn * Math.sin(deg2rad(curveRow)));
+  const centreRow = o.rows - o.centreRow;
 
   parameters = {
+    centreRow,
     curveColumn,
     curveRow,
     deltaColumnX,

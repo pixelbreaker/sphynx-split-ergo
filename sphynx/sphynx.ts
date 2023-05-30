@@ -20,11 +20,12 @@ export const init = (overrides: Partial<Options> = undefined) => {
     rows: 3,
     caseRimDrop: 2,
     caseSpacing: 2,
+    // centreRow: 2,
     // tentingAngle: 30,
     // zOffset: 20,
-    switchSpacing: "mx",
-    switchStyle: "mx",
-    keycapStyle: "sa",
+    switchSpacing: "choc",
+    switchStyle: "choc",
+    keycapStyle: "choc",
     trackpad: true,
     encoder: false,
     mcuHolder: "elite-c",
@@ -54,7 +55,7 @@ export class Sphynx {
 
   static getColumnOffsets(column: number): Vec3 {
     const offsets: Vec3[] = [
-      [0, 0.8, 0], // index inner
+      [0, 0.55, 0], // index inner
       [0, 0.2, 0], // index
       [1, 3, -2.5], // middle
       [1.6, -1.5, -0.5], // ring
@@ -164,7 +165,7 @@ export class Sphynx {
 
     return shape
       .translate([0, 0, -p.radiusRow])
-      .rotate([p.curveColumn * (o.centerRow - row), 0, 0])
+      .rotate([p.curveColumn * (p.centreRow - row), 0, 0])
       .translate([0, 0, p.radiusRow - p.radiusColumn])
       .rotate([0, columnAngle, Sphynx.getColumnSplay(column)])
       .translate([0, 0, p.radiusColumn])
@@ -181,22 +182,22 @@ export class Sphynx {
       column,
       row,
       shape
-        .rotate([-p.curveColumn * (o.centerRow - row), 0, 0])
+        .rotate([-p.curveColumn * (p.centreRow - row), 0, 0])
         .rotate([0, -columnAngle, Sphynx.getColumnSplay(column)])
         .rotate([0, -o.tentingAngle, 0])
     );
   }
 
-  getKeyPosition(column: number, row: number) {
+  getKeyPosition(column: number, row: number, offset: Vec3 = [0, 0, 0]) {
     const { o, p } = this.settings;
-    let position: Vec3 = [0, 0, 0];
+    let position: Vec3 = offset;
 
     const columnAngle = p.curveRow * (o.centerColumn - column);
-    position = rotateX(-p.curveColumn * (o.centerRow - row), position);
+    position = rotateX(-p.curveColumn * (p.centreRow - row), position);
     position = rotateY(-columnAngle, position);
     position = rotateY(-o.tentingAngle, position);
     position = add(position, [0, 0, -p.radiusRow]);
-    position = rotateX(p.curveColumn * (o.centerRow - row), position);
+    position = rotateX(p.curveColumn * (p.centreRow - row), position);
     position = add(position, [0, 0, p.radiusRow - p.radiusColumn]);
     position = rotateY(columnAngle, position);
     position = rotateZ(Sphynx.getColumnSplay(column), position);
@@ -252,7 +253,7 @@ export class Sphynx {
       o.trackpad
         ? [-3, -19, -1]
         : o.encoder
-        ? [-10, -13, -3]
+        ? [-10, -13, -6]
         : [-15, -10.3, -1], // translation
       shape
     );
@@ -861,11 +862,26 @@ export class Sphynx {
     for (let col = o.columns - 1; col >= 3; col--) {
       const offset = Sphynx.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
+      const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
 
       const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
       const xL = Math.abs(diff) !== 0 ? (diff < 0 ? -sphX : sphX) : sphX;
-      const pR = Math.abs(pDiff) !== 0 ? (pDiff < 0 ? -sphX : sphX) : -sphX;
-      const pL = Math.abs(pDiff) !== 0 ? (pDiff > 0 ? sphX : -sphX) : -sphX;
+      const pR =
+        col === 3
+          ? sphX
+          : Math.abs(pDiff) !== 0
+          ? pDiff < 0
+            ? -sphX
+            : sphX
+          : -sphX;
+      const pL =
+        col === 3
+          ? sphX
+          : Math.abs(nDiff) !== 0
+          ? nDiff > 0
+            ? sphX
+            : -sphX
+          : -sphX;
 
       const offsetR = { ...this.sphereOffset, x: xR };
       const offsetL = { ...this.sphereOffset, x: xL };
@@ -920,16 +936,32 @@ export class Sphynx {
 
     let pOffset = 0;
     let pDiff = 0;
+
     const sphX = this.sphereOffset.x;
 
     for (let col = o.columns - 1; col >= 3; col--) {
       const offset = Sphynx.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
+      const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
 
       const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
       const xL = Math.abs(diff) !== 0 ? (diff < 0 ? -sphX : sphX) : sphX;
-      const pR = Math.abs(pDiff) !== 0 ? (pDiff < 0 ? -sphX : sphX) : -sphX;
-      const pL = Math.abs(pDiff) !== 0 ? (pDiff > 0 ? sphX : -sphX) : -sphX;
+      const pR =
+        col === 3
+          ? sphX
+          : Math.abs(pDiff) !== 0
+          ? pDiff < 0
+            ? -sphX
+            : sphX
+          : -sphX;
+      const pL =
+        col === 3
+          ? sphX
+          : Math.abs(nDiff) !== 0
+          ? nDiff > 0
+            ? sphX
+            : -sphX
+          : -sphX;
 
       const offsetR = { ...this.sphereOffset, x: xR };
       const offsetL = { ...this.sphereOffset, x: xL };
@@ -992,26 +1024,38 @@ export class Sphynx {
     );
   };
 
+  USBHolderPosition() {
+    const { o, p } = this.settings;
+    let pos = this.getKeyPosition(1, 0, [
+      -(p.mountWidth / 2),
+      p.mountHeight / 2 + o.caseSpacing + o.webThickness + this.sphereSize / 2,
+      0,
+    ]);
+    pos = V3.add(pos, [2, 3.4, 0]);
+    pos = V3.add(pos, [o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
+    return pos;
+  }
+
+  readonly TRSCutPos = [-9.5, -6.3, 8] as Vec3;
+
   USBHolder() {
     const { o, p } = this.settings;
-    const [x, y] = this.getKeyPosition(1, 0);
+    const [x, y] = this.USBHolderPosition();
     return importModel(`../models/${o.mcuHolder}.stl`)
-      .rotate([0, 0, Sphynx.getColumnSplay(1)]) // + getColumnSplay(1) / 2])
-      .translate([x, y + (p.mountHeight - p.keyholeHeight) * 0.7, 0])
-      .translate([
-        -p.mountWidth / 2,
-        p.mountHeight / 2 + o.caseSpacing + this.sphereSize + 0.5,
-        0,
-      ])
-      .translate([o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
+      .union(cube([9, 6, 18]).translate(this.TRSCutPos))
+      .rotate([0, 0, Sphynx.getColumnSplay(1)])
+      .translate([x, y, 0]);
   }
 
   USBHolderSpace() {
-    return this.USBHolder()
+    const { o, p } = this.settings;
+    const [x, y] = this.USBHolderPosition();
+    return importModel(`../models/${o.mcuHolder}.stl`)
       .projection()
       .linear_extrude({ height: 13.02, center: false })
       .translate([0, 0, -1])
-      .union(cube([9, 6, 18]).translate([-44, 38, 8]));
+      .union(cube([9, 6, 18]).translate(this.TRSCutPos))
+      .translate([x, y, 0]);
   }
 
   previewKeycaps() {
@@ -1048,6 +1092,7 @@ export class Sphynx {
   }
 
   trackpadInset() {
+    const { o, p } = this.settings;
     return this.thumbRPlace(
       cylinder({ d: 41, h: 8, $fn: 50 }).translate([this.trackpadOffsetX, 0, 7])
     )
@@ -1055,9 +1100,9 @@ export class Sphynx {
         this.thumbRPlace(this.posts.post.br).union(
           this.thumbRPlace(this.posts.post.bl),
           this.thumbRPlace(this.posts.post.tl),
-          this.keyPlace(3, 3, this.posts.post.tl).translate([0, -2, 0]),
-          this.keyPlace(2, 3, this.posts.post.tr).translate([0, -2, 0]),
-          this.keyPlace(2, 3, this.posts.post.tl).translate([0, -2, 0])
+          this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -2, 0]),
+          this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -2, 0]),
+          this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -2, 0])
         )
       )
       .union(
@@ -1071,15 +1116,16 @@ export class Sphynx {
   }
 
   trackpadOuter() {
+    const { o, p } = this.settings;
     return this.thumbRPlace(
       cylinder({ d: 42, h: 4, $fn: 70 }).translate([this.trackpadOffsetX, 0, 3])
     ).hull(
       this.thumbRPlace(this.posts.thumb.br).union(
         this.thumbRPlace(this.posts.thumb.bl),
         this.thumbRPlace(this.posts.thumb.tl),
-        this.keyPlace(3, 3, this.posts.rim.tl),
-        this.keyPlace(2, 3, this.posts.post.tr),
-        this.keyPlace(2, 3, this.posts.post.tl)
+        this.keyPlace(3, o.rows, this.posts.rim.tl),
+        this.keyPlace(2, o.rows, this.posts.post.tr),
+        this.keyPlace(2, o.rows, this.posts.post.tl)
       )
       // .translate([0, 0, -5])
     );
@@ -1148,12 +1194,7 @@ export class Sphynx {
   };
 }
 
-const right = new Sphynx(options, parameters);
+const sphynx = new Sphynx(options, parameters);
 
-// export const main = right.buildCase(right.singleKeyhole());
-// .union
-// // USBHolder().debug()
-// // previewKeycaps(),
-// // previewTrackpad()
-// // previewEncoder()
-// ();
+export const main = sphynx.buildCase(sphynx.singleKeyhole());
+// .union(sphynx.USBHolder().debug());
