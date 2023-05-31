@@ -5,12 +5,10 @@ import { indent, serialize } from "./translation-util";
 export const shape3 = <T>(s: string[], t: T) => {
   const sh = new Shape3(s);
   Object.assign(sh, t);
-  return sh as (Shape3 & T);
-}
-
+  return sh as Shape3 & T;
+};
 
 export class Shape3 extends Shape {
-
   // 3d only functions
   projection(p?: { cut: boolean }) {
     return new Shape2([`projection(${serialize(p)})`, ...this.src.map(indent)]);
@@ -18,7 +16,7 @@ export class Shape3 extends Shape {
 
   render() {
     return new Shape3([`render()`, ...this.src.map(indent)]);
-  };
+  }
 
   // 'upgrade' common funcs
   union(...s: Shape3[]): Shape3 {
@@ -54,22 +52,22 @@ export class Shape3 extends Shape {
   translate(p: Vec3): Shape3 & Vec3 {
     const src = super.translate(p).src;
     return shape3(src, p);
-  };
+  }
 
   rotate(p: Vec3): Shape3 & Vec3 {
     const src = super.rotate(p).src;
     return shape3(src, p);
-  };
+  }
 
   mirror(p: Vec3): Shape3 & Vec3 {
     const src = super.mirror(p).src;
     return shape3(src, p);
-  };
+  }
 
   color(p: string) {
     const src = super.color(p).src;
     return new Shape3(src);
-  };
+  }
 
   tile(p: TileProps): Shape3 & TileProps {
     const src = super.tile(p).src;
@@ -82,7 +80,7 @@ export class Shape3 extends Shape {
   }
 
   debug() {
-    this.src.unshift('#');
+    this.src.unshift("#");
     return this;
   }
 }

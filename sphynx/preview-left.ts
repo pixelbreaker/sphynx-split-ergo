@@ -1,7 +1,5 @@
-import { options } from "./options";
-import { init } from "./Sphynx";
+import { defaultOptions } from "./options";
 import { model } from "./case-left";
-init();
 
 export const main = model
   .buildCase(model.singleKeyhole(), true)
@@ -10,7 +8,7 @@ export const main = model
     ...[
       model
         .buildPlate()
-        .translate([0, 0, -options.plateThickness])
+        .translate([0, 0, -defaultOptions.plateThickness])
         .color("Silver"),
       model.USBHolder().color("Azure"),
       model.preview(),

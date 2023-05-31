@@ -49,6 +49,7 @@ export type Parameters = {
   deltaColumnX: number;
   keycapHeight: number;
   keyholeHeight?: number;
+  keyholeThickness: number;
   keyholeWidth?: number;
   keyTopHeight: number;
   mountHeight?: number;
@@ -80,12 +81,11 @@ export const defaultOptions: Options = {
   zOffset: 10,
 };
 
-export let options: Required<Options>;
-export let parameters: Parameters;
-
-export const buildOptions = (userOptions: Partial<Options> = {}) => {
-  options = { ...defaultOptions, ...userOptions } as Options;
-  buildParameters(options);
+export const buildOptions = (
+  userOptions: Partial<Options> = defaultOptions
+) => {
+  const options = { ...defaultOptions, ...userOptions } as Options;
+  return { options, parameters: buildParameters(options) };
 };
 
 export const buildParameters = (
@@ -108,14 +108,16 @@ export const buildParameters = (
     (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow) / 2);
   const deltaColumnX = -1 + -(radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
+  const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;
 
-  parameters = {
+  return {
     centreRow,
     curveColumn,
     curveRow,
     deltaColumnX,
     keycapHeight,
     keyholeHeight,
+    keyholeThickness,
     keyholeWidth,
     keyTopHeight,
     mountHeight,

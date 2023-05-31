@@ -1,12 +1,11 @@
-import { options, parameters } from "./options";
-import { init, Sphynx } from "./Sphynx";
+import { defaultOptions } from "./options";
+import { Sphynx } from "./Sphynx";
 
-init();
-
-export const model = new Sphynx(
-  { ...options, encoder: true, trackpad: false },
-  parameters
-);
+export const model = new Sphynx({
+  ...defaultOptions,
+  encoder: true,
+  trackpad: false,
+});
 
 export const main = model
   .buildCase(model.singleKeyhole(), true)

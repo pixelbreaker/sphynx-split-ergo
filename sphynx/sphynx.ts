@@ -1,39 +1,16 @@
 import {
   Options,
   Parameters,
-  buildOptions,
-  options,
-  parameters,
+  buildParameters,
+  defaultOptions,
 } from "./options";
 import { cube, cylinder, sphere } from "../src/csg/primitives";
-import { deg2rad } from "../src/math";
 import { importModel, importShape } from "../src/csg/primitives";
 import { Shape3 } from "../src/csg/base3";
 import { Vec3 } from "../src/csg/base";
 import { V3 } from "../src/math";
 import { partition } from "./utils";
 const { add, rotateX, rotateY, rotateZ } = V3;
-
-export const init = (overrides: Partial<Options> = undefined) => {
-  buildOptions({
-    columns: 5,
-    rows: 3,
-    caseRimDrop: 2,
-    caseSpacing: 2,
-    // centreRow: 2,
-    // tentingAngle: 30,
-    // zOffset: 20,
-    switchSpacing: "choc",
-    switchStyle: "choc",
-    keycapStyle: "choc",
-    trackpad: true,
-    encoder: false,
-    mcuHolder: "elite-c",
-    ...overrides,
-  } as Options);
-};
-
-init(); // build options globally
 
 type Posts = { tr: Shape3; tl: Shape3; br: Shape3; bl: Shape3 };
 export class Sphynx {
@@ -52,6 +29,7 @@ export class Sphynx {
   readonly thumbSphere: Shape3;
   readonly webSphere: Shape3;
   readonly trackpadOffsetX = 2;
+  trackpadOffsetY: number;
 
   static getColumnOffsets(column: number): Vec3 {
     const offsets: Vec3[] = [
@@ -76,15 +54,15 @@ export class Sphynx {
     return -splays[Math.min(Math.max(column, 0), splays.length - 1)];
   }
 
-  constructor(o: Options, p: Parameters) {
-    this.settings = { o, p };
+  constructor(o: Options) {
+    this.settings = { o, p: buildParameters(o) };
     this.sphereSize = o.webThickness;
 
     // set up some reusable objects
     this.postOffset = { x: this.postSize / 2, y: this.postSize / 2 };
     this.sphereOffset = { x: o.caseSpacing, y: o.caseSpacing };
     this.thumbSphereOffset = { x: -o.caseSpacing - 1, y: -o.caseSpacing - 1 };
-
+    this.trackpadOffsetY = o.switchStyle === "choc" ? 5 : 8;
     this.webRim = sphere({
       d: this.sphereSize * 1.5,
       $fn: this.sphereQuality,
@@ -98,7 +76,18 @@ export class Sphynx {
     this.webSphere = sphere({
       d: this.sphereSize,
       $fn: this.sphereQuality,
-    }).translate([0, 0, this.sphereSize / -2 + o.webThickness]);
+    })
+      .union(
+        sphere({
+          d: this.sphereSize,
+          $fn: this.sphereQuality,
+        }).translate([
+          0,
+          0,
+          -(this.settings.p.keyholeThickness - this.sphereSize),
+        ])
+      )
+      .translate([0, 0, this.sphereSize / -2 + o.webThickness]);
 
     this.makePosts();
   }
@@ -120,34 +109,33 @@ export class Sphynx {
       case "mx":
         // tabThickness
         tabHeight = 2;
-        return cube([p.mountWidth, p.mountHeight, o.webThickness])
-          .translate([0, 0, o.webThickness / 2])
+        return cube([p.mountWidth, p.mountHeight, p.keyholeThickness])
           .difference(
-            cube([p.keyholeWidth, p.keyholeHeight, o.webThickness + 4]),
-            cube([3, p.keyholeHeight + tabThickness, o.webThickness]).translate(
-              [0, 0, o.webThickness - tabHeight]
-            )
-          );
+            cube([p.keyholeWidth, p.keyholeHeight, p.keyholeThickness + 1]),
+            cube([4, p.keyholeHeight + 1.5, p.keyholeThickness]).translate([
+              0, 0, -1.5,
+            ])
+          )
+          .translate([0, 0, p.keyholeThickness / 2]);
+      // .translate([0, 0, p.keyholeThickness / 2 - tabHeight]);
       case "choc":
       default:
-        return cube([p.mountWidth, p.mountHeight, o.webThickness])
-          .translate([0, 0, o.webThickness / 2])
+        return cube([p.mountWidth, p.mountHeight, p.keyholeThickness])
+          .translate([0, 0, p.keyholeThickness / 2])
           .difference(
-            cube([p.keyholeWidth, p.keyholeHeight, o.webThickness + 4]),
+            cube([p.keyholeWidth, p.keyholeHeight, p.keyholeThickness + 4]),
             cube([
               p.keyholeWidth + tabThickness,
               p.keyholeHeight - 2,
-              o.webThickness,
+              p.keyholeThickness,
+            ]),
+            cube([
+              p.keyholeWidth - 2,
+              p.keyholeHeight + tabThickness,
+              p.keyholeThickness,
             ])
-              .union(
-                cube([
-                  p.keyholeWidth - 2,
-                  p.keyholeHeight + tabThickness,
-                  o.webThickness,
-                ])
-              )
-              .translate([0, 0, o.webThickness / 2 - tabHeight])
           );
+      // .translate([0, 0, o.webThickness / 2 - tabHeight]);
     }
   }
 
@@ -155,7 +143,7 @@ export class Sphynx {
     const { o, p } = this.settings;
     return importModel(
       `../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
-    ).translate([0, 0, 4]);
+    ).translate([0, 0, o.keycapStyle === "choc" ? 4 : 6]);
   }
 
   // Placement
@@ -290,7 +278,8 @@ export class Sphynx {
   getWebPost(
     pos: "TL" | "TR" | "BL" | "BR",
     shape: Shape3,
-    offset: { x: number; y: number } = this.postOffset
+    offset: { x: number; y: number } = this.postOffset,
+    zOffset: number = 0
   ) {
     const { o, p } = this.settings;
     const [y, x] = pos.split("");
@@ -298,7 +287,7 @@ export class Sphynx {
     return shape.translate([
       x === "L" ? p.mountWidth / -2 + offset.x : p.mountWidth / 2 - offset.x,
       y === "T" ? p.mountHeight / 2 - offset.y : p.mountHeight / -2 + offset.y,
-      0,
+      p.keyholeThickness - o.webThickness + zOffset,
     ]);
   }
 
@@ -806,7 +795,16 @@ export class Sphynx {
       rimHulls.push(
         this.triangleHulls(
           this.keyPlace(o.columns, row, this.posts.rim.bl),
-          this.keyPlace(o.columns, row + 1, this.posts.rim.tl),
+          this.keyPlace(
+            o.columns,
+            row + 1,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              this.sphereOffset,
+              row === o.rows - 1 ? -o.caseRimDrop : 0
+            )
+          ),
           this.keyPlace(o.columns, row, this.posts.post.bl),
           this.keyPlace(o.columns, row + 1, this.posts.post.tl)
         )
@@ -834,7 +832,16 @@ export class Sphynx {
       walls.push(
         this.buildWall(
           this.keyPlace(o.columns, row, this.posts.rim.bl),
-          this.keyPlace(o.columns, row + 1, this.posts.rim.tl)
+          this.keyPlace(
+            o.columns,
+            row + 1,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              this.sphereOffset,
+              row === o.rows - 1 ? -o.caseRimDrop : 0
+            )
+          )
         )
       );
       if (row >= 0) {
@@ -893,13 +900,13 @@ export class Sphynx {
           this.keyPlace(
             col,
             o.rows,
-            this.getWebPost("TR", this.webRim, offsetR)
+            this.getWebPost("TR", this.webRim, offsetR, -o.caseRimDrop)
           ),
           this.keyPlace(col, o.rows, this.posts.post.tr),
           this.keyPlace(
             col + 1,
             o.rows,
-            this.getWebPost("TL", this.webRim, offsetL)
+            this.getWebPost("TL", this.webRim, offsetL, -o.caseRimDrop)
           ),
           this.keyPlace(col + 1, o.rows, this.posts.post.tl)
         )
@@ -910,12 +917,12 @@ export class Sphynx {
             this.keyPlace(
               col,
               o.rows,
-              this.getWebPost("TL", this.webRim, pOffsetL)
+              this.getWebPost("TL", this.webRim, pOffsetL, -o.caseRimDrop)
             ),
             this.keyPlace(
               col,
               o.rows,
-              this.getWebPost("TR", this.webRim, pOffsetR)
+              this.getWebPost("TR", this.webRim, pOffsetR, -o.caseRimDrop)
             ),
             this.keyPlace(col, o.rows, this.posts.post.tl),
             this.keyPlace(col, o.rows, this.posts.post.tr)
@@ -973,12 +980,12 @@ export class Sphynx {
           this.keyPlace(
             col,
             o.rows,
-            this.getWebPost("TR", this.webRim, offsetR)
+            this.getWebPost("TR", this.webRim, offsetR, -o.caseRimDrop)
           ),
           this.keyPlace(
             col + 1,
             o.rows,
-            this.getWebPost("TL", this.webRim, offsetL)
+            this.getWebPost("TL", this.webRim, offsetL, -o.caseRimDrop)
           )
         )
       );
@@ -988,12 +995,12 @@ export class Sphynx {
             this.keyPlace(
               col,
               o.rows,
-              this.getWebPost("TL", this.webRim, pOffsetL)
+              this.getWebPost("TL", this.webRim, pOffsetL, -o.caseRimDrop)
             ),
             this.keyPlace(
               col,
               o.rows,
-              this.getWebPost("TR", this.webRim, pOffsetR)
+              this.getWebPost("TR", this.webRim, pOffsetR, -o.caseRimDrop)
             )
           )
         );
@@ -1070,7 +1077,7 @@ export class Sphynx {
       cylinder({ d: 40, h: 2, $fn: 70 }).translate([
         this.trackpadOffsetX,
         0,
-        6.5,
+        this.trackpadOffsetY + 1.5,
       ])
     ).color("#222222");
   }
@@ -1094,15 +1101,19 @@ export class Sphynx {
   trackpadInset() {
     const { o, p } = this.settings;
     return this.thumbRPlace(
-      cylinder({ d: 41, h: 8, $fn: 50 }).translate([this.trackpadOffsetX, 0, 7])
+      cylinder({ d: 41, h: 8, $fn: 50 }).translate([
+        this.trackpadOffsetX,
+        0,
+        this.trackpadOffsetY + 2,
+      ])
     )
       .hull(
         this.thumbRPlace(this.posts.post.br).union(
           this.thumbRPlace(this.posts.post.bl),
           this.thumbRPlace(this.posts.post.tl),
-          this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -2, 0]),
-          this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -2, 0]),
-          this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -2, 0])
+          this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -3, 1]),
+          this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -3, 1]),
+          this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -3, 1])
         )
       )
       .union(
@@ -1118,7 +1129,11 @@ export class Sphynx {
   trackpadOuter() {
     const { o, p } = this.settings;
     return this.thumbRPlace(
-      cylinder({ d: 42, h: 4, $fn: 70 }).translate([this.trackpadOffsetX, 0, 3])
+      cylinder({ d: 42, h: 4, $fn: 70 }).translate([
+        this.trackpadOffsetX,
+        0,
+        this.trackpadOffsetY - 2,
+      ])
     ).hull(
       this.thumbRPlace(this.posts.thumb.br).union(
         this.thumbRPlace(this.posts.thumb.bl),
@@ -1132,13 +1147,14 @@ export class Sphynx {
   }
 
   trackpad(mirror: boolean = false) {
+    const { o, p } = this.settings;
     const hullForm = this.trackpadOuter().difference(this.trackpadInset());
 
     return this.thumbRPlace(
       importModel("../models/cirque-40-flat.stl")
         .mirror([Number(mirror), 0, 0])
         .rotate([0, 0, 180])
-        .translate([this.trackpadOffsetX, 0, 5])
+        .translate([this.trackpadOffsetX, 0, this.trackpadOffsetY])
     ).union(hullForm);
   }
 
@@ -1194,7 +1210,7 @@ export class Sphynx {
   };
 }
 
-const sphynx = new Sphynx(options, parameters);
+const sphynx = new Sphynx(defaultOptions);
 
 export const main = sphynx.buildCase(sphynx.singleKeyhole());
 // .union(sphynx.USBHolder().debug());
