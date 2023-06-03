@@ -10,6 +10,8 @@ import { Shape3 } from "../src/csg/base3";
 import { Vec3 } from "../src/csg/base";
 import { V3 } from "../src/math";
 import { partition } from "./utils";
+import { Splinky } from "./Splinky";
+import { Insert } from "./Insert";
 const { add, rotateX, rotateY, rotateZ } = V3;
 
 type Posts = { tr: Shape3; tl: Shape3; br: Shape3; bl: Shape3 };
@@ -128,12 +130,12 @@ export class Sphynx {
               p.keyholeWidth + tabThickness,
               p.keyholeHeight - 2,
               p.keyholeThickness,
-            ]),
-            cube([
-              p.keyholeWidth - 2,
-              p.keyholeHeight + tabThickness,
-              p.keyholeThickness,
             ])
+            // cube([
+            //   p.keyholeWidth - 2,
+            //   p.keyholeHeight + tabThickness,
+            //   p.keyholeThickness,
+            // ])
           );
       // .translate([0, 0, o.webThickness / 2 - tabHeight]);
     }
@@ -1031,14 +1033,34 @@ export class Sphynx {
     );
   };
 
+  isBastard() {
+    const { o } = this.settings;
+    return o.mcuHolder === "bastardkb-holder";
+  }
+
   USBHolderPosition() {
     const { o, p } = this.settings;
-    let pos = this.getKeyPosition(1, 0, [
-      -(p.mountWidth / 2),
-      p.mountHeight / 2 + o.caseSpacing + o.webThickness + this.sphereSize / 2,
-      0,
-    ]);
-    pos = V3.add(pos, [2, 3.4, 0]);
+
+    let pos;
+    if (this.isBastard()) {
+      pos = this.getKeyPosition(0, 0, [
+        -(p.mountWidth / 2) - 1,
+        p.mountHeight / 2 - 1,
+        0,
+      ]);
+      pos = V3.add(pos, [2, 0, 0]);
+    } else {
+      pos = this.getKeyPosition(1, 0, [
+        -(p.mountWidth / 2),
+        p.mountHeight / 2 +
+          o.caseSpacing +
+          o.webThickness +
+          this.sphereSize / 2,
+        0,
+      ]);
+      pos = V3.add(pos, [2, 3, 0]);
+    }
+    pos = V3.add(pos, [2, 3.5, 0]);
     pos = V3.add(pos, [o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
     return pos;
   }
@@ -1048,21 +1070,35 @@ export class Sphynx {
   USBHolder() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    return importModel(`../models/${o.mcuHolder}.stl`)
-      .union(cube([9, 6, 18]).translate(this.TRSCutPos))
-      .rotate([0, 0, Sphynx.getColumnSplay(1)])
+    let holder;
+    if (o.mcuHolder === "bastardkb-holder") {
+      const splinky = new Splinky(o);
+      holder = splinky.assembled();
+    } else {
+      holder = importModel(`../models/${o.mcuHolder}.stl`).union(
+        cube([9, 6, 18]).translate(this.TRSCutPos)
+      );
+    }
+    return holder
+
+      .rotate([0, 0, (Sphynx.getColumnSplay(0) + Sphynx.getColumnSplay(1)) / 2])
       .translate([x, y, 0]);
   }
 
   USBHolderSpace() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    return importModel(`../models/${o.mcuHolder}.stl`)
-      .projection()
-      .linear_extrude({ height: 13.02, center: false })
-      .translate([0, 0, -1])
-      .union(cube([9, 6, 18]).translate(this.TRSCutPos))
-      .translate([x, y, 0]);
+    if (o.mcuHolder === "bastardkb-holder") {
+      const splinky = new Splinky(o);
+      return splinky.cutaway().translate([x, y, 0]);
+    } else {
+      return importModel(`../models/${o.mcuHolder}.stl`)
+        .projection()
+        .linear_extrude({ height: 13.02, center: false })
+        .translate([0, 0, -1])
+        .union(cube([9, 6, 18]).translate(this.TRSCutPos))
+        .translate([x, y, 0]);
+    }
   }
 
   previewKeycaps() {
@@ -1158,6 +1194,65 @@ export class Sphynx {
     ).union(hullForm);
   }
 
+  // inserts
+  getInsertPositions(): { pos: Vec3; rotation: number }[] {
+    const { o, p } = this.settings;
+    return [
+      (() => {
+        // top center
+        const [x, y] = this.getKeyPosition(2, 0, [5, p.mountHeight / 2, 0]);
+        return { pos: [x, y, 0], rotation: 0 };
+      })(),
+      (() => {
+        // front right
+        const [x, y] = this.getKeyPosition(3, o.rows - 1, [
+          0,
+          -p.mountHeight / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0], rotation: 180 };
+      })(),
+      (() => {
+        // front left
+        const [x, y] = this.getKeyPosition(0, o.rows - 1, [
+          -6,
+          -8 - p.mountHeight / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0], rotation: 70 };
+      })(),
+      (() => {
+        // back right
+        const [x, y] = this.getKeyPosition(4, 0, [
+          -p.mountWidth / 2,
+          3 + p.mountHeight / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0], rotation: -30 };
+      })(),
+    ];
+  }
+  inserts() {
+    const { o, p } = this.settings;
+    const [x, y] = this.USBHolderPosition();
+    const splinky = new Splinky(o);
+
+    const [first, ...rest] = this.getInsertPositions().map(
+      ({ pos, rotation }) => Insert.getInsert(o, pos, rotation)
+    );
+
+    const inserts = first.union(
+      ...rest,
+      ...(this.isBastard() && [splinky.inserts().translate([x, y, 0])])
+    );
+    return inserts.intersection(
+      this.outline()
+        .projection()
+        .offset({ delta: -1 })
+        .linear_extrude({ height: 50 })
+    );
+  }
+
   buildCase(keyhole: Shape3, mirror: boolean = false) {
     const { o, p } = this.settings;
     const models = [];
@@ -1210,7 +1305,14 @@ export class Sphynx {
   };
 }
 
-const sphynx = new Sphynx(defaultOptions);
+const sphynx = new Sphynx({
+  ...defaultOptions,
+  mcuHolder: "bastardkb-holder",
+  encoder: false,
+  trackpad: true,
+});
 
-export const main = sphynx.buildCase(sphynx.singleKeyhole());
-// .union(sphynx.USBHolder().debug());
+export const main = sphynx
+  .buildCase(sphynx.singleKeyhole())
+  // .union(sphynx.USBHolder());
+  .union(sphynx.inserts(), sphynx.USBHolder());

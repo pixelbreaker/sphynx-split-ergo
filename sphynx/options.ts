@@ -1,12 +1,16 @@
 import { Vec3 } from "../src/csg/base";
 import { deg2rad } from "../src/math";
 
-type SwitchTypes = "choc" | "mx";
-type SwitchStyle = SwitchTypes;
-type SwitchSpacing = SwitchTypes;
-type KeycapStyles = "choc" | "xda" | "sa";
-type MCUHolder = "elite-c" | "rpi-pico" | "pro-micro" | "splinky";
-type RenderSide = "right" | "left";
+export type SwitchTypes = "choc" | "mx";
+export type SwitchStyle = SwitchTypes;
+export type SwitchSpacing = SwitchTypes;
+export type KeycapStyles = "choc" | "xda" | "sa";
+export type MCUHolder =
+  | "elite-c"
+  | "rpi-pico"
+  | "pro-micro"
+  | "bastardkb-holder";
+export type RenderSide = "right" | "left";
 
 export type Options = {
   caseRimDrop: number;
@@ -16,14 +20,17 @@ export type Options = {
   columns: 5 | 6;
   extraHeight: number;
   extraWidth: number;
+  insertDepth: number;
+  insertExternal: number;
+  insertInternal: number;
   keycapStyle: KeycapStyles;
   mcuHolder: MCUHolder;
+  plateThickness: number;
   rows: 3 | 4;
   side: RenderSide;
   tentingAngle: number;
   thumbOffsets: Vec3;
   webThickness: number;
-  plateThickness: number;
   zOffset: number;
   // trackpad: boolean;
   // encoder: boolean;
@@ -67,17 +74,20 @@ export const defaultOptions: Options = {
   encoder: false,
   extraHeight: 0,
   extraWidth: 1.4,
+  insertDepth: 4,
+  insertExternal: 10,
+  insertInternal: 5.4,
   keycapStyle: "choc",
   mcuHolder: "elite-c",
+  plateThickness: 2,
   rows: 3,
   side: "right",
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
   thumbOffsets: [8, -1, -3],
-  trackpad: true,
+  trackpad: false,
   webThickness: 2,
-  plateThickness: 2,
   zOffset: 10,
 };
 

@@ -121,8 +121,8 @@ export const sphere = (p: CirleProps) => {
   return new Alignable([size, size, size], [`sphere(${serialize(p)});`]);
 };
 
-export const cube = (p: Vec3) =>
-  new Cube(p, [`cube(size=${serialize(p)}, center=true);`]);
+export const cube = (p: Vec3, center: boolean = true) =>
+  new Cube(p, [`cube(size=${serialize(p)}, center=${center});`]);
 
 export const importModel = (filename: string) => {
   return new Shape3([`import ("${filename}");`]);
@@ -143,7 +143,7 @@ export type CylinderProps = FProp<
   }
 >;
 
-export const cylinder = (p: CylinderProps) => {
+export const cylinder = (p: CylinderProps, center: boolean = true) => {
   let width: number;
   if ("d" in p) {
     width = p.d;
@@ -155,7 +155,7 @@ export const cylinder = (p: CylinderProps) => {
     width = Math.max(p.r1, p.r2) * 2;
   }
   const { sector: angle, ...rest } = p;
-  const src = [`cylinder(center=true, ${serialize(rest)});`];
+  const src = [`cylinder(center=${center}, ${serialize(rest)});`];
   if (angle && angle % 360 !== 0) {
     const poly = sector(angle, width).linear_extrude({ height: p.h + 1 });
     const s = new Shape3(src).intersection(poly);
