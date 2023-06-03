@@ -1201,7 +1201,7 @@ export class Sphynx {
       (() => {
         // top center
         const [x, y] = this.getKeyPosition(2, 0, [5, p.mountHeight / 2, 0]);
-        return { pos: [x, y, 0], rotation: 0 };
+        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 0 };
       })(),
       (() => {
         // front right
@@ -1210,7 +1210,7 @@ export class Sphynx {
           -p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, 0], rotation: 180 };
+        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 180 };
       })(),
       (() => {
         // front left
@@ -1219,7 +1219,7 @@ export class Sphynx {
           -8 - p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, 0], rotation: 70 };
+        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 70 };
       })(),
       (() => {
         // back right
@@ -1228,10 +1228,11 @@ export class Sphynx {
           3 + p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, 0], rotation: -30 };
+        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: -30 };
       })(),
     ];
   }
+
   inserts() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
@@ -1272,7 +1273,8 @@ export class Sphynx {
         this.caseWalls().difference(this.USBHolderSpace()),
         this.caseRim(),
         this.placeThumbs(keyhole),
-        this.thumbConnectors()
+        this.thumbConnectors(),
+        this.inserts()
       )
       .difference(...[...(o.trackpad && [this.trackpadInset()])])
       .union(...models); // add models after cutting away
@@ -1312,7 +1314,5 @@ const sphynx = new Sphynx({
   trackpad: true,
 });
 
-export const main = sphynx
-  .buildCase(sphynx.singleKeyhole())
-  // .union(sphynx.USBHolder());
-  .union(sphynx.inserts(), sphynx.USBHolder());
+export const main = sphynx.buildCase(sphynx.singleKeyhole());
+// .union(sphynx.USBHolder());
