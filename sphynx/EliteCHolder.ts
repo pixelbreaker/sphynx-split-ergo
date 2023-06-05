@@ -9,7 +9,7 @@ import {
   Parameters,
 } from "./options";
 
-export class Splinky {
+export class EliteCHolder {
   readonly settings: { o: Options; p: Parameters };
 
   readonly boltX = 34;
@@ -131,7 +131,7 @@ export class Splinky {
       .union(
         this.mcu(),
         this.trs(),
-        cube([31, 5, 8], false).translate([0, -1.5, 0])
+        cube([31, 20, 8], false).translate([0, -1.5, 0])
       )
       .translate([0, 0, this.plateClearance])
       .mirror([1, 0, 0])
@@ -155,33 +155,9 @@ export class Splinky {
       )
       .mirror([1, 0, 0])
       .rotate([0, 0, 180]);
-
-    // return cylinder({ d: o.insertExternal, h: o.insertDepth, $fn: 20 })
-    //   .translate([this.boltX, 4.09, 0])
-    //   .union(
-    //     cylinder({ d: o.insertExternal, h: o.insertDepth, $fn: 20 }).translate([
-    //       0,
-    //       this.boltY,
-    //       0,
-    //     ])
-    //   )
-    //   .difference(
-    //     cylinder({ d: o.insertInternal, h: o.insertDepth + 2, $fn: 20 })
-    //       .translate([this.boltX, 4.09, 0])
-    //       .union(
-    //         cylinder({
-    //           d: o.insertInternal,
-    //           h: o.insertDepth + 2,
-    //           $fn: 20,
-    //         }).translate([0, this.boltY, -1])
-    //       )
-    //   )
-    //   .translate([0, 0, this.plateClearance + 1.6 + o.insertDepth / 2])
-    //   .mirror([1, 0, 0])
-    //   .rotate([0, 0, 180]);
   }
 }
 
-const splinky = new Splinky(defaultOptions);
+const splinky = new EliteCHolder(defaultOptions);
 
 export const main = splinky.cutaway();

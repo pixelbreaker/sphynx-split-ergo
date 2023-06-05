@@ -10,7 +10,7 @@ import { Shape3 } from "../src/csg/base3";
 import { Vec3 } from "../src/csg/base";
 import { V3 } from "../src/math";
 import { partition } from "./utils";
-import { Splinky } from "./Splinky";
+import { EliteCHolder } from "./EliteCHolder";
 import { Insert } from "./Insert";
 const { add, rotateX, rotateY, rotateZ } = V3;
 
@@ -1072,7 +1072,7 @@ export class Sphynx {
     const [x, y] = this.USBHolderPosition();
     let holder;
     if (o.mcuHolder === "bastardkb-holder") {
-      const splinky = new Splinky(o);
+      const splinky = new EliteCHolder(o);
       holder = splinky.assembled();
     } else {
       holder = importModel(`../models/${o.mcuHolder}.stl`).union(
@@ -1089,7 +1089,7 @@ export class Sphynx {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
     if (o.mcuHolder === "bastardkb-holder") {
-      const splinky = new Splinky(o);
+      const splinky = new EliteCHolder(o);
       return splinky.cutaway().translate([x, y, 0]);
     } else {
       return importModel(`../models/${o.mcuHolder}.stl`)
@@ -1236,7 +1236,7 @@ export class Sphynx {
   inserts() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    const splinky = new Splinky(o);
+    const splinky = new EliteCHolder(o);
 
     const [first, ...rest] = this.getInsertPositions().map(
       ({ pos, rotation }) => Insert.getInsert(o, pos, rotation)
@@ -1246,12 +1246,14 @@ export class Sphynx {
       ...rest,
       ...(this.isBastard() && [splinky.inserts().translate([x, y, 0])])
     );
-    return inserts.intersection(
-      this.outline()
-        .projection()
-        .offset({ delta: -1 })
-        .linear_extrude({ height: 50 })
-    );
+    return inserts
+      .intersection(
+        this.outline()
+          .projection()
+          .offset({ delta: -1 })
+          .linear_extrude({ height: 50 })
+      )
+      .difference(this.USBHolderSpace());
   }
 
   buildCase(keyhole: Shape3, mirror: boolean = false) {
@@ -1276,7 +1278,7 @@ export class Sphynx {
         this.thumbConnectors(),
         this.inserts()
       )
-      .difference(...[...(o.trackpad && [this.trackpadInset()])])
+      .difference(...(o.trackpad && [this.trackpadInset()]))
       .union(...models); // add models after cutting away
   }
 
