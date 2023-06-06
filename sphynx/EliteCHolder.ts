@@ -77,7 +77,7 @@ export class EliteCHolder {
           .color("Black")
           .translate([18.3 - 2.5, 2.8, -2.3])
       )
-      .translate([11.4, 0.7, 0])
+      .translate([10.5, 0.7, 0])
       .union(
         cylinder({
           r: this.USBRadius,
@@ -94,7 +94,7 @@ export class EliteCHolder {
           .color("SlateGray")
           .rotate([90, 0, 0])
           .translate([
-            16.7 + this.USBRadius - 1,
+            15.9 + this.USBRadius - 1,
             this.useForCutaway ? -1 : 2.5,
             this.USBRadius / 2 - 0.8,
           ])
@@ -113,7 +113,7 @@ export class EliteCHolder {
           .translate([6.8 / 2, 0, this.TRSDiameter / 2 - 0.5])
       )
       .color("DimGray")
-      .translate([1.8, -1, 1.6]);
+      .translate([0.8, -1, 1.6]);
   }
 
   assembled() {
@@ -131,7 +131,7 @@ export class EliteCHolder {
       .union(
         this.mcu(),
         this.trs(),
-        cube([31, 20, 8], false).translate([0, -1.5, 0])
+        cube([30, 20, 8.5], false).translate([0, -1.5, -0.5])
       )
       .translate([0, 0, this.plateClearance])
       .mirror([1, 0, 0])
@@ -143,12 +143,14 @@ export class EliteCHolder {
 
     return Insert.getInsert(
       o,
+      "case",
       [this.boltX, 4.09, this.plateClearance + 1.6 + o.insertDepth / 2],
       180
     )
       .union(
         Insert.getInsert(
           o,
+          "case",
           [0, this.boltY, this.plateClearance + 1.6 + o.insertDepth / 2],
           90
         )

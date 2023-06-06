@@ -20,6 +20,8 @@ export type Options = {
   columns: 5 | 6;
   extraHeight: number;
   extraWidth: number;
+  feetDiameter: number;
+  feetInsetDepth: number;
   insertDepth: number;
   insertExternal: number;
   insertInternal: number;
@@ -27,6 +29,8 @@ export type Options = {
   mcuHolder: MCUHolder;
   plateThickness: number;
   rows: 3 | 4;
+  screwHoleDiameter: number;
+  screwHoleCountersinkDiameter: number;
   side: RenderSide;
   tentingAngle: number;
   thumbOffsets: Vec3;
@@ -74,13 +78,17 @@ export const defaultOptions: Options = {
   encoder: false,
   extraHeight: 0,
   extraWidth: 1.4,
-  insertDepth: 4,
+  feetDiameter: 8,
+  feetInsetDepth: 1.5,
+  insertDepth: 5,
   insertExternal: 10,
   insertInternal: 5.4,
   keycapStyle: "choc",
-  mcuHolder: "elite-c",
+  mcuHolder: "bastardkb-holder",
   plateThickness: 2,
   rows: 3,
+  screwHoleDiameter: 3.7,
+  screwHoleCountersinkDiameter: 7,
   side: "right",
   switchSpacing: "choc",
   switchStyle: "choc",

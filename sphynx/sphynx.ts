@@ -240,13 +240,20 @@ export class Sphynx {
     const { o, p } = this.settings;
     return this.placeThumb(
       o.trackpad ? [18, -5, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
-      o.trackpad
-        ? [-3, -19, -1]
-        : o.encoder
-        ? [-10, -13, -6]
-        : [-15, -10.3, -1], // translation
+      this.getThumbRPosition(),
       shape
     );
+  }
+
+  getThumbRPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
+    const { o } = this.settings;
+
+    let position = offset;
+
+    return add(
+      position,
+      o.trackpad ? [-3, -19, -1] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
+    ); // translation
   }
 
   thumbMPlace(shape: Shape3): Shape3 {
@@ -254,7 +261,15 @@ export class Sphynx {
   }
 
   thumbLPlace(shape: Shape3): Shape3 {
-    return this.placeThumb([8, 0, 33], [-54, -26, -10], shape);
+    return this.placeThumb([8, 0, 33], this.getThumbLPosition(), shape);
+  }
+
+  getThumbLPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
+    const { o } = this.settings;
+
+    let position = offset;
+
+    return add(position, [-54, -26, -10]);
   }
 
   placeThumbs(
@@ -1048,7 +1063,7 @@ export class Sphynx {
         p.mountHeight / 2 - 1,
         0,
       ]);
-      pos = V3.add(pos, [2, 0, 0]);
+      pos = V3.add(pos, [4, 3.5, 0]);
     } else {
       pos = this.getKeyPosition(1, 0, [
         -(p.mountWidth / 2),
@@ -1059,9 +1074,8 @@ export class Sphynx {
         0,
       ]);
       pos = V3.add(pos, [2, 3, 0]);
+      pos = V3.add(pos, [o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
     }
-    pos = V3.add(pos, [2, 3.5, 0]);
-    pos = V3.add(pos, [o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
     return pos;
   }
 
@@ -1201,7 +1215,7 @@ export class Sphynx {
       (() => {
         // top center
         const [x, y] = this.getKeyPosition(2, 0, [5, p.mountHeight / 2, 0]);
-        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 0 };
+        return { pos: [x, y, 0] as Vec3, rotation: 0 };
       })(),
       (() => {
         // front right
@@ -1210,7 +1224,7 @@ export class Sphynx {
           -p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 180 };
+        return { pos: [x, y, 0] as Vec3, rotation: 180 };
       })(),
       (() => {
         // front left
@@ -1219,7 +1233,7 @@ export class Sphynx {
           -8 - p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: 70 };
+        return { pos: [x, y, 0] as Vec3, rotation: 70 };
       })(),
       (() => {
         // back right
@@ -1228,7 +1242,88 @@ export class Sphynx {
           3 + p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, o.insertDepth / 2] as Vec3, rotation: -30 };
+        return { pos: [x, y, 0] as Vec3, rotation: -30 };
+      })(),
+    ];
+  }
+
+  // feet
+  getFeetPositions(): { pos: Vec3 }[] {
+    const { o, p } = this.settings;
+    return [
+      (() => {
+        // top left
+        const [x, y] = this.getKeyPosition(0, 0, [
+          -p.mountWidth / 2 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 5 - o.feetDiameter / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0] as Vec3 };
+      })(),
+      (() => {
+        // top center
+        const [x, y] = this.getKeyPosition(3, 0, [
+          p.mountWidth / 2 - 3 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 6 - o.feetDiameter / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0] as Vec3 };
+      })(),
+      (() => {
+        // top right
+        const [x, y] = this.getKeyPosition(o.columns - 1, 0, [
+          p.mountWidth / 2 - 3 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 7 - o.feetDiameter / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0] as Vec3 };
+      })(),
+      (() => {
+        // bottom right
+        const [x, y] = this.getKeyPosition(o.columns - 1, o.rows - 1, [
+          p.mountWidth / 2 - 3.5 + o.feetDiameter / 2,
+          -p.mountHeight / 2 - 5 + o.feetDiameter / 2,
+          0,
+        ]);
+        return { pos: [x, y, 0] as Vec3 };
+      })(),
+      (() => {
+        // bottom centre
+        const [x, y] = add(
+          add(this.getKeyPosition(1, o.rows - 1), o.thumbOffsets),
+          this.getThumbRPosition(
+            o.trackpad
+              ? [
+                  p.mountWidth / 2 + 10 - o.feetDiameter / 2,
+                  -p.mountHeight / 2 - 12 + o.feetDiameter / 2,
+                  0,
+                ]
+              : o.encoder
+              ? [
+                  p.mountWidth / 2 + 12 - o.feetDiameter / 2,
+                  -p.mountHeight / 2 - 12 + o.feetDiameter / 2,
+                  0,
+                ]
+              : [
+                  p.mountWidth / 2 + 14 - o.feetDiameter / 2,
+                  -p.mountHeight / 2 - 10 + o.feetDiameter / 2,
+                  0,
+                ]
+          )
+        );
+        return { pos: [x, y, 0] as Vec3 };
+      })(),
+      (() => {
+        // bottom left (thumb)
+        const [x, y] = add(
+          add(this.getKeyPosition(1, o.rows - 1), o.thumbOffsets),
+          this.getThumbLPosition([
+            8,
+            -p.mountHeight / 2 - 17 + o.feetDiameter / 2,
+            0,
+          ])
+        );
+        return { pos: [x, y, 0] as Vec3 };
       })(),
     ];
   }
@@ -1239,7 +1334,13 @@ export class Sphynx {
     const splinky = new EliteCHolder(o);
 
     const [first, ...rest] = this.getInsertPositions().map(
-      ({ pos, rotation }) => Insert.getInsert(o, pos, rotation)
+      ({ pos, rotation }) =>
+        Insert.getInsert(
+          o,
+          "case",
+          [pos[0], pos[1], o.insertDepth / 2],
+          rotation
+        )
     );
 
     const inserts = first.union(
@@ -1254,6 +1355,55 @@ export class Sphynx {
           .linear_extrude({ height: 50 })
       )
       .difference(this.USBHolderSpace());
+  }
+
+  screwholeOuters() {
+    const { o, p } = this.settings;
+
+    const [first, ...rest] = this.getInsertPositions().map(
+      ({ pos, rotation }) =>
+        Insert.getInsert(o, "outer", pos, rotation, o.plateThickness)
+    );
+
+    const inserts = first.union(...rest);
+    return inserts
+      .intersection(
+        this.outline()
+          .projection()
+          .offset({ delta: -1 })
+          .linear_extrude({ height: 50 })
+      )
+      .translate([0, 0, o.plateThickness / 2]);
+  }
+
+  screwholes() {
+    const { o, p } = this.settings;
+
+    const [first, ...rest] = this.getInsertPositions().map(
+      ({ pos, rotation }) => Insert.getInsert(o, "screwhole", pos, rotation)
+    );
+
+    const inserts = first.union(...rest);
+    return inserts;
+  }
+
+  feetOuters() {
+    const { o } = this.settings;
+
+    const [first, ...rest] = this.getFeetPositions().map(({ pos }) =>
+      Insert.getInsert(o, "foot-outer", pos, 0, o.plateThickness)
+    );
+
+    return first.union(...rest);
+  }
+  feetInsets() {
+    const { o } = this.settings;
+
+    const [first, ...rest] = this.getFeetPositions().map(({ pos }) =>
+      Insert.getInsert(o, "foot-inset", pos, 0, o.feetInsetDepth)
+    );
+
+    return first.union(...rest);
   }
 
   buildCase(keyhole: Shape3, mirror: boolean = false) {
@@ -1278,7 +1428,7 @@ export class Sphynx {
         this.thumbConnectors(),
         this.inserts()
       )
-      .difference(...(o.trackpad && [this.trackpadInset()]))
+      .difference(...[...(o.trackpad && [this.trackpadInset()])])
       .union(...models); // add models after cutting away
   }
 
@@ -1298,14 +1448,16 @@ export class Sphynx {
     return shape
       .difference(
         shape
-          .offset({ delta: -4 })
+          .offset({ r: -4 })
           .difference(
             importShape("../models/voronoi.dxf")
               .scale([0.25, 0.25, 1])
               .translate([-168, -85, 0])
           )
       )
-      .linear_extrude({ height: o.plateThickness, center: false });
+      .linear_extrude({ height: o.plateThickness, center: false })
+      .union(this.screwholeOuters(), this.feetOuters())
+      .difference(this.screwholes(), this.feetInsets());
   };
 }
 
@@ -1317,4 +1469,4 @@ const sphynx = new Sphynx({
 });
 
 export const main = sphynx.buildCase(sphynx.singleKeyhole());
-// .union(sphynx.USBHolder());
+// .union(sphynx.USBHolder().debug());
