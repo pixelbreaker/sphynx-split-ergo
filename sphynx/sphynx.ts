@@ -119,7 +119,6 @@ export class Sphynx {
             ])
           )
           .translate([0, 0, p.keyholeThickness / 2]);
-      // .translate([0, 0, p.keyholeThickness / 2 - tabHeight]);
       case "choc":
       default:
         return cube([p.mountWidth, p.mountHeight, p.keyholeThickness])
@@ -137,7 +136,6 @@ export class Sphynx {
             //   p.keyholeThickness,
             // ])
           );
-      // .translate([0, 0, o.webThickness / 2 - tabHeight]);
     }
   }
 
@@ -216,14 +214,6 @@ export class Sphynx {
     return firstKey.union(...restKeys);
   }
 
-  buildWall(start: Shape3, end: Shape3) {
-    const edge = start.hull(end);
-    return edge
-      .projection()
-      .linear_extrude({ height: 1, center: false })
-      .hull(edge);
-  }
-
   // Thumb keys
   placeThumb(rot: Vec3, move: Vec3, shape: Shape3) {
     const { o, p } = this.settings;
@@ -236,13 +226,12 @@ export class Sphynx {
       .translate([p.mountWidth / 2, -p.mountHeight / 2, 0]);
   }
 
-  thumbRPlace(shape: Shape3): Shape3 {
-    const { o, p } = this.settings;
-    return this.placeThumb(
-      o.trackpad ? [18, -5, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
-      this.getThumbRPosition(),
-      shape
-    );
+  getThumbLPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
+    const { o } = this.settings;
+
+    let position = offset;
+
+    return add(position, [-54, -26, -10]);
   }
 
   getThumbRPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
@@ -253,7 +242,16 @@ export class Sphynx {
     return add(
       position,
       o.trackpad ? [-3, -19, -1] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
-    ); // translation
+    );
+  }
+
+  thumbRPlace(shape: Shape3): Shape3 {
+    const { o, p } = this.settings;
+    return this.placeThumb(
+      o.trackpad ? [18, -5, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
+      this.getThumbRPosition(),
+      shape
+    );
   }
 
   thumbMPlace(shape: Shape3): Shape3 {
@@ -262,14 +260,6 @@ export class Sphynx {
 
   thumbLPlace(shape: Shape3): Shape3 {
     return this.placeThumb([8, 0, 33], this.getThumbLPosition(), shape);
-  }
-
-  getThumbLPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
-    const { o } = this.settings;
-
-    let position = offset;
-
-    return add(position, [-54, -26, -10]);
   }
 
   placeThumbs(
@@ -290,7 +280,13 @@ export class Sphynx {
   }
 
   // Utility shapes
-  // const webThickness = 2;
+  buildWall(start: Shape3, end: Shape3) {
+    const edge = start.hull(end);
+    return edge
+      .projection()
+      .linear_extrude({ height: 1, center: false })
+      .hull(edge);
+  }
 
   getWebPost(
     pos: "TL" | "TR" | "BL" | "BR",
@@ -1396,6 +1392,7 @@ export class Sphynx {
 
     return first.union(...rest);
   }
+
   feetInsets() {
     const { o } = this.settings;
 
