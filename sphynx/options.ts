@@ -29,15 +29,13 @@ export type Options = {
   mcuHolder: MCUHolder;
   plateThickness: number;
   rows: 3 | 4;
-  screwHoleDiameter: number;
   screwHoleCountersinkDiameter: number;
+  screwHoleDiameter: number;
   side: RenderSide;
   tentingAngle: number;
   thumbOffsets: Vec3;
   webThickness: number;
   zOffset: number;
-  // trackpad: boolean;
-  // encoder: boolean;
 } & ( // Discriminated union to disable encoder when trackpad is enabled
   | { trackpad: true; encoder: false }
   | { trackpad: false; encoder: boolean }
@@ -67,6 +65,7 @@ export type Parameters = {
   mountWidth?: number;
   radiusColumn: number;
   radiusRow: number;
+  trackpadOffsetZ: number;
 };
 
 export const defaultOptions: Options = {
@@ -77,18 +76,18 @@ export const defaultOptions: Options = {
   columns: 5,
   encoder: false,
   extraHeight: 0,
-  extraWidth: 1.4,
+  extraWidth: 1.5,
   feetDiameter: 8,
-  feetInsetDepth: 1.5,
-  insertDepth: 5,
+  feetInsetDepth: 1,
+  insertDepth: 4,
   insertExternal: 10,
   insertInternal: 5.4,
   keycapStyle: "choc",
   mcuHolder: "bastardkb-holder",
   plateThickness: 2,
   rows: 3,
-  screwHoleDiameter: 3.7,
   screwHoleCountersinkDiameter: 7,
+  screwHoleDiameter: 3.7,
   side: "right",
   switchSpacing: "choc",
   switchStyle: "choc",
@@ -96,7 +95,7 @@ export const defaultOptions: Options = {
   thumbOffsets: [8, -1, -3],
   trackpad: false,
   webThickness: 2,
-  zOffset: 10,
+  zOffset: 11,
 };
 
 export const buildOptions = (
@@ -110,7 +109,7 @@ export const buildParameters = (
   o: Required<Options>,
   overrides: Partial<Parameters> = {}
 ) => {
-  const keyholeWidth = o.switchStyle === "choc" ? 13.8 : 13.95;
+  const keyholeWidth = o.switchStyle === "choc" ? 13.82 : 13.95;
   const keyholeHeight = keyholeWidth;
   const mountWidth = keyholeWidth + (o.switchSpacing === "choc" ? 3.2 : 4);
   const mountHeight = mountWidth;
@@ -120,13 +119,14 @@ export const buildParameters = (
   const curveRow = 4;
   const radiusRow =
     keyTopHeight +
-    (mountHeight + o.extraHeight) / 2 / Math.sin(deg2rad(curveColumn) / 2);
+    (mountHeight + o.extraHeight) / 2 / Math.sin(deg2rad(curveColumn / 2));
   const radiusColumn =
     keyTopHeight +
-    (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow) / 2);
-  const deltaColumnX = -1 + -(radiusColumn * Math.sin(deg2rad(curveRow)));
+    (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow / 2));
+  const deltaColumnX = -(1 + radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
   const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;
+  const trackpadOffsetZ = o.switchStyle === "choc" ? 7 : 10;
 
   return {
     centreRow,
@@ -142,6 +142,7 @@ export const buildParameters = (
     mountWidth,
     radiusColumn,
     radiusRow,
+    trackpadOffsetZ,
     ...overrides,
   };
 };

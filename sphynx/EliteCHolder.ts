@@ -17,9 +17,8 @@ export class EliteCHolder {
 
   readonly insertHoleDiameter = 5.5;
 
-  readonly cutoutHTall = 8.5;
-  readonly cutoutHShort = 8;
-  readonly cutoutW = 29.9;
+  readonly cutoutH = 8.5;
+  readonly cutoutW = 30;
 
   readonly holeOffsetV = 4;
   readonly TRSDiameter = 5.5;
@@ -28,7 +27,7 @@ export class EliteCHolder {
 
   readonly caseIndent = 2.1;
 
-  readonly plateClearance = 3;
+  readonly plateClearance = 4;
 
   useForCutaway = false;
 
@@ -99,7 +98,7 @@ export class EliteCHolder {
             this.USBRadius / 2 - 0.8,
           ])
       )
-      .translate([0, -1.5, this.holeOffsetV]);
+      .translate([0.2, -1.5, this.holeOffsetV]);
   }
 
   trs() {
@@ -113,7 +112,7 @@ export class EliteCHolder {
           .translate([6.8 / 2, 0, this.TRSDiameter / 2 - 0.5])
       )
       .color("DimGray")
-      .translate([0.8, -1, 1.6]);
+      .translate([1, -1, 1.6]);
   }
 
   assembled() {
@@ -131,7 +130,7 @@ export class EliteCHolder {
       .union(
         this.mcu(),
         this.trs(),
-        cube([30, 20, 8.5], false).translate([0, -1.5, -0.5])
+        cube([this.cutoutW, 20, this.cutoutH], false).translate([0, -1.5, -0.5])
       )
       .translate([0, 0, this.plateClearance])
       .mirror([1, 0, 0])

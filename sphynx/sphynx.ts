@@ -31,7 +31,6 @@ export class Sphynx {
   readonly thumbSphere: Shape3;
   readonly webSphere: Shape3;
   readonly trackpadOffsetX = 2;
-  trackpadOffsetY: number;
 
   static getColumnOffsets(column: number): Vec3 {
     const offsets: Vec3[] = [
@@ -64,7 +63,6 @@ export class Sphynx {
     this.postOffset = { x: this.postSize / 2, y: this.postSize / 2 };
     this.sphereOffset = { x: o.caseSpacing, y: o.caseSpacing };
     this.thumbSphereOffset = { x: -o.caseSpacing - 1, y: -o.caseSpacing - 1 };
-    this.trackpadOffsetY = o.switchStyle === "choc" ? 5 : 8;
     this.webRim = sphere({
       d: this.sphereSize * 1.5,
       $fn: this.sphereQuality,
@@ -241,7 +239,7 @@ export class Sphynx {
 
     return add(
       position,
-      o.trackpad ? [-3, -19, -1] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
+      o.trackpad ? [-3, -19, -3] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
     );
   }
 
@@ -1080,16 +1078,16 @@ export class Sphynx {
   USBHolder() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    let holder;
+    let mcu;
     if (o.mcuHolder === "bastardkb-holder") {
-      const splinky = new EliteCHolder(o);
-      holder = splinky.assembled();
+      const holder = new EliteCHolder(o);
+      mcu = holder.assembled();
     } else {
-      holder = importModel(`../models/${o.mcuHolder}.stl`).union(
+      mcu = importModel(`../models/${o.mcuHolder}.stl`).union(
         cube([9, 6, 18]).translate(this.TRSCutPos)
       );
     }
-    return holder
+    return mcu
 
       .rotate([0, 0, (Sphynx.getColumnSplay(0) + Sphynx.getColumnSplay(1)) / 2])
       .translate([x, y, 0]);
@@ -1099,8 +1097,8 @@ export class Sphynx {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
     if (o.mcuHolder === "bastardkb-holder") {
-      const splinky = new EliteCHolder(o);
-      return splinky.cutaway().translate([x, y, 0]);
+      const holder = new EliteCHolder(o);
+      return holder.cutaway().translate([x, y, 0]);
     } else {
       return importModel(`../models/${o.mcuHolder}.stl`)
         .projection()
@@ -1119,11 +1117,12 @@ export class Sphynx {
   }
 
   previewTrackpad() {
+    const { o, p } = this.settings;
     return this.thumbRPlace(
       cylinder({ d: 40, h: 2, $fn: 70 }).translate([
         this.trackpadOffsetX,
         0,
-        this.trackpadOffsetY + 1.5,
+        p.trackpadOffsetZ + 1.5,
       ])
     ).color("#222222");
   }
@@ -1147,10 +1146,10 @@ export class Sphynx {
   trackpadInset() {
     const { o, p } = this.settings;
     return this.thumbRPlace(
-      cylinder({ d: 41, h: 8, $fn: 50 }).translate([
+      cylinder({ d: 38, h: 8, $fn: 50 }).translate([
         this.trackpadOffsetX,
         0,
-        this.trackpadOffsetY + 2,
+        p.trackpadOffsetZ + 1.25,
       ])
     )
       .hull(
@@ -1164,8 +1163,8 @@ export class Sphynx {
       )
       .union(
         this.thumbRPlace(
-          cylinder({ d: 20, h: 60 })
-            .translate([this.trackpadOffsetX - 3, 6, 0])
+          cylinder({ d: 20, h: 30 })
+            .translate([this.trackpadOffsetX - 3, 6, 2])
             .rotate([5, 0, 20])
         )
       );
@@ -1178,7 +1177,7 @@ export class Sphynx {
       cylinder({ d: 42, h: 4, $fn: 70 }).translate([
         this.trackpadOffsetX,
         0,
-        this.trackpadOffsetY - 2,
+        p.trackpadOffsetZ - 1.25,
       ])
     ).hull(
       this.thumbRPlace(this.posts.thumb.br).union(
@@ -1200,7 +1199,7 @@ export class Sphynx {
       importModel("../models/cirque-40-flat.stl")
         .mirror([Number(mirror), 0, 0])
         .rotate([0, 0, 180])
-        .translate([this.trackpadOffsetX, 0, this.trackpadOffsetY])
+        .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
     ).union(hullForm);
   }
 
@@ -1216,11 +1215,11 @@ export class Sphynx {
       (() => {
         // front right
         const [x, y] = this.getKeyPosition(3, o.rows - 1, [
-          0,
-          -p.mountHeight / 2,
+          -p.mountWidth / 2 - 2,
+          -p.mountHeight / 2 - 2,
           0,
         ]);
-        return { pos: [x, y, 0] as Vec3, rotation: 180 };
+        return { pos: [x, y, 0] as Vec3, rotation: 210 };
       })(),
       (() => {
         // front left
@@ -1234,11 +1233,11 @@ export class Sphynx {
       (() => {
         // back right
         const [x, y] = this.getKeyPosition(4, 0, [
-          -p.mountWidth / 2,
-          3 + p.mountHeight / 2,
+          -2 - p.mountWidth / 2,
+          2 + p.mountHeight / 2,
           0,
         ]);
-        return { pos: [x, y, 0] as Vec3, rotation: -30 };
+        return { pos: [x, y, 0] as Vec3, rotation: -45 };
       })(),
     ];
   }
@@ -1250,8 +1249,8 @@ export class Sphynx {
       (() => {
         // top left
         const [x, y] = this.getKeyPosition(0, 0, [
-          -p.mountWidth / 2 + o.feetDiameter / 2,
-          p.mountHeight / 2 + 5 - o.feetDiameter / 2,
+          -p.mountWidth / 2 + 1 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 4 - o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1268,8 +1267,8 @@ export class Sphynx {
       (() => {
         // top right
         const [x, y] = this.getKeyPosition(o.columns - 1, 0, [
-          p.mountWidth / 2 - 3 + o.feetDiameter / 2,
-          p.mountHeight / 2 + 7 - o.feetDiameter / 2,
+          p.mountWidth / 2 - 4 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 5.5 - o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1277,8 +1276,8 @@ export class Sphynx {
       (() => {
         // bottom right
         const [x, y] = this.getKeyPosition(o.columns - 1, o.rows - 1, [
-          p.mountWidth / 2 - 3.5 + o.feetDiameter / 2,
-          -p.mountHeight / 2 - 5 + o.feetDiameter / 2,
+          p.mountWidth / 2 - 4 + o.feetDiameter / 2,
+          -p.mountHeight / 2 - 4 + o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1327,7 +1326,7 @@ export class Sphynx {
   inserts() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    const splinky = new EliteCHolder(o);
+    const holder = new EliteCHolder(o);
 
     const [first, ...rest] = this.getInsertPositions().map(
       ({ pos, rotation }) =>
@@ -1341,7 +1340,7 @@ export class Sphynx {
 
     const inserts = first.union(
       ...rest,
-      ...(this.isBastard() && [splinky.inserts().translate([x, y, 0])])
+      ...(this.isBastard() && [holder.inserts().translate([x, y, 0])])
     );
     return inserts
       .intersection(
@@ -1422,11 +1421,10 @@ export class Sphynx {
         this.caseWalls().difference(this.USBHolderSpace()),
         this.caseRim(),
         this.placeThumbs(keyhole),
-        this.thumbConnectors(),
-        this.inserts()
+        this.thumbConnectors()
       )
       .difference(...[...(o.trackpad && [this.trackpadInset()])])
-      .union(...models); // add models after cutting away
+      .union(this.inserts(), ...models); // add models after cutting away
   }
 
   outline() {
