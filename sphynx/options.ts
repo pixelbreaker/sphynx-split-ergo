@@ -69,8 +69,8 @@ export type Parameters = {
 };
 
 export const defaultOptions: Options = {
-  caseRimDrop: 1,
-  caseSpacing: 2,
+  caseRimDrop: 2,
+  caseSpacing: 2.5,
   centerColumn: 2.5,
   centreRow: 1.5,
   columns: 5,
@@ -92,7 +92,7 @@ export const defaultOptions: Options = {
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
-  thumbOffsets: [8, -1, -3],
+  thumbOffsets: [8, -3, -3],
   trackpad: false,
   webThickness: 2,
   zOffset: 11,
@@ -126,7 +126,7 @@ export const buildParameters = (
   const deltaColumnX = -(1 + radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
   const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;
-  const trackpadOffsetZ = o.switchStyle === "choc" ? 7 : 10;
+  const trackpadOffsetZ = o.switchStyle === "choc" ? 8.5 : 11;
 
   return {
     centreRow,

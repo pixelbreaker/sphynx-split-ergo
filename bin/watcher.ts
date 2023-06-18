@@ -54,7 +54,7 @@ const updateFile = _.debounce((path: string, stats: fs.Stats) => {
   load(path);
 }, 300);
 
-watcher.on("change", updateAll);
+watcher.on("change", updateFile);
 watcher.on("ready", () => {
   console.log("watching");
   console.log(watcher.getWatched());

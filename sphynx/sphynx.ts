@@ -239,14 +239,14 @@ export class Sphynx {
 
     return add(
       position,
-      o.trackpad ? [-3, -19, -3] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
+      o.trackpad ? [-2, -16, -3] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
     );
   }
 
   thumbRPlace(shape: Shape3): Shape3 {
     const { o, p } = this.settings;
     return this.placeThumb(
-      o.trackpad ? [18, -5, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
+      o.trackpad ? [17, -9, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
       this.getThumbRPosition(),
       shape
     );
@@ -358,6 +358,7 @@ export class Sphynx {
     // columns
     for (let col = 0; col < o.columns; col++) {
       for (let row = -1; row < o.rows; row++) {
+        if (row == o.rows - 1 && col < 2) continue;
         connectors.push(
           this.triangleHulls(
             this.keyPlace(col, row, this.posts.post.bl),
@@ -372,6 +373,7 @@ export class Sphynx {
     // corners
     for (let col = -1; col < o.columns; col++) {
       for (let row = -1; row < o.rows; row++) {
+        if (row == o.rows - 1 && col < (o.encoder ? 2 : 1)) continue;
         connectors.push(
           this.triangleHulls(
             this.keyPlace(col, row, this.posts.post.br),
@@ -411,15 +413,14 @@ export class Sphynx {
     // middle thumb to col 0
     connectors.push(
       this.triangleHulls(
-        this.keyPlace(-1, o.rows, this.posts.post.tr),
+        this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.keyPlace(-1, o.rows - 1, this.posts.rim.br),
         this.thumbLPlace(this.posts.thumb.tr)
       )
     );
     connectors.push(
       this.triangleHulls(
-        this.keyPlace(-1, o.rows, this.posts.post.tr),
-        // this.keyPlace(-1, o.rows - 1, this.posts.rim.br),
+        this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.thumbLPlace(this.posts.thumb.tr),
         this.thumbMPlace(this.posts.post.tl)
       )
@@ -427,10 +428,10 @@ export class Sphynx {
     connectors.push(
       this.triangleHulls(
         this.thumbMPlace(this.posts.post.tl),
-        this.keyPlace(-1, o.rows, this.posts.post.tr),
+        this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.thumbMPlace(this.posts.post.tr),
-        this.keyPlace(0, o.rows, this.posts.post.tl),
-        this.keyPlace(0, o.rows, this.posts.post.tr)
+        this.keyPlace(0, o.rows - 1, this.posts.post.bl),
+        this.keyPlace(0, o.rows - 1, this.posts.post.br)
       )
     );
 
@@ -439,33 +440,48 @@ export class Sphynx {
       this.triangleHulls(
         this.thumbRPlace(this.posts.post.tl),
         this.thumbMPlace(this.posts.post.tr),
-        this.keyPlace(1, o.rows, this.posts.post.tl),
-        this.keyPlace(0, o.rows, this.posts.post.tr)
-      )
-    );
-    connectors.push(
-      this.triangleHulls(
-        this.thumbRPlace(this.posts.post.tl),
-        this.thumbRPlace(this.posts.post.tr),
-        this.keyPlace(1, o.rows, this.posts.post.tl),
-        this.keyPlace(1, o.rows, this.posts.post.tr)
-      )
-    );
-
-    connectors.push(
-      this.triangleHulls(
-        this.thumbRPlace(this.posts.thumb.br),
-        this.thumbRPlace(this.posts.post.tr),
-        this.keyPlace(3, o.rows, this.posts.rim.tl),
-        this.keyPlace(3, o.rows, this.posts.post.tl)
+        this.keyPlace(1, o.rows - 1, this.posts.post.bl),
+        this.keyPlace(0, o.rows - 1, this.posts.post.br)
       )
     );
     if (!o.encoder) {
       connectors.push(
         this.triangleHulls(
           this.thumbRPlace(this.posts.post.tr),
-          this.keyPlace(3, o.rows, this.posts.post.tl),
           this.keyPlace(1, o.rows, this.posts.post.tr),
+          this.keyPlace(1, o.rows - 1, this.posts.post.br)
+        )
+      );
+    }
+
+    connectors.push(
+      this.triangleHulls(
+        this.thumbRPlace(this.posts.post.tl),
+        this.thumbRPlace(this.posts.post.tr),
+        this.keyPlace(1, o.rows - 1, this.posts.post.bl),
+        this.keyPlace(1, o.rows - 1, this.posts.post.br)
+      )
+    );
+
+    connectors.push(
+      this.triangleHulls(
+        this.keyPlace(
+          3,
+          o.rows,
+          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
+        ),
+        this.thumbRPlace(this.posts.thumb.br),
+        this.keyPlace(3, o.rows, this.posts.post.tl),
+        this.thumbRPlace(this.posts.post.tr)
+      )
+    );
+
+    if (!o.encoder) {
+      connectors.push(
+        this.triangleHulls(
+          this.thumbRPlace(this.posts.post.tr),
+          this.keyPlace(3, o.rows, this.posts.post.tl),
+          this.keyPlace(1, o.rows - 1, this.posts.post.br),
           this.keyPlace(2, o.rows, this.posts.post.tr),
           this.keyPlace(2, o.rows, this.posts.post.tl)
         )
@@ -481,9 +497,10 @@ export class Sphynx {
 
       connectors.push(
         this.triangleHulls(
-          this.thumbRPlace(this.posts.post.tr),
           this.keyPlace(2, o.rows, this.posts.post.tl),
-          this.keyPlace(1, o.rows, this.posts.post.tr)
+          this.keyPlace(2, o.rows - 1, this.posts.post.bl),
+          this.thumbRPlace(this.posts.post.tr),
+          this.keyPlace(1, o.rows - 1, this.posts.post.br)
         )
       );
 
@@ -620,7 +637,11 @@ export class Sphynx {
     walls.push(
       this.buildWall(
         this.thumbRPlace(this.posts.thumb.br),
-        this.keyPlace(3, o.rows, this.posts.rim.tl)
+        this.keyPlace(
+          3,
+          o.rows,
+          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
+        )
       )
     );
 
@@ -634,16 +655,18 @@ export class Sphynx {
 
     const rimHulls = [];
     for (let row = -1; row < o.rows; row++) {
-      rimHulls.push(
-        this.triangleHulls(
-          this.keyPlace(-1, row, this.posts.rim.br),
-          row < o.rows - 1
-            ? this.keyPlace(-1, row + 1, this.posts.rim.tr)
-            : null,
-          this.keyPlace(-1, row, this.posts.post.br),
-          this.keyPlace(-1, row + 1, this.posts.post.tr)
-        )
-      );
+      if (row < o.rows - 1) {
+        rimHulls.push(
+          this.triangleHulls(
+            this.keyPlace(-1, row, this.posts.rim.br),
+            row < o.rows - 1
+              ? this.keyPlace(-1, row + 1, this.posts.rim.tr)
+              : null,
+            this.keyPlace(-1, row, this.posts.post.br),
+            this.keyPlace(-1, row + 1, this.posts.post.tr)
+          )
+        );
+      }
       if (row >= 0) {
         rimHulls.push(
           this.triangleHulls(
@@ -1054,7 +1077,7 @@ export class Sphynx {
     if (this.isBastard()) {
       pos = this.getKeyPosition(0, 0, [
         -(p.mountWidth / 2) - 1,
-        p.mountHeight / 2 - 1,
+        p.mountHeight / 2 - 0,
         0,
       ]);
       pos = V3.add(pos, [4, 3.5, 0]);
@@ -1183,7 +1206,11 @@ export class Sphynx {
       this.thumbRPlace(this.posts.thumb.br).union(
         this.thumbRPlace(this.posts.thumb.bl),
         this.thumbRPlace(this.posts.thumb.tl),
-        this.keyPlace(3, o.rows, this.posts.rim.tl),
+        this.keyPlace(
+          3,
+          o.rows,
+          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
+        ),
         this.keyPlace(2, o.rows, this.posts.post.tr),
         this.keyPlace(2, o.rows, this.posts.post.tl)
       )
@@ -1447,7 +1474,7 @@ export class Sphynx {
           .difference(
             importShape("../models/voronoi.dxf")
               .scale([0.25, 0.25, 1])
-              .translate([-168, -85, 0])
+              .translate([-162, -75, 0])
           )
       )
       .linear_extrude({ height: o.plateThickness, center: false })
