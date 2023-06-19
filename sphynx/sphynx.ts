@@ -1180,13 +1180,15 @@ export class Sphynx {
       ])
     )
       .hull(
-        this.thumbRPlace(this.posts.thumb.br).union(
-          this.thumbMPlace(this.posts.thumb.br),
-          this.thumbRPlace(this.posts.post.tl),
-          this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -3, 1]),
-          this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -3, 1]),
-          this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -3, 1])
-        )
+        this.thumbRPlace(this.posts.thumb.br)
+          .translate([0, 2, 2])
+          .union(
+            this.thumbMPlace(this.posts.thumb.br).translate([0, 2, 2]),
+            this.thumbRPlace(this.posts.post.tl),
+            this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -3, 2]),
+            this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -3, 1]),
+            this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -3, 1])
+          )
       )
       .union(
         this.thumbRPlace(
