@@ -23,7 +23,7 @@ export class Sphynx {
   readonly postSize = 0.1;
   // readonly postOffset = { x: this.postSize / 2, y: this.postSize / 2 };
   readonly sphereSize;
-  readonly sphereQuality = 12;
+  readonly sphereQuality = 15;
   readonly postOffset: { x: number; y: number };
   readonly sphereOffset: { x: number; y: number };
   readonly thumbSphereOffset: { x: number; y: number };
@@ -239,7 +239,11 @@ export class Sphynx {
 
     return add(
       position,
-      o.trackpad ? [-2, -16, -3] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
+      o.trackpad
+        ? [-3, -14.5, -3]
+        : o.encoder
+        ? [-10, -13, -6]
+        : [-15, -10.3, -1]
     );
   }
 
@@ -1176,8 +1180,8 @@ export class Sphynx {
       ])
     )
       .hull(
-        this.thumbRPlace(this.posts.post.br).union(
-          this.thumbRPlace(this.posts.post.bl),
+        this.thumbRPlace(this.posts.thumb.br).union(
+          this.thumbMPlace(this.posts.thumb.br),
           this.thumbRPlace(this.posts.post.tl),
           this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -3, 1]),
           this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -3, 1]),
@@ -1197,15 +1201,15 @@ export class Sphynx {
   trackpadOuter() {
     const { o, p } = this.settings;
     return this.thumbRPlace(
-      cylinder({ d: 42, h: 4, $fn: 70 }).translate([
+      cylinder({ d: 42, h: 4, $fn: 95 }).translate([
         this.trackpadOffsetX,
         0,
         p.trackpadOffsetZ - 1.25,
       ])
     ).hull(
       this.thumbRPlace(this.posts.thumb.br).union(
-        this.thumbRPlace(this.posts.thumb.bl),
-        this.thumbRPlace(this.posts.thumb.tl),
+        this.thumbMPlace(this.posts.thumb.br),
+        this.thumbRPlace(this.posts.post.tl),
         this.keyPlace(
           3,
           o.rows,
