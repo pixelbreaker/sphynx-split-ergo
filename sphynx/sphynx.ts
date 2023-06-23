@@ -1282,8 +1282,8 @@ export class Sphynx {
       (() => {
         // top left
         const [x, y] = this.getKeyPosition(0, 0, [
-          -p.mountWidth / 2 + 1 + o.feetDiameter / 2,
-          p.mountHeight / 2 + 4 - o.feetDiameter / 2,
+          -p.mountWidth / 2 - 1 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 5 - o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1292,7 +1292,7 @@ export class Sphynx {
         // top center
         const [x, y] = this.getKeyPosition(3, 0, [
           p.mountWidth / 2 - 3 + o.feetDiameter / 2,
-          p.mountHeight / 2 + 6 - o.feetDiameter / 2,
+          p.mountHeight / 2 + 7 - o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1300,8 +1300,8 @@ export class Sphynx {
       (() => {
         // top right
         const [x, y] = this.getKeyPosition(o.columns - 1, 0, [
-          p.mountWidth / 2 - 4 + o.feetDiameter / 2,
-          p.mountHeight / 2 + 5.5 - o.feetDiameter / 2,
+          p.mountWidth / 2 - 3 + o.feetDiameter / 2,
+          p.mountHeight / 2 + 6.5 - o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1309,8 +1309,8 @@ export class Sphynx {
       (() => {
         // bottom right
         const [x, y] = this.getKeyPosition(o.columns - 1, o.rows - 1, [
-          p.mountWidth / 2 - 4 + o.feetDiameter / 2,
-          -p.mountHeight / 2 - 4 + o.feetDiameter / 2,
+          p.mountWidth / 2 - 3.5 + o.feetDiameter / 2,
+          -p.mountHeight / 2 - 6 + o.feetDiameter / 2,
           0,
         ]);
         return { pos: [x, y, 0] as Vec3 };
@@ -1322,8 +1322,8 @@ export class Sphynx {
           this.getThumbRPosition(
             o.trackpad
               ? [
-                  p.mountWidth / 2 + 10 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 12 + o.feetDiameter / 2,
+                  p.mountWidth / 2 + 10.5 - o.feetDiameter / 2,
+                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2,
                   0,
                 ]
               : o.encoder
@@ -1442,8 +1442,8 @@ export class Sphynx {
       models.push(this.trackpad(mirror));
     } else if (o.encoder) {
       models.push(
-        this.thumbRPlace(importModel("../models/ec11.stl")).translate([
-          0, -0.8, -2.5,
+        this.thumbRPlace(importModel("../models/ec11-2.stl")).translate([
+          0, -0.8, -2.4,
         ])
       );
     }

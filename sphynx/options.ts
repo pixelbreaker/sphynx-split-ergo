@@ -77,17 +77,17 @@ export const defaultOptions: Options = {
   encoder: false,
   extraHeight: 0,
   extraWidth: 1.5,
-  feetDiameter: 8,
+  feetDiameter: 8.5,
   feetInsetDepth: 1,
   insertDepth: 4,
   insertExternal: 10,
   insertInternal: 5.4,
   keycapStyle: "choc",
   mcuHolder: "bastardkb-holder",
-  plateThickness: 2,
+  plateThickness: 2.5,
   rows: 3,
-  screwHoleCountersinkDiameter: 7,
-  screwHoleDiameter: 3.7,
+  screwHoleCountersinkDiameter: 9,
+  screwHoleDiameter: 4.6,
   side: "right",
   switchSpacing: "choc",
   switchStyle: "choc",
@@ -126,7 +126,7 @@ export const buildParameters = (
   const deltaColumnX = -(1 + radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
   const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;
-  const trackpadOffsetZ = o.switchStyle === "choc" ? 8.5 : 11;
+  const trackpadOffsetZ = o.switchStyle === "choc" ? 8.5 : 14;
 
   return {
     centreRow,

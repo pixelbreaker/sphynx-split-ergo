@@ -100,7 +100,7 @@ export class Insert {
               false
             )
           )
-          .translate([0, 0, -1]);
+          .translate([0, 0, -0.2]);
         break;
 
       case "foot-outer":
