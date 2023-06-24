@@ -1497,4 +1497,7 @@ const sphynx = new Sphynx({
 });
 
 export const main = sphynx.buildCase(sphynx.singleKeyhole());
+// export const main = sphynx
+//   .placeKeys(sphynx.singleKeyhole())
+//   .union(sphynx.placeThumbs(sphynx.singleKeyhole()));
 // .union(sphynx.USBHolder().debug());
