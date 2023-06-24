@@ -126,7 +126,7 @@ export const buildParameters = (
   const deltaColumnX = -(1 + radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
   const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;
-  const trackpadOffsetZ = o.switchStyle === "choc" ? 8.5 : 14;
+  const trackpadOffsetZ = 13; //o.switchStyle === "choc" ? 8.5 : 14;
 
   return {
     centreRow,

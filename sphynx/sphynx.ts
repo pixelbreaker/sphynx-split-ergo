@@ -12,6 +12,7 @@ import { V3 } from "../src/math";
 import { partition } from "./utils";
 import { EliteCHolder } from "./EliteCHolder";
 import { Insert } from "./Insert";
+import { AccessoryHolder } from "./AccessoryHolder";
 const { add, rotateX, rotateY, rotateZ } = V3;
 
 type Posts = { tr: Shape3; tl: Shape3; br: Shape3; bl: Shape3 };
@@ -239,18 +240,14 @@ export class Sphynx {
 
     return add(
       position,
-      o.trackpad
-        ? [-3, -14.5, -3]
-        : o.encoder
-        ? [-10, -13, -6]
-        : [-15, -10.3, -1]
+      o.trackpad ? [0, -22, -5] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
     );
   }
 
   thumbRPlace(shape: Shape3): Shape3 {
     const { o, p } = this.settings;
     return this.placeThumb(
-      o.trackpad ? [17, -9, -20] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
+      o.trackpad ? [0, 0, 0] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
       this.getThumbRPosition(),
       shape
     );
@@ -460,10 +457,10 @@ export class Sphynx {
 
     connectors.push(
       this.triangleHulls(
-        this.thumbRPlace(this.posts.post.tl),
-        this.thumbRPlace(this.posts.post.tr),
         this.keyPlace(1, o.rows - 1, this.posts.post.bl),
-        this.keyPlace(1, o.rows - 1, this.posts.post.br)
+        this.thumbRPlace(this.posts.post.tl),
+        this.keyPlace(1, o.rows - 1, this.posts.post.br),
+        this.thumbRPlace(this.posts.post.tr)
       )
     );
 
@@ -1172,32 +1169,13 @@ export class Sphynx {
 
   trackpadInset() {
     const { o, p } = this.settings;
+    // const hullForm = this.trackpadOuter().difference(this.trackpadInset());
+    const holder = new AccessoryHolder();
     return this.thumbRPlace(
-      cylinder({ d: 38, h: 8, $fn: 50 }).translate([
-        this.trackpadOffsetX,
-        0,
-        p.trackpadOffsetZ + 1.25,
-      ])
-    )
-      .hull(
-        this.thumbRPlace(this.posts.thumb.br)
-          .translate([0, 2, 2])
-          .union(
-            this.thumbMPlace(this.posts.thumb.br).translate([0, 2, 2]),
-            this.thumbRPlace(this.posts.post.tl),
-            this.keyPlace(3, o.rows, this.posts.post.tl).translate([0, -3, 2]),
-            this.keyPlace(2, o.rows, this.posts.post.tr).translate([0, -3, 1]),
-            this.keyPlace(2, o.rows, this.posts.post.tl).translate([0, -3, 1])
-          )
-      )
-      .union(
-        this.thumbRPlace(
-          cylinder({ d: 20, h: 30 })
-            .translate([this.trackpadOffsetX - 3, 6, 2])
-            .rotate([5, 0, 20])
-        )
-      );
-    // .translate([0, 0, 5]);
+      holder
+        .bodyCutaway()
+        .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
+    );
   }
 
   trackpadOuter() {
@@ -1226,14 +1204,17 @@ export class Sphynx {
 
   trackpad(mirror: boolean = false) {
     const { o, p } = this.settings;
-    const hullForm = this.trackpadOuter().difference(this.trackpadInset());
-
+    // const hullForm = this.trackpadOuter().difference(this.trackpadInset());
+    const holder = new AccessoryHolder();
     return this.thumbRPlace(
-      importModel("../models/cirque-40-flat.stl")
-        .mirror([Number(mirror), 0, 0])
-        .rotate([0, 0, 180])
-        .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
-    ).union(hullForm);
+      holder.main().translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
+    );
+    // return this.thumbRPlace(
+    //   importModel("../models/cirque-40-flat.stl")
+    //     .mirror([Number(mirror), 0, 0])
+    //     .rotate([0, 0, 180])
+    //     .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
+    // ).union(hullForm);
   }
 
   // inserts
@@ -1457,7 +1438,8 @@ export class Sphynx {
         this.thumbConnectors()
       )
       .difference(...[...(o.trackpad && [this.trackpadInset()])])
-      .union(this.inserts(), ...models); // add models after cutting away
+      .union(this.inserts(), ...models)
+      .intersection(cube([200, 200, 150], false).translate([-150, -150, 0])); // add models after cutting away
   }
 
   outline() {
