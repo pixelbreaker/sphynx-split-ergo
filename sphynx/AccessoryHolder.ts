@@ -11,7 +11,7 @@ export class AccessoryHolder {
   readonly height = 15;
   readonly rounding = 3;
   readonly outer = 50;
-  readonly inner = 46;
+  readonly inner = 46.5;
   readonly hole = 43.9;
 
   constructor() {}
@@ -21,7 +21,7 @@ export class AccessoryHolder {
   }
 
   bodyCutaway() {
-    return cylinder({ d: this.outer - 1, h: 100, $fn: 90 }, true);
+    return cylinder({ d: this.outer, h: 100, $fn: 90 }, true);
   }
 
   outerBody() {
@@ -38,12 +38,23 @@ export class AccessoryHolder {
       .translate([0, 0, -this.height]);
   }
 
+  outline() {
+    return cylinder(
+      {
+        d: this.outer,
+        h: this.height,
+        $fn: 90,
+      },
+      false
+    );
+  }
+
   sectorBody() {
     return cylinder(
       {
         d: this.outer,
         h: 50,
-        sector: 200,
+        sector: 207,
         $fn: 90,
       },
       false
@@ -56,7 +67,7 @@ export class AccessoryHolder {
         ])
       )
       .translate([0, 0, -this.height - 25])
-      .rotate([0, 0, 180]);
+      .rotate([0, 0, 200]);
   }
 
   main() {

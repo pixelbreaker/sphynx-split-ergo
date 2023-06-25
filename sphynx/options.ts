@@ -5,14 +5,10 @@ export type SwitchTypes = "choc" | "mx";
 export type SwitchStyle = SwitchTypes;
 export type SwitchSpacing = SwitchTypes;
 export type KeycapStyles = "choc" | "xda" | "sa";
-export type MCUHolder =
-  | "elite-c"
-  | "rpi-pico"
-  | "pro-micro"
-  | "bastardkb-holder";
 export type RenderSide = "right" | "left";
 
 export type Options = {
+  accessoryHolder: boolean;
   caseRimDrop: number;
   caseSpacing: number;
   centerColumn: number;
@@ -26,7 +22,6 @@ export type Options = {
   insertExternal: number;
   insertInternal: number;
   keycapStyle: KeycapStyles;
-  mcuHolder: MCUHolder;
   plateThickness: number;
   rows: 3 | 4;
   screwHoleCountersinkDiameter: number;
@@ -36,20 +31,16 @@ export type Options = {
   thumbOffsets: Vec3;
   webThickness: number;
   zOffset: number;
-} & ( // Discriminated union to disable encoder when trackpad is enabled
-  | { trackpad: true; encoder: false }
-  | { trackpad: false; encoder: boolean }
-) & // Discriminated union to ensure mx switches have mx spacing only
-  (
-    | {
-        switchStyle: Extract<SwitchStyle, "mx">;
-        switchSpacing: Extract<SwitchSpacing, "mx">;
-      }
-    | {
-        switchStyle: Extract<SwitchStyle, "choc">;
-        switchSpacing: SwitchSpacing;
-      }
-  );
+} & ( // Discriminated union to ensure mx switches have mx spacing only
+  | {
+      switchStyle: Extract<SwitchStyle, "mx">;
+      switchSpacing: Extract<SwitchSpacing, "mx">;
+    }
+  | {
+      switchStyle: Extract<SwitchStyle, "choc">;
+      switchSpacing: SwitchSpacing;
+    }
+);
 
 export type Parameters = {
   centreRow: number;
@@ -69,12 +60,12 @@ export type Parameters = {
 };
 
 export const defaultOptions: Options = {
+  accessoryHolder: true,
   caseRimDrop: 2,
   caseSpacing: 2.5,
   centerColumn: 2.5,
   centreRow: 1.5,
   columns: 5,
-  encoder: false,
   extraHeight: 0,
   extraWidth: 1.5,
   feetDiameter: 8.5,
@@ -83,7 +74,6 @@ export const defaultOptions: Options = {
   insertExternal: 10,
   insertInternal: 5.4,
   keycapStyle: "choc",
-  mcuHolder: "bastardkb-holder",
   plateThickness: 2.5,
   rows: 3,
   screwHoleCountersinkDiameter: 9,
@@ -92,8 +82,7 @@ export const defaultOptions: Options = {
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
-  thumbOffsets: [8, -3, -3],
-  trackpad: false,
+  thumbOffsets: [6, -5, -3],
   webThickness: 2,
   zOffset: 11,
 };

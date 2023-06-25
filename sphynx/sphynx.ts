@@ -240,14 +240,14 @@ export class Sphynx {
 
     return add(
       position,
-      o.trackpad ? [0, -22, -5] : o.encoder ? [-10, -13, -6] : [-15, -10.3, -1]
+      o.accessoryHolder ? [1.5, -19.5, -5] : [-15, -10.3, -1]
     );
   }
 
   thumbRPlace(shape: Shape3): Shape3 {
     const { o, p } = this.settings;
     return this.placeThumb(
-      o.trackpad ? [0, 0, 0] : o.encoder ? [0, 1, -6] : [11.5, -26, 10], // rotation
+      o.accessoryHolder ? [0, 0, -20] : [11.5, -26, 10], // rotation
       this.getThumbRPosition(),
       shape
     );
@@ -271,7 +271,7 @@ export class Sphynx {
     return this.thumbLPlace(key).union(
       ...[
         this.thumbMPlace(key),
-        ...((!(o.trackpad || o.encoder) || !ignoreRThumbWithAccessory) && [
+        ...((!o.accessoryHolder || !ignoreRThumbWithAccessory) && [
           this.thumbRPlace(key),
         ]),
       ]
@@ -374,7 +374,7 @@ export class Sphynx {
     // corners
     for (let col = -1; col < o.columns; col++) {
       for (let row = -1; row < o.rows; row++) {
-        if (row == o.rows - 1 && col < (o.encoder ? 2 : 1)) continue;
+        if (row == o.rows - 1 && col < (o.accessoryHolder ? 2 : 1)) continue;
         connectors.push(
           this.triangleHulls(
             this.keyPlace(col, row, this.posts.post.br),
@@ -445,15 +445,15 @@ export class Sphynx {
         this.keyPlace(0, o.rows - 1, this.posts.post.br)
       )
     );
-    if (!o.encoder) {
-      connectors.push(
-        this.triangleHulls(
-          this.thumbRPlace(this.posts.post.tr),
-          this.keyPlace(1, o.rows, this.posts.post.tr),
-          this.keyPlace(1, o.rows - 1, this.posts.post.br)
-        )
-      );
-    }
+    // if (!o.encoder) {
+    // connectors.push(
+    //   this.triangleHulls(
+    //     this.thumbRPlace(this.posts.post.tr),
+    //     this.keyPlace(1, o.rows, this.posts.post.tr),
+    //     this.keyPlace(1, o.rows - 1, this.posts.post.br)
+    //   ).debug()
+    // );
+    // }
 
     connectors.push(
       this.triangleHulls(
@@ -464,55 +464,59 @@ export class Sphynx {
       )
     );
 
-    connectors.push(
-      this.triangleHulls(
-        this.keyPlace(
-          3,
-          o.rows,
-          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
-        ),
-        this.thumbRPlace(this.posts.thumb.br),
-        this.keyPlace(3, o.rows, this.posts.post.tl),
-        this.thumbRPlace(this.posts.post.tr)
-      )
-    );
-
-    if (!o.encoder) {
+    if (o.accessoryHolder) {
       connectors.push(
         this.triangleHulls(
+          this.keyPlace(
+            4,
+            o.rows,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              { ...this.sphereOffset, x: -this.sphereOffset.x },
+              -o.caseRimDrop
+            )
+          ),
+          this.thumbRPlace(this.posts.thumb.br),
+          this.keyPlace(4, o.rows, this.posts.post.tl),
+          this.thumbRPlace(this.posts.post.tr)
+        ),
+        this.triangleHulls(
+          this.keyPlace(4, o.rows, this.posts.post.tl),
+          this.keyPlace(3, o.rows - 1, this.posts.post.br),
           this.thumbRPlace(this.posts.post.tr),
-          this.keyPlace(3, o.rows, this.posts.post.tl),
-          this.keyPlace(1, o.rows - 1, this.posts.post.br),
-          this.keyPlace(2, o.rows, this.posts.post.tr),
-          this.keyPlace(2, o.rows, this.posts.post.tl)
+          this.keyPlace(3, o.rows - 1, this.posts.post.bl)
         )
       );
     } else {
       connectors.push(
         this.triangleHulls(
-          this.thumbRPlace(this.posts.post.tr),
+          this.keyPlace(
+            3,
+            o.rows,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              this.sphereOffset,
+              -o.caseRimDrop
+            )
+          ),
+          this.thumbRPlace(this.posts.thumb.br),
           this.keyPlace(3, o.rows, this.posts.post.tl),
-          this.keyPlace(2, o.rows, this.posts.post.tr)
-        )
-      );
-
-      connectors.push(
-        this.triangleHulls(
-          this.keyPlace(2, o.rows, this.posts.post.tl),
-          this.keyPlace(2, o.rows - 1, this.posts.post.bl),
-          this.thumbRPlace(this.posts.post.tr),
-          this.keyPlace(1, o.rows - 1, this.posts.post.br)
-        )
-      );
-
-      connectors.push(
-        this.triangleHulls(
-          this.thumbRPlace(this.posts.post.tr),
-          this.keyPlace(2, o.rows, this.posts.post.tl),
-          this.keyPlace(2, o.rows, this.posts.post.tr)
+          this.thumbRPlace(this.posts.post.tr)
         )
       );
     }
+
+    connectors.push(
+      this.triangleHulls(
+        this.thumbRPlace(this.posts.post.tr),
+        this.keyPlace(3, o.rows, this.posts.post.tl),
+        this.keyPlace(1, o.rows - 1, this.posts.post.br),
+        this.keyPlace(2, o.rows, this.posts.post.tr),
+        this.keyPlace(2, o.rows, this.posts.post.tl)
+      )
+    );
 
     const [first, ...rest] = connectors;
     return first.union(...rest);
@@ -635,16 +639,39 @@ export class Sphynx {
         this.thumbRPlace(this.posts.thumb.br)
       )
     );
-    walls.push(
-      this.buildWall(
-        this.thumbRPlace(this.posts.thumb.br),
-        this.keyPlace(
-          3,
-          o.rows,
-          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
+    if (o.accessoryHolder) {
+      walls.push(
+        this.buildWall(
+          this.thumbRPlace(this.posts.thumb.br),
+          this.keyPlace(
+            4,
+            o.rows,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              { ...this.sphereOffset, x: -this.sphereOffset.x },
+              -o.caseRimDrop
+            )
+          )
         )
-      )
-    );
+      );
+    } else {
+      walls.push(
+        this.buildWall(
+          this.thumbRPlace(this.posts.thumb.br),
+          this.keyPlace(
+            3,
+            o.rows,
+            this.getWebPost(
+              "TL",
+              this.webRim,
+              this.sphereOffset,
+              -o.caseRimDrop
+            )
+          )
+        )
+      );
+    }
 
     const [first, ...rest] = walls;
     return first.union(...rest);
@@ -901,7 +928,7 @@ export class Sphynx {
     let pDiff = 0;
     const sphX = this.sphereOffset.x;
 
-    for (let col = o.columns - 1; col >= 3; col--) {
+    for (let col = o.columns - 1; col >= (o.accessoryHolder ? 4 : 3); col--) {
       const offset = Sphynx.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
       const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
@@ -981,7 +1008,7 @@ export class Sphynx {
 
     const sphX = this.sphereOffset.x;
 
-    for (let col = o.columns - 1; col >= 3; col--) {
+    for (let col = o.columns - 1; col >= (o.accessoryHolder ? 4 : 3); col--) {
       const offset = Sphynx.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
       const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
@@ -1066,34 +1093,15 @@ export class Sphynx {
     );
   };
 
-  isBastard() {
-    const { o } = this.settings;
-    return o.mcuHolder === "bastardkb-holder";
-  }
-
   USBHolderPosition() {
     const { o, p } = this.settings;
-
     let pos;
-    if (this.isBastard()) {
-      pos = this.getKeyPosition(0, 0, [
-        -(p.mountWidth / 2) - 1,
-        p.mountHeight / 2 - 0,
-        0,
-      ]);
-      pos = V3.add(pos, [4, 3.5, 0]);
-    } else {
-      pos = this.getKeyPosition(1, 0, [
-        -(p.mountWidth / 2),
-        p.mountHeight / 2 +
-          o.caseSpacing +
-          o.webThickness +
-          this.sphereSize / 2,
-        0,
-      ]);
-      pos = V3.add(pos, [2, 3, 0]);
-      pos = V3.add(pos, [o.mcuHolder === "rpi-pico" ? -1 : 0, 0, 0]);
-    }
+    pos = this.getKeyPosition(0, 0, [
+      -(p.mountWidth / 2) - 1,
+      p.mountHeight / 2 - 0,
+      0,
+    ]);
+    pos = V3.add(pos, [4, 3.5, 0]);
     return pos;
   }
 
@@ -1103,14 +1111,9 @@ export class Sphynx {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
     let mcu;
-    if (o.mcuHolder === "bastardkb-holder") {
-      const holder = new EliteCHolder(o);
-      mcu = holder.assembled();
-    } else {
-      mcu = importModel(`../models/${o.mcuHolder}.stl`).union(
-        cube([9, 6, 18]).translate(this.TRSCutPos)
-      );
-    }
+    const holder = new EliteCHolder(o);
+    mcu = holder.assembled();
+
     return mcu
 
       .rotate([0, 0, (Sphynx.getColumnSplay(0) + Sphynx.getColumnSplay(1)) / 2])
@@ -1120,17 +1123,8 @@ export class Sphynx {
   USBHolderSpace() {
     const { o, p } = this.settings;
     const [x, y] = this.USBHolderPosition();
-    if (o.mcuHolder === "bastardkb-holder") {
-      const holder = new EliteCHolder(o);
-      return holder.cutaway().translate([x, y, 0]);
-    } else {
-      return importModel(`../models/${o.mcuHolder}.stl`)
-        .projection()
-        .linear_extrude({ height: 13.02, center: false })
-        .translate([0, 0, -1])
-        .union(cube([9, 6, 18]).translate(this.TRSCutPos))
-        .translate([x, y, 0]);
-    }
+    const holder = new EliteCHolder(o);
+    return holder.cutaway().translate([x, y, 0]);
   }
 
   previewKeycaps() {
@@ -1143,10 +1137,10 @@ export class Sphynx {
   previewTrackpad() {
     const { o, p } = this.settings;
     return this.thumbRPlace(
-      cylinder({ d: 40, h: 2, $fn: 70 }).translate([
+      cylinder({ d: 43.9, h: 2, $fn: 70 }).translate([
         this.trackpadOffsetX,
         0,
-        p.trackpadOffsetZ + 1.5,
+        p.trackpadOffsetZ,
       ])
     ).color("#222222");
   }
@@ -1161,8 +1155,8 @@ export class Sphynx {
     const { o, p } = this.settings;
     return this.previewKeycaps().union(
       ...[
-        ...(o.encoder && [this.previewEncoder()]),
-        ...(o.trackpad && [this.previewTrackpad()]),
+        // ...(o.encoder && [this.previewEncoder()]),
+        ...(o.accessoryHolder && [this.previewTrackpad()]),
       ]
     );
   }
@@ -1228,12 +1222,21 @@ export class Sphynx {
       })(),
       (() => {
         // front right
-        const [x, y] = this.getKeyPosition(3, o.rows - 1, [
-          -p.mountWidth / 2 - 2,
-          -p.mountHeight / 2 - 2,
-          0,
-        ]);
-        return { pos: [x, y, 0] as Vec3, rotation: 210 };
+        if (o.accessoryHolder) {
+          const [x, y] = this.getKeyPosition(4, o.rows - 1, [
+            -p.mountWidth / 2 - 1,
+            2 - p.mountHeight / 2,
+            0,
+          ]);
+          return { pos: [x, y, 0] as Vec3, rotation: 180 };
+        } else {
+          const [x, y] = this.getKeyPosition(3, o.rows - 1, [
+            p.mountWidth / 2 - 2,
+            -2 - p.mountHeight / 2,
+            0,
+          ]);
+          return { pos: [x, y, 0] as Vec3, rotation: 120 };
+        }
       })(),
       (() => {
         // front left
@@ -1301,16 +1304,10 @@ export class Sphynx {
         const [x, y] = add(
           add(this.getKeyPosition(1, o.rows - 1), o.thumbOffsets),
           this.getThumbRPosition(
-            o.trackpad
+            o.accessoryHolder
               ? [
                   p.mountWidth / 2 + 10.5 - o.feetDiameter / 2,
                   -p.mountHeight / 2 - 13 + o.feetDiameter / 2,
-                  0,
-                ]
-              : o.encoder
-              ? [
-                  p.mountWidth / 2 + 12 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 12 + o.feetDiameter / 2,
                   0,
                 ]
               : [
@@ -1352,10 +1349,7 @@ export class Sphynx {
         )
     );
 
-    const inserts = first.union(
-      ...rest,
-      ...(this.isBastard() && [holder.inserts().translate([x, y, 0])])
-    );
+    const inserts = first.union(...rest, holder.inserts().translate([x, y, 0]));
     return inserts
       .intersection(
         this.outline()
@@ -1363,7 +1357,7 @@ export class Sphynx {
           .offset({ delta: -1 })
           .linear_extrude({ height: 50 })
       )
-      .difference(this.USBHolderSpace());
+      .difference(this.USBHolderSpace(), this.trackpadInset());
   }
 
   screwholeOuters() {
@@ -1419,35 +1413,42 @@ export class Sphynx {
   buildCase(keyhole: Shape3, mirror: boolean = false) {
     const { o, p } = this.settings;
     const models = [];
-    if (o.trackpad) {
+    if (o.accessoryHolder) {
       models.push(this.trackpad(mirror));
-    } else if (o.encoder) {
-      models.push(
-        this.thumbRPlace(importModel("../models/ec11-2.stl")).translate([
-          0, -0.8, -2.4,
-        ])
-      );
     }
-
     return this.placeKeys(keyhole)
       .union(
         this.keyConnectors(),
         this.caseWalls().difference(this.USBHolderSpace()),
         this.caseRim(),
         this.placeThumbs(keyhole),
-        this.thumbConnectors()
+        this.thumbConnectors(),
+        this.inserts()
       )
-      .difference(...[...(o.trackpad && [this.trackpadInset()])])
-      .union(this.inserts(), ...models)
-      .intersection(cube([200, 200, 150], false).translate([-150, -150, 0])); // add models after cutting away
+      .difference(...[...(o.accessoryHolder && [this.trackpadInset()])])
+      .union(...models)
+      .intersection(cube([300, 300, 250], false).translate([-150, -150, 0])); // add models after cutting away
   }
 
   outline() {
+    const { o, p } = this.settings;
+    const models = [];
+    if (o.accessoryHolder) {
+      const holder = new AccessoryHolder();
+      models.push(
+        this.thumbRPlace(holder.outline()).translate([
+          this.trackpadOffsetX - 0.2,
+          0,
+          0,
+        ])
+      );
+    }
     return this.placeKeys(this.filledKeyhole()).union(
       this.keyConnectors(),
       this.caseWalls().difference(this.USBHolderSpace()),
       this.caseRim(),
       this.placeThumbs(this.filledKeyhole()),
+      ...models,
       this.thumbConnectors()
     );
   }
@@ -1473,9 +1474,7 @@ export class Sphynx {
 
 const sphynx = new Sphynx({
   ...defaultOptions,
-  mcuHolder: "bastardkb-holder",
-  encoder: false,
-  trackpad: true,
+  accessoryHolder: true,
 });
 
 export const main = sphynx.buildCase(sphynx.singleKeyhole());
