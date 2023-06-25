@@ -28,6 +28,7 @@ export class Sphynx {
   readonly postOffset: { x: number; y: number };
   readonly sphereOffset: { x: number; y: number };
   readonly thumbSphereOffset: { x: number; y: number };
+  readonly thumbWallSphere: Shape3;
   readonly webRim: Shape3;
   readonly thumbSphere: Shape3;
   readonly webSphere: Shape3;
@@ -74,6 +75,11 @@ export class Sphynx {
       $fn: this.sphereQuality,
     }).translate([0, 0, this.sphereSize / -2 + o.webThickness - o.caseRimDrop]);
 
+    this.thumbWallSphere = sphere({
+      d: this.sphereSize * 1.5,
+      $fn: this.sphereQuality,
+    }).translate([0, 0, this.sphereSize / -2 + o.webThickness]);
+
     this.webSphere = sphere({
       d: this.sphereSize,
       $fn: this.sphereQuality,
@@ -95,11 +101,9 @@ export class Sphynx {
 
   filledKeyhole(): Shape3 {
     const { o, p } = this.settings;
-    return cube([p.mountWidth, p.mountHeight, o.webThickness]).translate([
-      0,
-      0,
-      o.webThickness / 2,
-    ]);
+    return cube([p.mountWidth, p.mountHeight, o.webThickness])
+      .translate([0, 0, o.webThickness / 2])
+      .render();
   }
 
   singleKeyhole(): Shape3 {
@@ -117,7 +121,8 @@ export class Sphynx {
               0, 0, -1.5,
             ])
           )
-          .translate([0, 0, p.keyholeThickness / 2]);
+          .translate([0, 0, p.keyholeThickness / 2])
+          .render();
       case "choc":
       default:
         return cube([p.mountWidth, p.mountHeight, p.keyholeThickness])
@@ -134,7 +139,8 @@ export class Sphynx {
             //   p.keyholeHeight + tabThickness,
             //   p.keyholeThickness,
             // ])
-          );
+          )
+          .render();
     }
   }
 
@@ -142,7 +148,9 @@ export class Sphynx {
     const { o, p } = this.settings;
     return importModel(
       `../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
-    ).translate([0, 0, o.keycapStyle === "choc" ? 4 : 6]);
+    )
+      .translate([0, 0, o.keycapStyle === "choc" ? 4 : 6])
+      .render();
   }
 
   // Placement
@@ -322,6 +330,7 @@ export class Sphynx {
       post: this.getPosts(this.webSphere),
       rim: this.getPosts(this.webRim, this.sphereOffset),
       thumb: this.getPosts(this.thumbSphere, this.thumbSphereOffset),
+      thumbWall: this.getPosts(this.thumbWallSphere, this.thumbSphereOffset),
     };
   }
 
@@ -411,26 +420,26 @@ export class Sphynx {
     );
 
     // direct to main body
-    // middle thumb to col 0
+    // middle thumb to col 0u
     connectors.push(
       this.triangleHulls(
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.keyPlace(-1, o.rows - 1, this.posts.rim.br),
-        this.thumbLPlace(this.posts.thumb.tr)
+        this.thumbMPlace(this.posts.thumbWall.tl)
       )
     );
+    // connectors.push(
+    //   this.triangleHulls(
+    //     this.keyPlace(-1, o.rows - 1, this.posts.post.br),
+    //     this.thumbLPlace(this.posts.thumb.tr),
+    //     this.thumbMPlace(this.posts.post.tl)
+    //   ).debug()
+    // );
     connectors.push(
       this.triangleHulls(
+        this.thumbMPlace(this.posts.thumbWall.tl),
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
-        this.thumbLPlace(this.posts.thumb.tr),
-        this.thumbMPlace(this.posts.post.tl)
-      )
-    );
-    connectors.push(
-      this.triangleHulls(
-        this.thumbMPlace(this.posts.post.tl),
-        this.keyPlace(-1, o.rows - 1, this.posts.post.br),
-        this.thumbMPlace(this.posts.post.tr),
+        this.thumbMPlace(this.posts.thumbWall.tr),
         this.keyPlace(0, o.rows - 1, this.posts.post.bl),
         this.keyPlace(0, o.rows - 1, this.posts.post.br)
       )
@@ -439,28 +448,19 @@ export class Sphynx {
     // right thumb
     connectors.push(
       this.triangleHulls(
-        this.thumbRPlace(this.posts.post.tl),
-        this.thumbMPlace(this.posts.post.tr),
+        // this.thumbRPlace(this.posts.thumb.tr),
+        this.keyPlace(0, o.rows - 1, this.posts.post.br),
         this.keyPlace(1, o.rows - 1, this.posts.post.bl),
-        this.keyPlace(0, o.rows - 1, this.posts.post.br)
+        this.thumbMPlace(this.posts.thumbWall.tr)
       )
     );
-    // if (!o.encoder) {
-    // connectors.push(
-    //   this.triangleHulls(
-    //     this.thumbRPlace(this.posts.post.tr),
-    //     this.keyPlace(1, o.rows, this.posts.post.tr),
-    //     this.keyPlace(1, o.rows - 1, this.posts.post.br)
-    //   ).debug()
-    // );
-    // }
 
     connectors.push(
       this.triangleHulls(
+        this.thumbMPlace(this.posts.thumbWall.tr),
+        this.thumbRPlace(this.posts.post.tr),
         this.keyPlace(1, o.rows - 1, this.posts.post.bl),
-        this.thumbRPlace(this.posts.post.tl),
-        this.keyPlace(1, o.rows - 1, this.posts.post.br),
-        this.thumbRPlace(this.posts.post.tr)
+        this.keyPlace(1, o.rows - 1, this.posts.post.br)
       )
     );
 
@@ -527,18 +527,43 @@ export class Sphynx {
     // between thumb keys
     connectors.push(
       this.triangleHulls(
-        this.thumbMPlace(this.posts.post.tl),
-        this.thumbLPlace(this.posts.post.tr),
-        this.thumbLPlace(this.posts.thumb.tr)
+        this.thumbRPlace(this.posts.post.tl),
+        this.thumbRPlace(this.posts.post.tr),
+        this.thumbMPlace(this.posts.thumbWall.tr)
       )
     );
 
     connectors.push(
       this.triangleHulls(
-        this.thumbLPlace(this.posts.post.tl),
+        this.thumbRPlace(this.posts.post.tl),
+        this.thumbMPlace(this.posts.post.tr),
+        this.thumbMPlace(this.posts.thumbWall.tr)
+      )
+    );
+
+    connectors.push(
+      this.triangleHulls(
+        this.thumbMPlace(this.posts.thumbWall.tl),
+        this.thumbMPlace(this.posts.post.tl),
+        this.thumbMPlace(this.posts.thumbWall.tr),
+        this.thumbMPlace(this.posts.post.tr)
+      )
+    );
+
+    connectors.push(
+      this.triangleHulls(
+        this.thumbMPlace(this.posts.post.tl),
         this.thumbLPlace(this.posts.post.tr),
+        this.thumbLPlace(this.posts.thumbWall.tr)
+      )
+    );
+
+    connectors.push(
+      this.triangleHulls(
         this.thumbLPlace(this.posts.thumb.tl),
-        this.thumbLPlace(this.posts.thumb.tr)
+        this.thumbLPlace(this.posts.post.tl),
+        this.thumbLPlace(this.posts.thumbWall.tr),
+        this.thumbLPlace(this.posts.post.tr)
       )
     );
 
@@ -611,29 +636,21 @@ export class Sphynx {
     const walls = [];
     walls.push(
       this.buildWall(
-        this.thumbLPlace(this.posts.thumb.tr),
+        this.thumbLPlace(this.posts.thumbWall.tr),
         this.thumbLPlace(this.posts.thumb.tl)
-      )
-    );
-    walls.push(
+      ),
       this.buildWall(
         this.thumbLPlace(this.posts.thumb.tl),
         this.thumbLPlace(this.posts.thumb.bl)
-      )
-    );
-    walls.push(
+      ),
       this.buildWall(
         this.thumbLPlace(this.posts.thumb.bl),
         this.thumbLPlace(this.posts.thumb.br)
-      )
-    );
-    walls.push(
+      ),
       this.buildWall(
         this.thumbLPlace(this.posts.thumb.br),
         this.thumbMPlace(this.posts.thumb.br)
-      )
-    );
-    walls.push(
+      ),
       this.buildWall(
         this.thumbMPlace(this.posts.thumb.br),
         this.thumbRPlace(this.posts.thumb.br)
@@ -737,7 +754,7 @@ export class Sphynx {
     // thumb to left wall extra wall panel
     walls.push(
       this.buildWall(
-        this.thumbLPlace(this.posts.thumb.tr),
+        this.thumbLPlace(this.posts.thumbWall.tr),
         this.keyPlace(-1, o.rows - 1, this.posts.rim.br)
       )
     );
