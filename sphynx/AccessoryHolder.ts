@@ -1,6 +1,6 @@
 import { Vec2, Vec3 } from "../src/csg/base";
 import { polyRound } from "../src/csg/polyround";
-import { cylinder, sector, sphere } from "../src/csg/primitives";
+import { cylinder, polygon, sector, sphere } from "../src/csg/primitives";
 import {
   buildParameters,
   defaultOptions,
@@ -9,20 +9,27 @@ import {
 } from "./options";
 
 export class AccessoryHolder {
-  readonly height = 16;
-  readonly outer = 50;
-  readonly inner = 46.5;
-  readonly hole = 43.9;
+  readonly totalHeight = 27.5;
+  readonly height;
+  readonly outer = 51;
+  readonly inner = 47;
+  readonly hole = 44.2;
   readonly holeDepth = 2;
+  readonly quality = 90;
 
-  constructor() {}
+  constructor() {
+    this.height = this.totalHeight - 8.5;
+  }
 
   innerCutaway() {
-    return cylinder({ d: this.inner, h: this.height + 3, $fn: 90 }, false);
+    return cylinder(
+      { d: this.inner, h: this.height + 3, $fn: this.quality },
+      false
+    );
   }
 
   bodyCutaway() {
-    return cylinder({ d: this.outer, h: 100, $fn: 90 }, true);
+    return cylinder({ d: this.outer - 1, h: 100, $fn: this.quality }, true);
   }
 
   outline() {
@@ -30,27 +37,70 @@ export class AccessoryHolder {
       {
         d: this.outer,
         h: this.height,
-        $fn: 90,
+        $fn: this.quality,
       },
       false
     );
   }
 
-  sectorBody() {
-    return cylinder(
-      {
-        d: this.outer,
-        h: 50,
-        sector: 207,
-        $fn: 90,
-      },
-      false
-    )
+  shim() {
+    return cylinder({
+      d: this.inner - 0.4,
+      h: 1,
+      $fn: this.quality,
+    }).difference(
+      cylinder({ d: 42.2, h: 3, $fn: this.quality }).translate([0, 0, -0.5])
+    );
+  }
+
+  spacerPillar() {
+    const h = this.totalHeight - this.holeDepth - 1.4;
+    return cylinder({
+      d: this.inner - 0.4,
+      h,
+      sector: 35,
+      $fn: this.quality,
+    })
       .difference(
-        cylinder({ d: this.inner, h: 53, $fn: 90 }, false).translate([0, 0, -1])
+        cylinder({
+          d1: this.inner - 10,
+          d2: this.inner - 5,
+          h: this.totalHeight,
+          $fn: this.quality,
+        }).translate([0, 0, -0.5])
       )
-      .translate([0, 0, -this.height - 22])
-      .rotate([0, 0, 200]);
+      .translate([0, 0, h / 2]);
+  }
+
+  spacer() {
+    return this.spacerPillar().union(
+      this.spacerPillar().rotate([0, 0, 120]),
+      this.spacerPillar().rotate([0, 0, 240]),
+      cylinder({ d: this.inner - 0.4, h: 3, $fn: this.quality })
+        .difference(
+          cylinder({ d: this.inner - 10, h: 4, $fn: this.quality }).translate([
+            0, 0, -0.1,
+          ])
+        )
+        .translate([0, 0, 1.5])
+    );
+    // .translate([0, 0, h]);
+  }
+
+  sectorBody() {
+    const h = this.totalHeight - this.height + 3;
+    const points: Vec2[] = [
+      [this.outer / 2, 0],
+      [this.inner / 2, 0],
+      [this.inner / 2, h],
+      [this.outer / 2, h],
+    ];
+    const radii: number[] = [0, 0, 0, 0];
+
+    return polygon({ points })
+      .rotate_extrude({ angle: 205, $fn: this.quality })
+      .rotate([180, 0, 28])
+      .translate([0, 0, h]);
   }
 
   topRim() {
@@ -67,8 +117,9 @@ export class AccessoryHolder {
 
     return polyRound({ points, radii })
       .toPolygon()
-      .rotate_extrude({ angle: 360, $fn: 90 })
-      .rotate([180, 0, 0]);
+      .rotate_extrude({ angle: 360, $fn: this.quality })
+      .rotate([180, 0, 0])
+      .translate([0, 0, this.totalHeight]);
   }
 
   main() {
@@ -77,4 +128,5 @@ export class AccessoryHolder {
 }
 
 const holder = new AccessoryHolder();
-export const main = holder.main();
+// export const main = holder.main().color("red").union(holder.spacer());
+export const main = holder.spacer();

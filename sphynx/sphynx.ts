@@ -33,11 +33,12 @@ export class Sphynx {
   readonly thumbSphere: Shape3;
   readonly webSphere: Shape3;
   readonly trackpadOffsetX = 2;
+  readonly accessoryOrigin: Vec3;
 
   static getColumnOffsets(column: number): Vec3 {
     const offsets: Vec3[] = [
       [0, 0.55, 0], // index inner
-      [0, 0.2, 0], // index
+      [0.3, 0.2, 0], // index
       [1, 3, -2.5], // middle
       [1.6, -1.5, -0.5], // ring
       [1.4, -12.5, 2], // pinky
@@ -60,6 +61,8 @@ export class Sphynx {
   constructor(o: Options) {
     this.settings = { o, p: buildParameters(o) };
     this.sphereSize = o.webThickness;
+    const [x, y] = this.getKeyPosition(2, 2);
+    this.accessoryOrigin = [x, y - 35.8, 0];
 
     // set up some reusable objects
     this.postOffset = { x: this.postSize / 2, y: this.postSize / 2 };
@@ -101,9 +104,11 @@ export class Sphynx {
 
   filledKeyhole(): Shape3 {
     const { o, p } = this.settings;
-    return cube([p.mountWidth, p.mountHeight, o.webThickness])
-      .translate([0, 0, o.webThickness / 2])
-      .render();
+    return cube([p.mountWidth, p.mountHeight, o.webThickness]).translate([
+      0,
+      0,
+      o.webThickness / 2,
+    ]);
   }
 
   singleKeyhole(): Shape3 {
@@ -121,8 +126,7 @@ export class Sphynx {
               0, 0, -1.5,
             ])
           )
-          .translate([0, 0, p.keyholeThickness / 2])
-          .render();
+          .translate([0, 0, p.keyholeThickness / 2]);
       case "choc":
       default:
         return cube([p.mountWidth, p.mountHeight, p.keyholeThickness])
@@ -139,8 +143,7 @@ export class Sphynx {
             //   p.keyholeHeight + tabThickness,
             //   p.keyholeThickness,
             // ])
-          )
-          .render();
+          );
     }
   }
 
@@ -148,9 +151,7 @@ export class Sphynx {
     const { o, p } = this.settings;
     return importModel(
       `../models/${o.keycapStyle}${o.keycapStyle === "sa" ? row + 1 : ""}.stl`
-    )
-      .translate([0, 0, o.keycapStyle === "choc" ? 4 : 6])
-      .render();
+    ).translate([0, 0, o.keycapStyle === "choc" ? 4 : 6]);
   }
 
   // Placement
@@ -248,14 +249,14 @@ export class Sphynx {
 
     return add(
       position,
-      o.accessoryHolder ? [1.5, -19.5, -5] : [-15, -10.3, -1]
+      o.accessoryHolder ? [-5, -10.5, -5] : [-15, -10.3, -1]
     );
   }
 
   thumbRPlace(shape: Shape3): Shape3 {
     const { o, p } = this.settings;
     return this.placeThumb(
-      o.accessoryHolder ? [0, 0, -20] : [11.5, -26, 10], // rotation
+      o.accessoryHolder ? [0, 0, 5] : [11.5, -26, 10], // rotation
       this.getThumbRPosition(),
       shape
     );
@@ -1162,6 +1163,12 @@ export class Sphynx {
     ).color("#222222");
   }
 
+  previewTrackball() {
+    const { o, p } = this.settings;
+    const [x, y] = this.accessoryOrigin;
+    return sphere({ d: 34, $fn: 120 }).translate([x, y, 25]).color("#222222");
+  }
+
   previewEncoder() {
     return this.thumbRPlace(importModel("../models/encoder.stl"))
       .translate([0, 0, 3])
@@ -1173,63 +1180,24 @@ export class Sphynx {
     return this.previewKeycaps().union(
       ...[
         // ...(o.encoder && [this.previewEncoder()]),
-        ...(o.accessoryHolder && [this.previewTrackpad()]),
+        ...(o.accessoryHolder && [this.previewTrackball()]),
       ]
     );
   }
 
-  trackpadInset() {
+  accessoryInset() {
     const { o, p } = this.settings;
-    // const hullForm = this.trackpadOuter().difference(this.trackpadInset());
     const holder = new AccessoryHolder();
-    return this.thumbRPlace(
-      holder
-        .bodyCutaway()
-        .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
-    );
+    return holder.bodyCutaway().translate(this.accessoryOrigin);
   }
 
-  trackpadOuter() {
-    const { o, p } = this.settings;
-    return this.thumbRPlace(
-      cylinder({ d: 42, h: 4, $fn: 95 }).translate([
-        this.trackpadOffsetX,
-        0,
-        p.trackpadOffsetZ - 1.25,
-      ])
-    ).hull(
-      this.thumbRPlace(this.posts.thumb.br).union(
-        this.thumbMPlace(this.posts.thumb.br),
-        this.thumbRPlace(this.posts.post.tl),
-        this.keyPlace(
-          3,
-          o.rows,
-          this.getWebPost("TL", this.webRim, this.sphereOffset, -o.caseRimDrop)
-        ),
-        this.keyPlace(2, o.rows, this.posts.post.tr),
-        this.keyPlace(2, o.rows, this.posts.post.tl)
-      )
-      // .translate([0, 0, -5])
-    );
-  }
-
-  trackpad(mirror: boolean = false) {
-    const { o, p } = this.settings;
-    // const hullForm = this.trackpadOuter().difference(this.trackpadInset());
+  accessoryHolder(mirror: boolean = false) {
     const holder = new AccessoryHolder();
-    return this.thumbRPlace(
-      holder.main().translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
-    );
-    // return this.thumbRPlace(
-    //   importModel("../models/cirque-40-flat.stl")
-    //     .mirror([Number(mirror), 0, 0])
-    //     .rotate([0, 0, 180])
-    //     .translate([this.trackpadOffsetX, 0, p.trackpadOffsetZ])
-    // ).union(hullForm);
+    return holder.main().translate(this.accessoryOrigin);
   }
 
   // inserts
-  getInsertPositions(): { pos: Vec3; rotation: number }[] {
+  getInsertPositions(forPlate = false): { pos: Vec3; rotation: number }[] {
     const { o, p } = this.settings;
     return [
       (() => {
@@ -1245,7 +1213,7 @@ export class Sphynx {
             2 - p.mountHeight / 2,
             0,
           ]);
-          return { pos: [x, y, 0] as Vec3, rotation: 180 };
+          return { pos: [x, y, 0] as Vec3, rotation: forPlate ? 200 : 180 };
         } else {
           const [x, y] = this.getKeyPosition(3, o.rows - 1, [
             p.mountWidth / 2 - 2,
@@ -1324,7 +1292,7 @@ export class Sphynx {
             o.accessoryHolder
               ? [
                   p.mountWidth / 2 + 10.5 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2,
+                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2 - 18,
                   0,
                 ]
               : [
@@ -1374,13 +1342,13 @@ export class Sphynx {
           .offset({ delta: -1 })
           .linear_extrude({ height: 50 })
       )
-      .difference(this.USBHolderSpace(), this.trackpadInset());
+      .difference(this.USBHolderSpace(), this.accessoryInset());
   }
 
-  screwholeOuters() {
+  screwholeOuters(forPlate = false) {
     const { o, p } = this.settings;
 
-    const [first, ...rest] = this.getInsertPositions().map(
+    const [first, ...rest] = this.getInsertPositions(forPlate).map(
       ({ pos, rotation }) =>
         Insert.getInsert(o, "outer", pos, rotation, o.plateThickness)
     );
@@ -1431,7 +1399,7 @@ export class Sphynx {
     const { o, p } = this.settings;
     const models = [];
     if (o.accessoryHolder) {
-      models.push(this.trackpad(mirror));
+      models.push(this.accessoryHolder(mirror));
     }
     return this.placeKeys(keyhole)
       .union(
@@ -1442,9 +1410,9 @@ export class Sphynx {
         this.thumbConnectors(),
         this.inserts()
       )
-      .difference(...[...(o.accessoryHolder && [this.trackpadInset()])])
-      .union(...models)
-      .intersection(cube([300, 300, 250], false).translate([-150, -150, 0])); // add models after cutting away
+      .difference(...[...(o.accessoryHolder && [this.accessoryInset()])])
+      .union(...models);
+    // .intersection(cube([300, 300, 250], false).translate([-150, -150, 0])); // add models after cutting away
   }
 
   outline() {
@@ -1452,13 +1420,7 @@ export class Sphynx {
     const models = [];
     if (o.accessoryHolder) {
       const holder = new AccessoryHolder();
-      models.push(
-        this.thumbRPlace(holder.outline()).translate([
-          this.trackpadOffsetX - 0.2,
-          0,
-          0,
-        ])
-      );
+      models.push(holder.outline().translate(this.accessoryOrigin));
     }
     return this.placeKeys(this.filledKeyhole()).union(
       this.keyConnectors(),
@@ -1470,7 +1432,7 @@ export class Sphynx {
     );
   }
 
-  buildPlate = () => {
+  buildPlate() {
     const { o, p } = this.settings;
     const shape = this.outline().projection();
     return shape
@@ -1480,13 +1442,13 @@ export class Sphynx {
           .difference(
             importShape("../models/voronoi.dxf")
               .scale([0.25, 0.25, 1])
-              .translate([-162, -75, 0])
+              .translate([-164, -77, 0])
           )
       )
       .linear_extrude({ height: o.plateThickness, center: false })
-      .union(this.screwholeOuters(), this.feetOuters())
+      .union(this.screwholeOuters(true), this.feetOuters())
       .difference(this.screwholes(), this.feetInsets());
-  };
+  }
 }
 
 const sphynx = new Sphynx({
