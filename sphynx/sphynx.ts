@@ -1107,13 +1107,10 @@ export class Sphynx {
 
   previewTrackpad() {
     const { o, p } = this.settings;
-    return this.thumbRPlace(
-      cylinder({ d: 43.9, h: 2, $fn: 70 }).translate([
-        this.trackpadOffsetX,
-        0,
-        p.trackpadOffsetZ,
-      ])
-    ).color("#222222");
+    const [x, y] = this.accessoryOrigin;
+    return cylinder({ d: 43.9, h: 2, $fn: 70 })
+      .translate([x, y, 27])
+      .color("#222222");
   }
 
   previewTrackball() {
@@ -1133,7 +1130,7 @@ export class Sphynx {
     return this.previewKeycaps().union(
       ...[
         // ...(o.encoder && [this.previewEncoder()]),
-        ...(o.accessoryHolder && [this.previewTrackball()]),
+        ...(o.accessoryHolder && [this.previewTrackpad()]),
       ]
     );
   }
