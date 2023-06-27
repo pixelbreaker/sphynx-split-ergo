@@ -122,11 +122,17 @@ export class AccessoryHolder {
       .translate([0, 0, this.totalHeight]);
   }
 
+  encoderTab() {
+    return cylinder({ d: this.outer + 3, h: 6, sector: 65 })
+      .translate([0, 0, this.totalHeight - this.height])
+      .rotate([0, 0, 82]);
+  }
+
   main() {
-    return this.topRim().union(this.sectorBody());
+    return this.topRim().difference(this.encoderTab()).union(this.sectorBody());
   }
 }
 
 const holder = new AccessoryHolder();
 // export const main = holder.main().color("red").union(holder.spacer());
-export const main = holder.spacer();
+export const main = holder.main();

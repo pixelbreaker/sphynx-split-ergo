@@ -409,9 +409,7 @@ export class Sphynx {
         this.thumbMPlace(this.posts.post.br),
         this.thumbRPlace(this.posts.post.tl),
         this.thumbRPlace(this.posts.post.bl)
-      )
-    );
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbLPlace(this.posts.post.tr),
         this.thumbLPlace(this.posts.post.br),
@@ -427,16 +425,7 @@ export class Sphynx {
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.keyPlace(-1, o.rows - 1, this.posts.rim.br),
         this.thumbMPlace(this.posts.thumbWall.tl)
-      )
-    );
-    // connectors.push(
-    //   this.triangleHulls(
-    //     this.keyPlace(-1, o.rows - 1, this.posts.post.br),
-    //     this.thumbLPlace(this.posts.thumb.tr),
-    //     this.thumbMPlace(this.posts.post.tl)
-    //   ).debug()
-    // );
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.thumbWall.tl),
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
@@ -453,10 +442,7 @@ export class Sphynx {
         this.keyPlace(0, o.rows - 1, this.posts.post.br),
         this.keyPlace(1, o.rows - 1, this.posts.post.bl),
         this.thumbMPlace(this.posts.thumbWall.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.thumbWall.tr),
         this.thumbRPlace(this.posts.post.tr),
@@ -531,96 +517,63 @@ export class Sphynx {
         this.thumbRPlace(this.posts.post.tl),
         this.thumbRPlace(this.posts.post.tr),
         this.thumbMPlace(this.posts.thumbWall.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbRPlace(this.posts.post.tl),
         this.thumbMPlace(this.posts.post.tr),
         this.thumbMPlace(this.posts.thumbWall.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.thumbWall.tl),
         this.thumbMPlace(this.posts.post.tl),
         this.thumbMPlace(this.posts.thumbWall.tr),
         this.thumbMPlace(this.posts.post.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.post.tl),
         this.thumbLPlace(this.posts.post.tr),
         this.thumbLPlace(this.posts.thumbWall.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbLPlace(this.posts.thumb.tl),
         this.thumbLPlace(this.posts.post.tl),
         this.thumbLPlace(this.posts.thumbWall.tr),
         this.thumbLPlace(this.posts.post.tr)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbLPlace(this.posts.post.tl),
         this.thumbLPlace(this.posts.post.bl),
         this.thumbLPlace(this.posts.thumb.tl),
         this.thumbLPlace(this.posts.thumb.bl)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbLPlace(this.posts.post.br),
         this.thumbLPlace(this.posts.post.bl),
         this.thumbLPlace(this.posts.thumb.br),
         this.thumbLPlace(this.posts.thumb.bl)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbLPlace(this.posts.post.br),
         this.thumbMPlace(this.posts.post.bl),
         this.thumbLPlace(this.posts.thumb.br)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.post.bl),
         this.thumbLPlace(this.posts.thumb.br),
         this.thumbMPlace(this.posts.post.br),
         this.thumbMPlace(this.posts.thumb.br)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbMPlace(this.posts.post.br),
         this.thumbRPlace(this.posts.post.bl),
         this.thumbMPlace(this.posts.thumb.br)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbRPlace(this.posts.post.bl),
         this.thumbMPlace(this.posts.thumb.br),
         this.thumbRPlace(this.posts.post.br),
         this.thumbRPlace(this.posts.thumb.br)
-      )
-    );
-
-    connectors.push(
+      ),
       this.triangleHulls(
         this.thumbRPlace(this.posts.post.tr),
         this.thumbRPlace(this.posts.post.br),
