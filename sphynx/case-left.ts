@@ -3,8 +3,6 @@ import { Sphynx } from "./Sphynx";
 
 export const model = new Sphynx({
   ...defaultOptions,
-  encoder: true,
-  trackpad: false,
 });
 
 export const main = model

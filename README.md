@@ -1,6 +1,6 @@
 # Sphynx keyboard
 
-Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads and rotary encoders can also be added in place of the outer thumb key.
+Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
 
 ![Right side render](./img/right.png)
 
@@ -29,8 +29,6 @@ Some of the 3D models used are from Thingiverse and under [Creative Commons Attr
 
 The models are:
 
-- [EC11 encoder switch plate adapter](https://www.thingiverse.com/thing:3770166)
 - [MBK Choc keycaps](https://www.thingiverse.com/thing:4564253)
 - [SA Keycaps](https://www.thingiverse.com/thing:4283287)
 - [XDA Keycaps](https://www.thingiverse.com/thing:4593219/files)
-- [Encoder knob](https://www.thingiverse.com/thing:4541677/files)
