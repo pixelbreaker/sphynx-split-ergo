@@ -1,4 +1,4 @@
-# Tenome (Te-no-may 手の目) keyboard
+# Tenome (Te-no-meh 手の目) keyboard
 
 Tenome is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
 
