@@ -1,5 +1,5 @@
 import { buildOptions, defaultOptions } from "./options";
-import { Sphynx } from "./Sphynx";
+import { Sphynx } from "./Tenome";
 
 const { options: chocOptions, parameters: chocParameters } = buildOptions({
   ...defaultOptions,

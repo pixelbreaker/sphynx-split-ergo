@@ -1,7 +1,7 @@
 import { defaultOptions } from "./options";
-import { Sphynx } from "./Sphynx";
+import { Tenome } from "./Tenome";
 
-export const model = new Sphynx({
+export const model = new Tenome({
   ...defaultOptions,
 });
 

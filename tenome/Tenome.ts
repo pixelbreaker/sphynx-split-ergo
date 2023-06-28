@@ -16,7 +16,7 @@ import { AccessoryHolder } from "./AccessoryHolder";
 const { add, rotateX, rotateY, rotateZ } = V3;
 
 type Posts = { tr: Shape3; tl: Shape3; br: Shape3; bl: Shape3 };
-export class Sphynx {
+export class Tenome {
   readonly settings: { o: Options; p: Parameters };
   posts: { [key: string]: Posts };
 
@@ -163,9 +163,9 @@ export class Sphynx {
       .translate([0, 0, -p.radiusRow])
       .rotate([p.curveColumn * (p.centreRow - row), 0, 0])
       .translate([0, 0, p.radiusRow - p.radiusColumn])
-      .rotate([0, columnAngle, Sphynx.getColumnSplay(column)])
+      .rotate([0, columnAngle, Tenome.getColumnSplay(column)])
       .translate([0, 0, p.radiusColumn])
-      .translate(Sphynx.getColumnOffsets(column))
+      .translate(Tenome.getColumnOffsets(column))
       .rotate([0, o.tentingAngle, 0])
       .translate([0, 0, o.zOffset - (column > 2 && row >= o.rows ? 0.5 : 0)]);
   }
@@ -179,7 +179,7 @@ export class Sphynx {
       row,
       shape
         .rotate([-p.curveColumn * (p.centreRow - row), 0, 0])
-        .rotate([0, -columnAngle, Sphynx.getColumnSplay(column)])
+        .rotate([0, -columnAngle, Tenome.getColumnSplay(column)])
         .rotate([0, -o.tentingAngle, 0])
     );
   }
@@ -196,9 +196,9 @@ export class Sphynx {
     position = rotateX(p.curveColumn * (p.centreRow - row), position);
     position = add(position, [0, 0, p.radiusRow - p.radiusColumn]);
     position = rotateY(columnAngle, position);
-    position = rotateZ(Sphynx.getColumnSplay(column), position);
+    position = rotateZ(Tenome.getColumnSplay(column), position);
     position = add(position, [0, 0, p.radiusColumn]);
-    position = add(position, Sphynx.getColumnOffsets(column));
+    position = add(position, Tenome.getColumnOffsets(column));
     position = rotateY(o.tentingAngle, position);
     position = add(position, [0, 0, o.zOffset]);
 
@@ -724,7 +724,7 @@ export class Sphynx {
     let pOffset = 0;
     let pDiff = 0;
     for (let col = -1; col < o.columns; col++) {
-      const offset = Sphynx.getColumnOffsets(col + 1)[2];
+      const offset = Tenome.getColumnOffsets(col + 1)[2];
       const diff = offset - pOffset;
       const sphX = this.sphereOffset.x;
 
@@ -778,7 +778,7 @@ export class Sphynx {
     let pOffset = 0;
     let pDiff = 0;
     for (let col = -1; col < o.columns; col++) {
-      const offset = Sphynx.getColumnOffsets(col + 1)[2];
+      const offset = Tenome.getColumnOffsets(col + 1)[2];
       const diff = offset - pOffset;
       const sphX = this.sphereOffset.x;
 
@@ -900,9 +900,9 @@ export class Sphynx {
     const sphX = this.sphereOffset.x;
 
     for (let col = o.columns - 1; col >= (o.accessoryHolder ? 4 : 3); col--) {
-      const offset = Sphynx.getColumnOffsets(col)[2];
+      const offset = Tenome.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
-      const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
+      const nDiff = Tenome.getColumnOffsets(col - 1)[2] - offset;
 
       const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
       const xL = Math.abs(diff) !== 0 ? (diff < 0 ? -sphX : sphX) : sphX;
@@ -980,9 +980,9 @@ export class Sphynx {
     const sphX = this.sphereOffset.x;
 
     for (let col = o.columns - 1; col >= (o.accessoryHolder ? 4 : 3); col--) {
-      const offset = Sphynx.getColumnOffsets(col)[2];
+      const offset = Tenome.getColumnOffsets(col)[2];
       const diff = offset - pOffset;
-      const nDiff = Sphynx.getColumnOffsets(col - 1)[2] - offset;
+      const nDiff = Tenome.getColumnOffsets(col - 1)[2] - offset;
 
       const xR = Math.abs(diff) !== 0 ? (diff > 0 ? -sphX : sphX) : sphX;
       const xL = Math.abs(diff) !== 0 ? (diff < 0 ? -sphX : sphX) : sphX;
@@ -1087,7 +1087,7 @@ export class Sphynx {
 
     return mcu
 
-      .rotate([0, 0, (Sphynx.getColumnSplay(0) + Sphynx.getColumnSplay(1)) / 2])
+      .rotate([0, 0, (Tenome.getColumnSplay(0) + Tenome.getColumnSplay(1)) / 2])
       .translate([x, y, 0]);
   }
 
@@ -1427,7 +1427,7 @@ export class Sphynx {
   }
 }
 
-const sphynx = new Sphynx({
+const sphynx = new Tenome({
   ...defaultOptions,
   accessoryHolder: true,
 });

@@ -6,7 +6,7 @@ import * as _ from "lodash";
 import { genScad } from "./gen-scad";
 
 const cwd = process.cwd();
-const watchDir = path.join(cwd, "sphynx");
+const watchDir = path.join(cwd, "tenome");
 const outputDir = path.join(cwd, "target");
 
 const resetNodeCache = () => {
