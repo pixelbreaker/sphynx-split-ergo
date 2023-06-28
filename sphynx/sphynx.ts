@@ -1109,14 +1109,14 @@ export class Sphynx {
     const { o, p } = this.settings;
     const [x, y] = this.accessoryOrigin;
     return cylinder({ d: 43.9, h: 2, $fn: 70 })
-      .translate([x, y, 27])
+      .translate([x, y, 25])
       .color("#222222");
   }
 
   previewTrackball() {
     const { o, p } = this.settings;
     const [x, y] = this.accessoryOrigin;
-    return sphere({ d: 34, $fn: 120 }).translate([x, y, 25]).color("#222222");
+    return sphere({ d: 34, $fn: 120 }).translate([x, y, 23]).color("#222222");
   }
 
   previewEncoder() {
@@ -1127,10 +1127,15 @@ export class Sphynx {
 
   preview() {
     const { o, p } = this.settings;
+    const holder = new AccessoryHolder();
+    const [x, y] = this.accessoryOrigin;
+
     return this.previewKeycaps().union(
       ...[
-        // ...(o.encoder && [this.previewEncoder()]),
-        ...(o.accessoryHolder && [this.previewTrackpad()]),
+        ...(o.accessoryHolder && [
+          this.previewTrackpad(),
+          holder.spacer().translate([x, y, 0]),
+        ]),
       ]
     );
   }
@@ -1385,7 +1390,7 @@ export class Sphynx {
   buildPlate() {
     const { o, p } = this.settings;
     const shape = this.outline().projection();
-    return shape
+    let plate: Shape3 = shape
       .difference(
         shape
           .offset({ r: -4 })
@@ -1395,9 +1400,30 @@ export class Sphynx {
               .translate([-164, -77, 0])
           )
       )
-      .linear_extrude({ height: o.plateThickness, center: false })
+      .linear_extrude({ height: o.plateThickness, center: false });
+    // .union(this.screwholeOuters(true), this.feetOuters())
+    // .difference(this.screwholes(), this.feetInsets());
+
+    if (o.accessoryHolder) {
+      const holder = new AccessoryHolder();
+      const [x, y] = this.accessoryOrigin;
+      const ring = holder.innerCutaway().projection();
+
+      plate = plate
+        .difference(holder.innerCutaway().translate([x, y, -3]))
+        .union(
+          ring
+            .difference(ring.offset({ r: -4 }))
+            .linear_extrude({ height: o.plateThickness, center: false })
+            .translate([x, y, 0])
+        );
+    }
+
+    plate = plate
       .union(this.screwholeOuters(true), this.feetOuters())
       .difference(this.screwholes(), this.feetInsets());
+
+    return plate;
   }
 }
 

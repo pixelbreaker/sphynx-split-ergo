@@ -9,7 +9,7 @@ import {
 } from "./options";
 
 export class AccessoryHolder {
-  readonly totalHeight = 27.5;
+  readonly totalHeight = 25;
   readonly height;
   readonly outer = 51;
   readonly inner = 47;
@@ -63,7 +63,7 @@ export class AccessoryHolder {
     })
       .difference(
         cylinder({
-          d1: this.inner - 10,
+          d1: this.inner - 8,
           d2: this.inner - 5,
           h: this.totalHeight,
           $fn: this.quality,
@@ -78,7 +78,7 @@ export class AccessoryHolder {
       this.spacerPillar().rotate([0, 0, 240]),
       cylinder({ d: this.inner - 0.4, h: 3, $fn: this.quality })
         .difference(
-          cylinder({ d: this.inner - 10, h: 4, $fn: this.quality }).translate([
+          cylinder({ d: this.inner - 8, h: 4, $fn: this.quality }).translate([
             0, 0, -0.1,
           ])
         )
@@ -134,5 +134,5 @@ export class AccessoryHolder {
 }
 
 const holder = new AccessoryHolder();
-// export const main = holder.main().color("red").union(holder.spacer());
-export const main = holder.spacer();
+export const main = holder.main().color("grey").union(holder.spacer());
+// export const main = holder.spacer();

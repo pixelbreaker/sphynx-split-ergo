@@ -26,7 +26,6 @@ export type Options = {
   rows: 3 | 4;
   screwHoleCountersinkDiameter: number;
   screwHoleDiameter: number;
-  side: RenderSide;
   tentingAngle: number;
   thumbOffsets: Vec3;
   webThickness: number;
@@ -78,7 +77,6 @@ export const defaultOptions: Options = {
   rows: 3,
   screwHoleCountersinkDiameter: 9,
   screwHoleDiameter: 4.6,
-  side: "right",
   switchSpacing: "choc",
   switchStyle: "choc",
   tentingAngle: 14,
