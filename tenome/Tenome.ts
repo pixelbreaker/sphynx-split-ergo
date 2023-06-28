@@ -1134,7 +1134,7 @@ export class Tenome {
       ...[
         ...(o.accessoryHolder && [
           this.previewTrackpad(),
-          holder.spacer().translate([x, y, 0]),
+          holder.spacer().translate([x, y, 0]).color("#222222"),
         ]),
       ]
     );
@@ -1247,7 +1247,7 @@ export class Tenome {
             o.accessoryHolder
               ? [
                   p.mountWidth / 2 + 10.5 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2 - 18,
+                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2 - 19,
                   0,
                 ]
               : [
@@ -1387,7 +1387,7 @@ export class Tenome {
     );
   }
 
-  buildPlate() {
+  buildPlate(trackball = false) {
     const { o, p } = this.settings;
     const shape = this.outline().projection();
     let plate: Shape3 = shape
@@ -1404,17 +1404,18 @@ export class Tenome {
     // .union(this.screwholeOuters(true), this.feetOuters())
     // .difference(this.screwholes(), this.feetInsets());
 
-    if (o.accessoryHolder) {
+    if (trackball) {
       const holder = new AccessoryHolder();
       const [x, y] = this.accessoryOrigin;
-      const ring = holder.innerCutaway().projection();
+      const ring = holder.trackballBodyCutaway().projection();
 
       plate = plate
-        .difference(holder.innerCutaway().translate([x, y, -3]))
+        .difference(holder.trackballCutaway().translate([x, y, -3]))
         .union(
           ring
-            .difference(ring.offset({ r: -4 }))
+            // .difference(ring.offset({ r: -4 }))
             .linear_extrude({ height: o.plateThickness, center: false })
+            .difference(holder.trackballCutaway())
             .translate([x, y, 0])
         );
     }

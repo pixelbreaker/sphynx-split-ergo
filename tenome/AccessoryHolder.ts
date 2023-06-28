@@ -13,6 +13,7 @@ export class AccessoryHolder {
   readonly height;
   readonly outer = 51;
   readonly inner = 47;
+  readonly trackballCut = 45.5;
   readonly hole = 44.2;
   readonly holeDepth = 2;
   readonly quality = 90;
@@ -30,6 +31,14 @@ export class AccessoryHolder {
 
   bodyCutaway() {
     return cylinder({ d: this.outer - 1, h: 100, $fn: this.quality }, true);
+  }
+
+  trackballBodyCutaway() {
+    return cylinder({ d: this.outer, h: 100, $fn: this.quality }, true);
+  }
+
+  trackballCutaway() {
+    return cylinder({ d: this.trackballCut, h: 100, $fn: this.quality }, true);
   }
 
   outline() {

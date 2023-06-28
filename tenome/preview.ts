@@ -1,16 +1,16 @@
 import { defaultOptions } from "./options";
-import { model } from "./case-right";
+import { model } from "./case";
 
 export const main = model
   .buildCase(model.singleKeyhole())
-  .color("SlateGray")
+  .color("#DDDDDD")
   .union(
     ...[
       model
-        .buildPlate()
+        .buildPlate(true)
         .translate([0, 0, -defaultOptions.plateThickness])
-        .color("Silver"),
-      model.USBHolder().color("Azure"),
+        .color("#333333"),
+      model.USBHolder().color("#338833"),
       model.preview(),
     ]
   );

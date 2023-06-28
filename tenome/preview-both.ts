@@ -1,6 +1,5 @@
-import { main as left } from "./preview-left";
-import { main as right } from "./preview-right";
+import { main } from "./preview";
 
-export const main = left
+export const preview = main
   .translate([-100, 0, 0])
-  .union(right.translate([100, 0, 0]));
+  .union(main.mirror([-1, 0, 0]).translate([100, 0, 0]));
