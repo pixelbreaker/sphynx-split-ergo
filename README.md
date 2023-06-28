@@ -1,6 +1,6 @@
-# Sphynx keyboard
+# Tenome (Te-no-may 手の目) keyboard
 
-Sphynx is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
+Tenome is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
 
 ![Right side render](./img/right.png)
 
@@ -15,7 +15,7 @@ This repository is a fork of Richard Wang's [Openscad-ts](https://github.com/ric
 
 ## Usage
 
-1. Check out this project with `git clone git@github.com:pixelbreaker/sphynx-split-ergo.git`
+1. Check out this project with `git clone git@github.com:pixelbreaker/tenome-split-ergo.git`
 2. Run `npm install`
 3. Run `npm watch`
 4. start editing files under projects, scad files will output into "/target" folder
