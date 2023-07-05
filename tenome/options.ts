@@ -28,6 +28,7 @@ export type Options = {
   screwHoleDiameter: number;
   tentingAngle: number;
   thumbOffsets: Vec3;
+  trackballCutoutInPlate: boolean;
   webThickness: number;
   zOffset: number;
 } & ( // Discriminated union to ensure mx switches have mx spacing only
@@ -72,15 +73,16 @@ export const defaultOptions: Options = {
   insertDepth: 4,
   insertExternal: 10,
   insertInternal: 5.4,
-  keycapStyle: "choc",
+  keycapStyle: "xda",
   plateThickness: 2.5,
   rows: 3,
   screwHoleCountersinkDiameter: 9,
   screwHoleDiameter: 4.6,
-  switchSpacing: "choc",
-  switchStyle: "choc",
+  switchSpacing: "mx",
+  switchStyle: "mx",
   tentingAngle: 14,
   thumbOffsets: [6, -5, -3],
+  trackballCutoutInPlate: true,
   webThickness: 2,
   zOffset: 11,
 };
@@ -106,7 +108,9 @@ export const buildParameters = (
   const curveRow = 4;
   const radiusRow =
     keyTopHeight +
-    (mountHeight + o.extraHeight) / 2 / Math.sin(deg2rad(curveColumn / 2));
+    (mountHeight + o.extraHeight + (o.switchStyle === "mx" ? 1.8 : 0)) /
+      2 /
+      Math.sin(deg2rad(curveColumn / 2));
   const radiusColumn =
     keyTopHeight +
     (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow / 2));

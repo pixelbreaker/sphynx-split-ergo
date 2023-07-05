@@ -55,7 +55,7 @@ export class AccessoryHolder {
   shim() {
     return cylinder({
       d: this.inner - 0.4,
-      h: 1,
+      h: 1.5,
       $fn: this.quality,
     }).difference(
       cylinder({ d: 42.2, h: 3, $fn: this.quality }).translate([0, 0, -0.5])
@@ -143,5 +143,5 @@ export class AccessoryHolder {
 }
 
 const holder = new AccessoryHolder();
-export const main = holder.main().color("grey").union(holder.spacer());
-// export const main = holder.spacer();
+// export const main = holder.main().color("grey").union(holder.spacer());
+export const main = holder.shim();

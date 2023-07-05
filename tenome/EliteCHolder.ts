@@ -52,7 +52,6 @@ export class EliteCHolder {
       [-4.4, 36.4],
       [-4.4, 28],
       [0, 28],
-      // [0, 0],
     ];
     const radii: number[] = [2, 1, 1, 5, 3, 3, 3, 3, 2, 2, 2, 5, 5, 5];
 
@@ -162,4 +161,4 @@ export class EliteCHolder {
 
 const splinky = new EliteCHolder(defaultOptions);
 
-export const main = splinky.cutaway();
+export const main = splinky.assembled();

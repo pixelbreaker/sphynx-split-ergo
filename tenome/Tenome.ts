@@ -239,7 +239,10 @@ export class Tenome {
 
     let position = offset;
 
-    return add(position, [-54, -26, -10]);
+    return add(
+      position,
+      o.switchSpacing === "choc" ? [-54, -26, -10] : [-55, -26.5, -10]
+    );
   }
 
   getThumbRPosition(offset: Vec3 = [0, 0, 0]): Vec3 {
@@ -1069,7 +1072,7 @@ export class Tenome {
     let pos;
     pos = this.getKeyPosition(0, 0, [
       -(p.mountWidth / 2) - 1,
-      p.mountHeight / 2 - 0,
+      p.mountHeight / 2 + (o.switchStyle === "mx" ? 1.5 : 0),
       0,
     ]);
     pos = V3.add(pos, [4, 3.5, 0]);
@@ -1152,7 +1155,7 @@ export class Tenome {
   }
 
   // inserts
-  getInsertPositions(forPlate = false): { pos: Vec3; rotation: number }[] {
+  getInsertPositions(): { pos: Vec3; rotation: number }[] {
     const { o, p } = this.settings;
     return [
       (() => {
@@ -1168,7 +1171,10 @@ export class Tenome {
             2 - p.mountHeight / 2,
             0,
           ]);
-          return { pos: [x, y, 0] as Vec3, rotation: forPlate ? 200 : 180 };
+          return {
+            pos: [x, y, 0] as Vec3,
+            rotation: o.trackballCutoutInPlate ? 200 : 188,
+          };
         } else {
           const [x, y] = this.getKeyPosition(3, o.rows - 1, [
             p.mountWidth / 2 - 2,
@@ -1241,23 +1247,24 @@ export class Tenome {
       })(),
       (() => {
         // bottom centre
-        const [x, y] = add(
-          add(this.getKeyPosition(1, o.rows - 1), o.thumbOffsets),
-          this.getThumbRPosition(
-            o.accessoryHolder
-              ? [
-                  p.mountWidth / 2 + 10.5 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 13 + o.feetDiameter / 2 - 19,
-                  0,
-                ]
-              : [
-                  p.mountWidth / 2 + 14 - o.feetDiameter / 2,
-                  -p.mountHeight / 2 - 10 + o.feetDiameter / 2,
-                  0,
-                ]
-          )
-        );
-        return { pos: [x, y, 0] as Vec3 };
+        if (o.accessoryHolder) {
+          const [x, y] = this.accessoryOrigin;
+          return {
+            pos: o.trackballCutoutInPlate
+              ? ([x - 28, y - 2, 0] as Vec3)
+              : ([x, y - 19.5, 0] as Vec3),
+          };
+        } else {
+          const [x, y] = add(
+            add(this.getKeyPosition(1, o.rows - 1), o.thumbOffsets),
+            this.getThumbRPosition([
+              p.mountWidth / 2 + 14 - o.feetDiameter / 2,
+              -p.mountHeight / 2 - 10 + o.feetDiameter / 2,
+              0,
+            ])
+          );
+          return { pos: [x, y, 0] as Vec3 };
+        }
       })(),
       (() => {
         // bottom left (thumb)
@@ -1300,10 +1307,10 @@ export class Tenome {
       .difference(this.USBHolderSpace(), this.accessoryInset());
   }
 
-  screwholeOuters(forPlate = false) {
+  screwholeOuters() {
     const { o, p } = this.settings;
 
-    const [first, ...rest] = this.getInsertPositions(forPlate).map(
+    const [first, ...rest] = this.getInsertPositions().map(
       ({ pos, rotation }) =>
         Insert.getInsert(o, "outer", pos, rotation, o.plateThickness)
     );
@@ -1330,7 +1337,7 @@ export class Tenome {
     return inserts;
   }
 
-  feetOuters() {
+  feetOuters(trackball = false) {
     const { o } = this.settings;
 
     const [first, ...rest] = this.getFeetPositions().map(({ pos }) =>
@@ -1340,7 +1347,7 @@ export class Tenome {
     return first.union(...rest);
   }
 
-  feetInsets() {
+  feetInsets(trackball = false) {
     const { o } = this.settings;
 
     const [first, ...rest] = this.getFeetPositions().map(({ pos }) =>
@@ -1387,7 +1394,7 @@ export class Tenome {
     );
   }
 
-  buildPlate(trackball = false) {
+  buildPlate() {
     const { o, p } = this.settings;
     const shape = this.outline().projection();
     let plate: Shape3 = shape
@@ -1404,7 +1411,7 @@ export class Tenome {
     // .union(this.screwholeOuters(true), this.feetOuters())
     // .difference(this.screwholes(), this.feetInsets());
 
-    if (trackball) {
+    if (o.accessoryHolder && o.trackballCutoutInPlate) {
       const holder = new AccessoryHolder();
       const [x, y] = this.accessoryOrigin;
       const ring = holder.trackballBodyCutaway().projection();
@@ -1421,7 +1428,7 @@ export class Tenome {
     }
 
     plate = plate
-      .union(this.screwholeOuters(true), this.feetOuters())
+      .union(this.screwholeOuters(), this.feetOuters())
       .difference(this.screwholes(), this.feetInsets());
 
     return plate;

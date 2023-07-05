@@ -17,8 +17,8 @@ This repository is a fork of Richard Wang's [Openscad-ts](https://github.com/ric
 
 1. Check out this project with `git clone git@github.com:pixelbreaker/tenome-split-ergo.git`
 2. Run `npm install`
-3. Run `npm watch`
-4. start editing files under projects, scad files will output into "/target" folder
+3. Run `npm start`
+4. start editing files under `tenome`, scad files will output into `/target` folder
 5. open openscad on the generated file
    - turn on "Automatic review and preview" mode
    - changes to the projects files will automatically propagate to openscad

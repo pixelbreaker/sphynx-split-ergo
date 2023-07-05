@@ -7,7 +7,7 @@ export const main = model
   .union(
     ...[
       model
-        .buildPlate(true)
+        .buildPlate()
         .translate([0, 0, -defaultOptions.plateThickness])
         .color("#333333"),
       model.USBHolder().color("#338833"),

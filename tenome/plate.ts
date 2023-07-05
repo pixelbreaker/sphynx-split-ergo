@@ -1,3 +1,3 @@
 import { model } from "./case";
 
-export const main = model.buildPlate(true);
+export const main = model.buildPlate();
