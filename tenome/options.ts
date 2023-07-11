@@ -108,12 +108,14 @@ export const buildParameters = (
   const curveRow = 4;
   const radiusRow =
     keyTopHeight +
-    (mountHeight + o.extraHeight + (o.switchStyle === "mx" ? 1.8 : 0)) /
+    (mountHeight + o.extraHeight + (o.switchStyle === "mx" ? 1.4 : 0)) /
       2 /
       Math.sin(deg2rad(curveColumn / 2));
   const radiusColumn =
     keyTopHeight +
-    (mountWidth + o.extraWidth) / 2 / Math.sin(deg2rad(curveRow / 2));
+    (mountWidth + o.extraWidth + (o.switchStyle === "mx" ? 0.6 : 0)) /
+      2 /
+      Math.sin(deg2rad(curveRow / 2));
   const deltaColumnX = -(1 + radiusColumn * Math.sin(deg2rad(curveRow)));
   const centreRow = o.rows - o.centreRow;
   const keyholeThickness = o.switchStyle === "choc" ? 2 : 4;

@@ -241,7 +241,21 @@ export class Tenome {
 
     return add(
       position,
-      o.switchSpacing === "choc" ? [-54, -26, -10] : [-55, -26.5, -10]
+      o.switchSpacing === "choc" ? [-54, -26, -10] : [-53.5, -26, -10]
+    );
+  }
+
+  thumbLPlace(shape: Shape3): Shape3 {
+    const { o } = this.settings;
+
+    return this.placeThumb(
+      [
+        o.switchSpacing === "choc" ? 8 : 3,
+        o.switchSpacing === "choc" ? 0 : -8,
+        o.switchSpacing === "choc" ? 33 : 30,
+      ],
+      this.getThumbLPosition(),
+      shape
     );
   }
 
@@ -266,11 +280,17 @@ export class Tenome {
   }
 
   thumbMPlace(shape: Shape3): Shape3 {
-    return this.placeThumb([9, -12.5, 23], [-34.8, -16.2, -7.8], shape);
-  }
+    const { o } = this.settings;
 
-  thumbLPlace(shape: Shape3): Shape3 {
-    return this.placeThumb([8, 0, 33], this.getThumbLPosition(), shape);
+    return this.placeThumb(
+      [
+        o.switchSpacing === "choc" ? 9 : 3,
+        o.switchSpacing === "choc" ? -12.5 : -3,
+        23,
+      ],
+      [-34.8, -16.2, -7.8],
+      shape
+    );
   }
 
   placeThumbs(
@@ -427,10 +447,10 @@ export class Tenome {
       this.triangleHulls(
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.keyPlace(-1, o.rows - 1, this.posts.rim.br),
-        this.thumbMPlace(this.posts.thumbWall.tl)
+        this.thumbLPlace(this.posts.thumbWall.tr)
       ),
       this.triangleHulls(
-        this.thumbMPlace(this.posts.thumbWall.tl),
+        this.thumbLPlace(this.posts.thumbWall.tr),
         this.keyPlace(-1, o.rows - 1, this.posts.post.br),
         this.thumbMPlace(this.posts.thumbWall.tr),
         this.keyPlace(0, o.rows - 1, this.posts.post.bl),
@@ -527,7 +547,7 @@ export class Tenome {
         this.thumbMPlace(this.posts.thumbWall.tr)
       ),
       this.triangleHulls(
-        this.thumbMPlace(this.posts.thumbWall.tl),
+        this.thumbLPlace(this.posts.thumbWall.tr),
         this.thumbMPlace(this.posts.post.tl),
         this.thumbMPlace(this.posts.thumbWall.tr),
         this.thumbMPlace(this.posts.post.tr)
@@ -1072,7 +1092,7 @@ export class Tenome {
     let pos;
     pos = this.getKeyPosition(0, 0, [
       -(p.mountWidth / 2) - 1,
-      p.mountHeight / 2 + (o.switchStyle === "mx" ? 1.5 : 0),
+      p.mountHeight / 2 + (o.switchStyle === "mx" ? 1.3 : 0),
       0,
     ]);
     pos = V3.add(pos, [4, 3.5, 0]);
@@ -1374,7 +1394,6 @@ export class Tenome {
       )
       .difference(...[...(o.accessoryHolder && [this.accessoryInset()])])
       .union(...models);
-    // .intersection(cube([300, 300, 250], false).translate([-150, -150, 0])); // add models after cutting away
   }
 
   outline() {
@@ -1435,13 +1454,16 @@ export class Tenome {
   }
 }
 
-const sphynx = new Tenome({
+const tenome = new Tenome({
   ...defaultOptions,
   accessoryHolder: true,
 });
 
-export const main = sphynx.buildCase(sphynx.singleKeyhole());
-// export const main = sphynx
-//   .placeKeys(sphynx.singleKeyhole())
-//   .union(sphynx.placeThumbs(sphynx.singleKeyhole()));
-// .union(sphynx.USBHolder().debug());
+// export const main = tenome
+//   .placeThumbs(tenome.singleKeyhole())
+//   .union(tenome.thumbConnectors(), tenome.thumbRim(), tenome.leftWall());
+export const main = tenome.buildCase(tenome.singleKeyhole());
+// export const main = tenome
+//   .placeKeys(tenome.singleKeyhole())
+//   .union(tenome.placeThumbs(tenome.singleKeyhole()));
+// .union(tenome.USBHolder().debug());
