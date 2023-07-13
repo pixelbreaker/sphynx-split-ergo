@@ -2,7 +2,7 @@
 
 Tenome is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
 
-![Right side render](./img/choc-mx.jpg)
+![Choc and MX versions](./img/choc-mx.jpg)
 
 I have written this from scratch in TypeScript, but the code is heavily influenced by and sections ported from the Clojure:
 
