@@ -2,7 +2,7 @@
 
 Tenome is a parametric split ergonomic keyboard with columnar stagger and splay. It is fully configurable to adjust the shape to fit your hands. Cirque trackpads, or trackball/encoder holders using the opensource designs from BastardKB can also be added in place of the outer thumb key.
 
-![Right side render](./img/right.png)
+![Right side render](./img/choc-mx.png)
 
 I have written this from scratch in TypeScript, but the code is heavily influenced by and sections ported from the Clojure:
 
@@ -22,6 +22,16 @@ This repository is a fork of Richard Wang's [Openscad-ts](https://github.com/ric
 5. open openscad on the generated file
    - turn on "Automatic review and preview" mode
    - changes to the projects files will automatically propagate to openscad
+
+## Accessories
+
+Tenome is designed primarily to be used with a pointing device or rotary encoder on each side. A Cirque Pinnacle 40mm trackpad can be pressed directly into the case and supported with an [Accessory spacer](./stls/accessory-holder-spacer.stl).
+
+Alternatively the opensource [Trackball](https://github.com/Bastardkb/Charybdis) or [Encoder](https://github.com/Bastardkb/Charybdis-EC11) mounts from Bastard Keyboards can be used.
+
+## Wiring
+
+The microcontroller should be mounted on the BastardKB [Elite-C holder](https://github.com/Bastardkb/Elite-C-holder).
 
 ### Attribution
 
